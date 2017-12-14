@@ -1,4 +1,4 @@
-# dr_scientist [![Build Status](https://travis-ci.org/polymonster/dr_scientist.svg?branch=master)](https://travis-ci.org/polymonster/dr_scientist) [![Build Status](https://ci.appveyor.com/api/projects/status/github/polymonster/dr_scientist?branch=master&svg=true&passingText=win32-passing&pendingText=win32-pending&failingText=win32-failing)](https://ci.appveyor.com/project/polymonster/dr_scientist)
+# dr_scientist [![Build Status](https://travis-ci.org/polymonster/dr_scientist.svg?branch=master)](https://travis-ci.org/polymonster/dr_scientist) [![Build Status](https://ci.appveyor.com/api/projects/status/github/polymonster/dr-scientist?branch=master&svg=true&passingText=win32-passing&pendingText=win32-pending&failingText=win32-failing)](https://ci.appveyor.com/project/polymonster/dr-scientist)
 
 requirements:   
 [python3](https://www.python.org/download/releases/3.0)  
