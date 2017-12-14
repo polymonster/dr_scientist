@@ -1,5 +1,4 @@
 # dr_scientist
-A Game Made by 2 Friends
 
 requirements:   
 [python3](https://www.python.org/download/releases/3.0)  
