@@ -1,7 +1,7 @@
 # dr_scientist
 A Game Made by 2 Friends
 
-requirements: 
+requirements:   
 [python3](https://www.python.org/download/releases/3.0)  
 [git lfs](https://git-lfs.github.com/)  
 [pmtech](https://github.com/polymonster/pmtech.git) to be one directory above  
