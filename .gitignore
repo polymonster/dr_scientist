@@ -47,3 +47,10 @@ examples/*ios_files*
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# project files
+build/
+bin/
+temp/
+.mayaSwatches
+.pyc
