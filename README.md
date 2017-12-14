@@ -1,9 +1,10 @@
 # dr_scientist
 A Game Made by 2 Friends
 
-requires python3
-
-requires [pmtech](https://github.com/polymonster/pmtech.git) to be one directory above
+requirements: 
+[python3](https://www.python.org/download/releases/3.0)
+[git lfs](https://git-lfs.github.com/)
+[pmtech](https://github.com/polymonster/pmtech.git) to be one directory above
 
 be sure to update or clone pmtech before running:      
 cd ../pmtech
