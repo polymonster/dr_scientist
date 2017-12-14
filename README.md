@@ -6,12 +6,13 @@ requires python3
 requires [pmtech](https://github.com/polymonster/pmtech.git) to be one directory above
 
 be sure to update or clone pmtech before running:      
-git pull ../pmtech
+cd ../pmtech
+git pull
 
 to generate projects and binaries run:   
 python3 ../pmtech/build.py -all
 
 alternative for win32:   
-run build.bat to get a build command prompt
+run build.bat to get a prompted input
 
 
