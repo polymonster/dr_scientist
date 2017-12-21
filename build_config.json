@@ -1,3 +1,5 @@
 {
-	"pmtech_dir": "../pmtech"
+	"pmtech_dir": "../pmtech",
+	"textures_dir": "assets/exported/textures",
+	"models_dir": "assets/exported/models"
 }
