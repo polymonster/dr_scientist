@@ -2,6 +2,7 @@
 #include "renderer.h"
 #include "timer.h"
 #include "file_system.h"
+#include "volume_generator.h"
 #include "pen_string.h"
 #include "loader.h"
 #include "dev_ui.h"
@@ -79,6 +80,8 @@ PEN_THREAD_RETURN pen::game_entry( void* params )
 
     pmfx::register_scene(sc);
     pmfx::register_camera(cc);
+
+	put::vgt::init(main_scene);
     
     pmfx::init("data/configs/editor_renderer.json");
     
@@ -93,6 +96,8 @@ PEN_THREAD_RETURN pen::game_entry( void* params )
         pmfx::render();
         
         pmfx::show_dev_ui();
+
+		put::vgt::show_dev_ui();
         
         if( enable_dev_ui )
         {
