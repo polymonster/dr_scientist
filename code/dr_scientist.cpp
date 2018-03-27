@@ -24,7 +24,7 @@ pen::window_creation_params pen_window
     1280,					//width
     720,					//height
     4,						//MSAA samples
-    "scene_editor"		    //window title / process name
+    "dr_scientist"		    //window title / process name
 };
 
 namespace physics
@@ -47,22 +47,24 @@ PEN_THREAD_RETURN pen::game_entry( void* params )
 	//create main camera and controller
 	put::camera main_camera;
 	put::camera_create_perspective( &main_camera, 60.0f, (f32)pen_window.width / (f32)pen_window.height, 0.1f, 1000.0f );
-    
-    put::camera_controller cc;
-    cc.camera = &main_camera;
-    cc.update_function = &ces::update_model_viewer_camera;
-    cc.name = "model_viewer_camera";
-    cc.id_name = PEN_HASH(cc.name.c_str());
-    
+
     //create the main scene and controller
     put::ces::entity_scene* main_scene = put::ces::create_scene("main_scene");
     put::ces::editor_init( main_scene );
     
+	put::camera_controller cc;
+	cc.camera = &main_camera;
+	cc.update_function = &ces::update_model_viewer_camera;
+	cc.name = "model_viewer_camera";
+	cc.id_name = PEN_HASH(cc.name.c_str());
+	cc.scene = main_scene;
+
     put::scene_controller sc;
     sc.scene = main_scene;
     sc.update_function = &ces::update_model_viewer_scene;
     sc.name = "main_scene";
     sc.id_name = PEN_HASH(sc.name.c_str());
+	sc.camera = &main_camera;
     
     //create view renderers
     put::scene_view_renderer svr_main;
