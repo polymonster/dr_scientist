@@ -2,7 +2,7 @@
 
 The project builds ontop of [pmtech](https://github.com/polymonster/pmtech.git) a lightweight cross platform 3D graphics framework. It is developed by 2 experienced games industry professionals, one coder, one artists. We both work full time so this project is a slow burner.
 
-![ds][images/ds.png]
+![alt text](images/ds.png)
 
 requirements:   
 [python3](https://www.python.org/download/releases/3.0)  
