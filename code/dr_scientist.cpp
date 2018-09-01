@@ -29,17 +29,17 @@ pen::window_creation_params pen_window
 
 namespace physics
 {
-    extern PEN_THREAD_RETURN physics_thread_main( void* params );
+    extern PEN_TRV physics_thread_main( void* params );
 }
 
-PEN_THREAD_RETURN pen::game_entry( void* params )
+PEN_TRV pen::user_entry( void* params )
 {
     //unpack the params passed to the thread and signal to the engine it ok to proceed
     pen::job_thread_params* job_params = (pen::job_thread_params*)params;
-    pen::job_thread* p_thread_info = job_params->job_thread_info;
-    pen::threads_semaphore_signal(p_thread_info->p_sem_continue, 1);
+    pen::job* p_thread_info = job_params->job_info;
+    pen::thread_semaphore_signal(p_thread_info->p_sem_continue, 1);
     
-    pen::threads_create_job( physics::physics_thread_main, 1024*10, nullptr, pen::THREAD_START_DETACHED );
+    pen::thread_create_job( physics::physics_thread_main, 1024*10, nullptr, pen::THREAD_START_DETACHED );
     
 	put::dev_ui::init();
 	put::dbg::init();
@@ -52,7 +52,7 @@ PEN_THREAD_RETURN pen::game_entry( void* params )
     put::ces::entity_scene* main_scene = put::ces::create_scene("main_scene");
     put::ces::editor_init( main_scene );
     
-	put::camera_controller cc;
+	put::scene_controller cc;
 	cc.camera = &main_camera;
 	cc.update_function = &ces::update_model_viewer_camera;
 	cc.name = "model_viewer_camera";
@@ -80,9 +80,9 @@ PEN_THREAD_RETURN pen::game_entry( void* params )
     pmfx::register_scene_view_renderer(svr_main);
     pmfx::register_scene_view_renderer(svr_editor);
 
-    pmfx::register_scene(sc);
-    pmfx::register_camera(cc);
-
+    pmfx::register_scene_controller(sc);
+    pmfx::register_scene_controller(cc);
+    
 	put::vgt::init(main_scene);
     
     pmfx::init("data/configs/editor_renderer.json");
@@ -107,7 +107,7 @@ PEN_THREAD_RETURN pen::game_entry( void* params )
             put::dev_ui::render();
         }
         
-        if( pen::input_is_key_held(PENK_MENU) && pen::input_is_key_pressed(PENK_D) )
+        if( pen::input_is_key_held(PK_MENU) && pen::input_is_key_pressed(PK_D) )
             enable_dev_ui = !enable_dev_ui;
         
         pen::renderer_present();
@@ -118,7 +118,7 @@ PEN_THREAD_RETURN pen::game_entry( void* params )
 		put::poll_hot_loader();
 
         //msg from the engine we want to terminate
-        if( pen::threads_semaphore_try_wait( p_thread_info->p_sem_exit ) )
+        if( pen::thread_semaphore_try_wait( p_thread_info->p_sem_exit ) )
             break;
     }
     
@@ -129,7 +129,7 @@ PEN_THREAD_RETURN pen::game_entry( void* params )
     pen::renderer_consume_cmd_buffer();
     
     //signal to the engine the thread has finished
-    pen::threads_semaphore_signal( p_thread_info->p_sem_terminated, 1);
+    pen::thread_semaphore_signal( p_thread_info->p_sem_terminated, 1);
     
     return PEN_THREAD_OK;
 }
