@@ -2,4 +2,4 @@ install: brew upgrade python
 os: osx
 language: cpp
 compiler: clang
-script: ./travis.sh
+script: ./.travis.sh

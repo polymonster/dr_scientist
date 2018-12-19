@@ -11,10 +11,10 @@ solution "dr_scientist"
 	linkoptions { link_cmd }
 	
 -- Engine Project	
-dofile "../pmtech/pen/project.lua"
+dofile "../pmtech/source/pen/project.lua"
 
 -- Toolkit Project	
-dofile "../pmtech/put/project.lua"
+dofile "../pmtech/source/put/project.lua"
 
 -- Example projects	
 -- ( project name, current script dir, )
