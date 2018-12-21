@@ -1,6 +1,5 @@
 {
     "pmtech_dir": "../pmtech",
     "textures_dir": "assets/exported/textures",
-    "models_dir": "assets/exported/models",
-    "vcvarsall_dir": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build"
+    "models_dir": "assets/exported/models"
 }
