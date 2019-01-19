@@ -32,6 +32,57 @@ namespace physics
     extern PEN_TRV physics_thread_main( void* params );
 }
 
+void update_character_controller(put::scene_controller* sc)
+{
+    static vec3f pos = vec3f::zero();
+    static vec3f dir = vec3f::unit_z();
+    f32 vel = 0.0f;
+    
+    u32 trajectory_node = 5;
+    
+    vec3f xz_dir = sc->camera->focus - sc->camera->pos;
+    xz_dir.y = 0.0f;
+    xz_dir = normalised(xz_dir);
+    
+    f32 xz_angle = acos(dot(xz_dir, vec3f(0.0f, 0.0f, 1.0f)));
+    
+    u32 num_pads = pen::input_get_num_gamepads();
+    if(num_pads > 0)
+    {
+        pen::gamepad_state gs;
+        pen::input_get_gamepad_state(0, gs);
+        
+        vec3f left_stick = vec3f(gs.axis[PGP_AXIS_LEFT_STICK_X], 0.0f, gs.axis[PGP_AXIS_LEFT_STICK_Y]);
+        
+        mat4 rot = mat::create_y_rotation(xz_angle);
+        
+        vec3f transfromed_left_stick = normalised(-rot.transform_vector(left_stick));
+        
+        if(mag(left_stick) > 0.2f)
+        {
+            vel = mag(left_stick);
+            dir = transfromed_left_stick;
+        }
+    }
+    
+    f32 dir_angle = atan2(dir.x, dir.z);
+    
+    if(sc->scene->num_nodes > trajectory_node)
+    {
+        quat rot;
+        rot.euler_angles(0.0f, dir_angle, 0.0f);
+        sc->scene->initial_transform[trajectory_node].rotation = rot;
+    }
+    
+    sc->scene->anim_controller[1].current_time += vel * 0.01f;
+    pos = sc->scene->local_matrices[1].get_translation();
+    
+    put::dbg::add_line(pos, pos + dir, vec4f::blue());
+    put::dbg::add_line(pos, pos + xz_dir);
+    put::dbg::add_circle(vec3f::unit_y(), pos, 0.5f, vec4f::green());
+    
+}
+
 PEN_TRV pen::user_entry( void* params )
 {
     //unpack the params passed to the thread and signal to the engine it ok to proceed
@@ -58,6 +109,13 @@ PEN_TRV pen::user_entry( void* params )
 	cc.name = "model_viewer_camera";
 	cc.id_name = PEN_HASH(cc.name.c_str());
 	cc.scene = main_scene;
+    
+    put::scene_controller character_controller;
+    character_controller.camera = &main_camera;
+    character_controller.update_function = &update_character_controller;
+    character_controller.name = "model_viewer_camera";
+    character_controller.id_name = PEN_HASH(character_controller.name.c_str());
+    character_controller.scene = main_scene;
 
     put::scene_controller sc;
     sc.scene = main_scene;
@@ -80,14 +138,13 @@ PEN_TRV pen::user_entry( void* params )
     pmfx::register_scene_view_renderer(svr_main);
     pmfx::register_scene_view_renderer(svr_editor);
 
+    pmfx::register_scene_controller(character_controller);
     pmfx::register_scene_controller(sc);
     pmfx::register_scene_controller(cc);
     
 	put::vgt::init(main_scene);
     
     pmfx::init("data/configs/editor_renderer.jsn");
-    
-    bool enable_dev_ui = true;
     
     while( 1 )
     {
@@ -98,20 +155,11 @@ PEN_TRV pen::user_entry( void* params )
         pmfx::render();
         
         pmfx::show_dev_ui();
-
 		put::vgt::show_dev_ui();
-        
-        if( enable_dev_ui )
-        {
-            put::dev_ui::console();
-            put::dev_ui::render();
-        }
-        
-        if( pen::input_is_key_held(PK_MENU) && pen::input_is_key_pressed(PK_D) )
-            enable_dev_ui = !enable_dev_ui;
+        put::dev_ui::console();
+        put::dev_ui::render();
         
         pen::renderer_present();
-
         pen::renderer_consume_cmd_buffer();
         
 		pmfx::poll_for_changes();
