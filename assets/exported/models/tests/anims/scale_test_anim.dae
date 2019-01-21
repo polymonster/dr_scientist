@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Mote</author>
+      <authoring_tool>Maya2018 | ColladaMaya v3.04C PhyreEngine(TM) 3.22.0.0</authoring_tool>
+      <comments>Collada Maya Export Options: bakeTransforms=0;exportPolygonMeshes=0;relativePaths=1;bakeLighting=0;isSampling=0;
+curveConstrainSampling=0;removeStaticCurves=1;exportCameraAsLookat=0;
+exportLights=0;exportCameras=0;exportDefaultCameras=0;exportJointsAndSkin=1;
+exportAnimations=1;exportTriangles=1;exportInvisibleNodes=0;
+exportNormals=0;exportTexCoords=0;
+exportVertexColors=0;exportVertexColorsAnimation=0;exportTangents=0;
+exportTexTangents=0;exportConstraints=0;exportPhysics=1;exportXRefs=1;instanceDuplicateCurves=0;
+dereferenceXRefs=1;cameraXFov=0;cameraYFov=1;
+animationTime=0.000000</comments>
+      <source_data>file:///D:/Dev/dr_scientist/assets/source/models/tests/anims/scale_test_anim.mb</source_data>
+    </contributor>
+    <created>2019-01-21T20:39:53Z</created>
+    <modified>2019-01-21T20:39:53Z</modified>
+    <unit meter="0.0099999997764825" name="centimeter"/>
+    <up_axis>Y_UP</up_axis>
+  </asset>
+  <library_animations>
+    <animation id="joint2.rotateX">
+      <source id="joint2.rotateX_joint2_rotateX.ANGLE-input">
+        <float_array id="joint2.rotateX_joint2_rotateX.ANGLE-input-array" count="4">0 1.25 2.5 4.166666507720947</float_array>
+        <technique_common>
+          <accessor source="#joint2.rotateX_joint2_rotateX.ANGLE-input-array" count="4" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="joint2.rotateX_joint2_rotateX.ANGLE-output">
+        <float_array id="joint2.rotateX_joint2_rotateX.ANGLE-output-array" count="4">0 31.95076560974121 -42.08998489379883 0</float_array>
+        <technique_common>
+          <accessor source="#joint2.rotateX_joint2_rotateX.ANGLE-output-array" count="4" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint2.rotateX_joint2_rotateX.ANGLE-interpolations">
+        <Name_array id="joint2.rotateX_joint2_rotateX.ANGLE-interpolations-array" count="4">BEZIER BEZIER BEZIER BEZIER</Name_array>
+        <technique_common>
+          <accessor source="#joint2.rotateX_joint2_rotateX.ANGLE-interpolations-array" count="4" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint2.rotateX_joint2_rotateX.ANGLE-intangents">
+        <float_array id="joint2.rotateX_joint2_rotateX.ANGLE-intangents-array" count="8">-0.3333333432674408 -8.520204544067383 0.8333333730697632 38.96576309204102 2.083333253860474 -37.52558898925781 3.611110925674438 -14.02999496459961</float_array>
+        <technique_common>
+          <accessor source="#joint2.rotateX_joint2_rotateX.ANGLE-intangents-array" count="4" stride="2">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint2.rotateX_joint2_rotateX.ANGLE-outtangents">
+        <float_array id="joint2.rotateX_joint2_rotateX.ANGLE-outtangents-array" count="8">0.4166666567325592 10.65025615692139 1.666666626930237 24.93576812744141 3.055555582046509 -48.17584609985352 4.5 8.417997360229492</float_array>
+        <technique_common>
+          <accessor source="#joint2.rotateX_joint2_rotateX.ANGLE-outtangents-array" count="4" stride="2">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="joint2.rotateX_joint2_rotateX.ANGLE-sampler">
+        <input semantic="INPUT" source="#joint2.rotateX_joint2_rotateX.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#joint2.rotateX_joint2_rotateX.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#joint2.rotateX_joint2_rotateX.ANGLE-interpolations"/>
+        <input semantic="IN_TANGENT" source="#joint2.rotateX_joint2_rotateX.ANGLE-intangents"/>
+        <input semantic="OUT_TANGENT" source="#joint2.rotateX_joint2_rotateX.ANGLE-outtangents"/>
+      </sampler>
+      <channel source="#joint2.rotateX_joint2_rotateX.ANGLE-sampler" target="joint2/rotateX.ANGLE"/>
+    </animation>
+    <animation id="joint2.scale">
+      <source id="joint2.scale_joint2_scale-input">
+        <float_array id="joint2.scale_joint2_scale-input-array" count="3">0 2.083333253860474 4.166666507720947</float_array>
+        <technique_common>
+          <accessor source="#joint2.scale_joint2_scale-input-array" count="3" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="joint2.scale_joint2_scale-output">
+        <float_array id="joint2.scale_joint2_scale-output-array" count="9">1 1 1 0.6000000238418579 0.6000000238418579 0.6000000238418579 1 1 1</float_array>
+        <technique_common>
+          <accessor source="#joint2.scale_joint2_scale-output-array" count="3" stride="3">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+            <param name="Z" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint2.scale_joint2_scale-interpolations">
+        <Name_array id="joint2.scale_joint2_scale-interpolations-array" count="3">LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#joint2.scale_joint2_scale-interpolations-array" count="3" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="joint2.scale_joint2_scale-sampler">
+        <input semantic="INPUT" source="#joint2.scale_joint2_scale-input"/>
+        <input semantic="OUTPUT" source="#joint2.scale_joint2_scale-output"/>
+        <input semantic="INTERPOLATION" source="#joint2.scale_joint2_scale-interpolations"/>
+      </sampler>
+      <channel source="#joint2.scale_joint2_scale-sampler" target="joint2/scale"/>
+    </animation>
+    <animation id="joint3.rotateX">
+      <source id="joint3.rotateX_joint3_rotateX.ANGLE-input">
+        <float_array id="joint3.rotateX_joint3_rotateX.ANGLE-input-array" count="4">0 1.25 2.5 4.166666507720947</float_array>
+        <technique_common>
+          <accessor source="#joint3.rotateX_joint3_rotateX.ANGLE-input-array" count="4" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="joint3.rotateX_joint3_rotateX.ANGLE-output">
+        <float_array id="joint3.rotateX_joint3_rotateX.ANGLE-output-array" count="4">0 31.95076560974121 -42.08998489379883 0</float_array>
+        <technique_common>
+          <accessor source="#joint3.rotateX_joint3_rotateX.ANGLE-output-array" count="4" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint3.rotateX_joint3_rotateX.ANGLE-interpolations">
+        <Name_array id="joint3.rotateX_joint3_rotateX.ANGLE-interpolations-array" count="4">BEZIER BEZIER BEZIER BEZIER</Name_array>
+        <technique_common>
+          <accessor source="#joint3.rotateX_joint3_rotateX.ANGLE-interpolations-array" count="4" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint3.rotateX_joint3_rotateX.ANGLE-intangents">
+        <float_array id="joint3.rotateX_joint3_rotateX.ANGLE-intangents-array" count="8">-0.3333333432674408 -8.520204544067383 0.8333333730697632 38.96576309204102 2.083333253860474 -37.52558898925781 3.611110925674438 -14.02999496459961</float_array>
+        <technique_common>
+          <accessor source="#joint3.rotateX_joint3_rotateX.ANGLE-intangents-array" count="4" stride="2">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint3.rotateX_joint3_rotateX.ANGLE-outtangents">
+        <float_array id="joint3.rotateX_joint3_rotateX.ANGLE-outtangents-array" count="8">0.4166666567325592 10.65025615692139 1.666666626930237 24.93576812744141 3.055555582046509 -48.17584609985352 4.5 8.417997360229492</float_array>
+        <technique_common>
+          <accessor source="#joint3.rotateX_joint3_rotateX.ANGLE-outtangents-array" count="4" stride="2">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="joint3.rotateX_joint3_rotateX.ANGLE-sampler">
+        <input semantic="INPUT" source="#joint3.rotateX_joint3_rotateX.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#joint3.rotateX_joint3_rotateX.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#joint3.rotateX_joint3_rotateX.ANGLE-interpolations"/>
+        <input semantic="IN_TANGENT" source="#joint3.rotateX_joint3_rotateX.ANGLE-intangents"/>
+        <input semantic="OUT_TANGENT" source="#joint3.rotateX_joint3_rotateX.ANGLE-outtangents"/>
+      </sampler>
+      <channel source="#joint3.rotateX_joint3_rotateX.ANGLE-sampler" target="joint3/rotateX.ANGLE"/>
+    </animation>
+    <animation id="joint3.scale">
+      <source id="joint3.scale_joint3_scale-input">
+        <float_array id="joint3.scale_joint3_scale-input-array" count="3">0 2.083333253860474 4.166666507720947</float_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale-input-array" count="3" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="joint3.scale_joint3_scale-output">
+        <float_array id="joint3.scale_joint3_scale-output-array" count="9">1 1 1 0.300000011920929 0.300000011920929 0.300000011920929 1 1 1</float_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale-output-array" count="3" stride="3">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+            <param name="Z" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint3.scale_joint3_scale-interpolations">
+        <Name_array id="joint3.scale_joint3_scale-interpolations-array" count="3">LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale-interpolations-array" count="3" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="joint3.scale_joint3_scale-sampler">
+        <input semantic="INPUT" source="#joint3.scale_joint3_scale-input"/>
+        <input semantic="OUTPUT" source="#joint3.scale_joint3_scale-output"/>
+        <input semantic="INTERPOLATION" source="#joint3.scale_joint3_scale-interpolations"/>
+      </sampler>
+      <channel source="#joint3.scale_joint3_scale-sampler" target="joint3/scale"/>
+    </animation>
+  </library_animations>
+  <library_physics_scenes>
+    <physics_scene id="MayaNativePhysicsScene">
+      <technique_common>
+        <gravity>0 -980 0</gravity>
+        <time_step>0.0829999968409538</time_step>
+      </technique_common>
+    </physics_scene>
+  </library_physics_scenes>
+  <library_visual_scenes>
+    <visual_scene id="VisualSceneNode" name="scale_test_anim">
+      <node id="joint1" name="joint1" type="JOINT">
+        <rotate sid="jointOrientZ">0 0 1 0</rotate>
+        <rotate sid="jointOrientY">0 1 0 0</rotate>
+        <rotate sid="jointOrientX">1 0 0 0</rotate>
+        <node id="joint2" name="joint2" type="JOINT">
+          <translate sid="translate">0 52.79170227050781 0</translate>
+          <rotate sid="jointOrientZ">0 0 1 0</rotate>
+          <rotate sid="jointOrientY">0 1 0 0</rotate>
+          <rotate sid="jointOrientX">1 0 0 0</rotate>
+          <rotate sid="rotateX">1 0 0 0</rotate>
+          <scale sid="scale">1 1 1</scale>
+          <node id="joint3" name="joint3" type="JOINT">
+            <translate sid="translate">0 51.66522979736328 0</translate>
+            <rotate sid="jointOrientZ">0 0 1 0</rotate>
+            <rotate sid="jointOrientY">0 1 0 0</rotate>
+            <rotate sid="jointOrientX">1 0 0 0</rotate>
+            <rotate sid="rotateX">1 0 0 0</rotate>
+            <scale sid="scale">1 1 1</scale>
+            <extra>
+              <technique profile="MAYA">
+                <segment_scale_compensate>1</segment_scale_compensate>
+              </technique>
+            </extra>
+          </node>
+          <extra>
+            <technique profile="MAYA">
+              <segment_scale_compensate>1</segment_scale_compensate>
+            </technique>
+          </extra>
+        </node>
+        <extra>
+          <technique profile="MAYA">
+            <segment_scale_compensate>1</segment_scale_compensate>
+          </technique>
+        </extra>
+      </node>
+      <node id="pPlatonic4" name="pPlatonic4" type="NODE">
+        <translate sid="rotatePivot">0 52.57011795043945 0</translate>
+        <rotate sid="rotateZ">0 0 1 0</rotate>
+        <rotate sid="rotateY">0 1 0 0</rotate>
+        <rotate sid="rotateX">1 0 0 0</rotate>
+        <translate sid="rotatePivotInverse">0 -52.57011795043945 0</translate>
+        <translate sid="scalePivot">0 52.57011795043945 0</translate>
+        <translate sid="scalePivotInverse">0 -52.57011795043945 0</translate>
+      </node>
+      <extra>
+        <technique profile="FCOLLADA">
+          <start_time>0</start_time>
+          <end_time>4.166666507720947</end_time>
+        </technique>
+      </extra>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_physics_scene url="#MayaNativePhysicsScene"/>
+    <instance_visual_scene url="#VisualSceneNode"/>
+  </scene>
+</COLLADA>
