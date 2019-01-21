@@ -15,8 +15,8 @@ dereferenceXRefs=1;cameraXFov=0;cameraYFov=1;
 animationTime=0.000000</comments>
       <source_data>file:///D:/Dev/dr_scientist/assets/source/models/tests/anims/scale_test_anim.mb</source_data>
     </contributor>
-    <created>2019-01-21T20:39:53Z</created>
-    <modified>2019-01-21T20:39:53Z</modified>
+    <created>2019-01-21T20:48:53Z</created>
+    <modified>2019-01-21T20:48:53Z</modified>
     <unit meter="0.0099999997764825" name="centimeter"/>
     <up_axis>Y_UP</up_axis>
   </asset>
@@ -172,10 +172,10 @@ animationTime=0.000000</comments>
       <channel source="#joint3.rotateX_joint3_rotateX.ANGLE-sampler" target="joint3/rotateX.ANGLE"/>
     </animation>
     <animation id="joint3.scale">
-      <source id="joint3.scale_joint3_scale-input">
-        <float_array id="joint3.scale_joint3_scale-input-array" count="3">0 2.083333253860474 4.166666507720947</float_array>
+      <source id="joint3.scale_joint3_scale.X-input">
+        <float_array id="joint3.scale_joint3_scale.X-input-array" count="3">0 2.083333253860474 4.166666507720947</float_array>
         <technique_common>
-          <accessor source="#joint3.scale_joint3_scale-input-array" count="3" stride="1">
+          <accessor source="#joint3.scale_joint3_scale.X-input-array" count="3" stride="1">
             <param name="TIME" type="float"/>
           </accessor>
         </technique_common>
@@ -184,30 +184,116 @@ animationTime=0.000000</comments>
           <post_infinity>CONSTANT</post_infinity>
         </technique>
       </source>
-      <source id="joint3.scale_joint3_scale-output">
-        <float_array id="joint3.scale_joint3_scale-output-array" count="9">1 1 1 0.300000011920929 0.300000011920929 0.300000011920929 1 1 1</float_array>
+      <source id="joint3.scale_joint3_scale.X-output">
+        <float_array id="joint3.scale_joint3_scale.X-output-array" count="3">1 0.3479918241500854 1</float_array>
         <technique_common>
-          <accessor source="#joint3.scale_joint3_scale-output-array" count="3" stride="3">
+          <accessor source="#joint3.scale_joint3_scale.X-output-array" count="3" stride="1">
             <param name="X" type="float"/>
-            <param name="Y" type="float"/>
-            <param name="Z" type="float"/>
           </accessor>
         </technique_common>
       </source>
-      <source id="joint3.scale_joint3_scale-interpolations">
-        <Name_array id="joint3.scale_joint3_scale-interpolations-array" count="3">LINEAR LINEAR LINEAR</Name_array>
+      <source id="joint3.scale_joint3_scale.X-interpolations">
+        <Name_array id="joint3.scale_joint3_scale.X-interpolations-array" count="3">LINEAR LINEAR LINEAR</Name_array>
         <technique_common>
-          <accessor source="#joint3.scale_joint3_scale-interpolations-array" count="3" stride="1">
+          <accessor source="#joint3.scale_joint3_scale.X-interpolations-array" count="3" stride="1">
             <param name="INTERPOLATION" type="Name"/>
           </accessor>
         </technique_common>
       </source>
-      <sampler id="joint3.scale_joint3_scale-sampler">
-        <input semantic="INPUT" source="#joint3.scale_joint3_scale-input"/>
-        <input semantic="OUTPUT" source="#joint3.scale_joint3_scale-output"/>
-        <input semantic="INTERPOLATION" source="#joint3.scale_joint3_scale-interpolations"/>
+      <source id="joint3.scale_joint3_scale.Y-input">
+        <float_array id="joint3.scale_joint3_scale.Y-input-array" count="3">0 2.083333253860474 4.166666507720947</float_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale.Y-input-array" count="3" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="joint3.scale_joint3_scale.Y-output">
+        <float_array id="joint3.scale_joint3_scale.Y-output-array" count="3">1 1.852153062820435 1</float_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale.Y-output-array" count="3" stride="1">
+            <param name="Y" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint3.scale_joint3_scale.Y-interpolations">
+        <Name_array id="joint3.scale_joint3_scale.Y-interpolations-array" count="3">LINEAR BEZIER LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale.Y-interpolations-array" count="3" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint3.scale_joint3_scale.Y-intangents">
+        <float_array id="joint3.scale_joint3_scale.Y-intangents-array" count="6">-0.0000999999974737 1 1.388888835906982 1.852153062820435 4.166566371917725 1</float_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale.Y-intangents-array" count="3" stride="2">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint3.scale_joint3_scale.Y-outtangents">
+        <float_array id="joint3.scale_joint3_scale.Y-outtangents-array" count="6">0.0000999999974737 1 2.777777671813965 1.852153062820435 4.16676664352417 1</float_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale.Y-outtangents-array" count="3" stride="2">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint3.scale_joint3_scale.Z-input">
+        <float_array id="joint3.scale_joint3_scale.Z-input-array" count="3">0 2.083333253860474 4.166666507720947</float_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale.Z-input-array" count="3" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="joint3.scale_joint3_scale.Z-output">
+        <float_array id="joint3.scale_joint3_scale.Z-output-array" count="3">1 0.3479918241500854 1</float_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale.Z-output-array" count="3" stride="1">
+            <param name="Z" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="joint3.scale_joint3_scale.Z-interpolations">
+        <Name_array id="joint3.scale_joint3_scale.Z-interpolations-array" count="3">LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#joint3.scale_joint3_scale.Z-interpolations-array" count="3" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="joint3.scale_joint3_scale.X-sampler">
+        <input semantic="INPUT" source="#joint3.scale_joint3_scale.X-input"/>
+        <input semantic="OUTPUT" source="#joint3.scale_joint3_scale.X-output"/>
+        <input semantic="INTERPOLATION" source="#joint3.scale_joint3_scale.X-interpolations"/>
       </sampler>
-      <channel source="#joint3.scale_joint3_scale-sampler" target="joint3/scale"/>
+      <sampler id="joint3.scale_joint3_scale.Y-sampler">
+        <input semantic="INPUT" source="#joint3.scale_joint3_scale.Y-input"/>
+        <input semantic="OUTPUT" source="#joint3.scale_joint3_scale.Y-output"/>
+        <input semantic="INTERPOLATION" source="#joint3.scale_joint3_scale.Y-interpolations"/>
+        <input semantic="IN_TANGENT" source="#joint3.scale_joint3_scale.Y-intangents"/>
+        <input semantic="OUT_TANGENT" source="#joint3.scale_joint3_scale.Y-outtangents"/>
+      </sampler>
+      <sampler id="joint3.scale_joint3_scale.Z-sampler">
+        <input semantic="INPUT" source="#joint3.scale_joint3_scale.Z-input"/>
+        <input semantic="OUTPUT" source="#joint3.scale_joint3_scale.Z-output"/>
+        <input semantic="INTERPOLATION" source="#joint3.scale_joint3_scale.Z-interpolations"/>
+      </sampler>
+      <channel source="#joint3.scale_joint3_scale.X-sampler" target="joint3/scale.X"/>
+      <channel source="#joint3.scale_joint3_scale.Y-sampler" target="joint3/scale.Y"/>
+      <channel source="#joint3.scale_joint3_scale.Z-sampler" target="joint3/scale.Z"/>
     </animation>
   </library_animations>
   <library_physics_scenes>
