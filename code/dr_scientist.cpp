@@ -34,6 +34,9 @@ namespace physics
 
 void update_character_controller(put::scene_controller* sc)
 {
+    static f32 blend = 0.0f;
+    ImGui::SliderFloat("Blend", &blend, 0.0f, 1.0f);
+    
     static vec3f pos = vec3f::zero();
     static vec3f dir = vec3f::unit_z();
     f32 vel = 0.0f;
@@ -76,6 +79,8 @@ void update_character_controller(put::scene_controller* sc)
     
     sc->scene->anim_controller[1].current_time += vel * 0.01f;
     pos = sc->scene->local_matrices[1].get_translation();
+    
+    sc->scene->anim_controller_v2[1].blend = blend;
     
     put::dbg::add_line(pos, pos + dir, vec4f::blue());
     put::dbg::add_line(pos, pos + xz_dir);
