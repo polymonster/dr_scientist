@@ -14,5 +14,6 @@ jobs:
           command: |
             cd ..
             git clone https://github.com/polymonster/pmtech.git
+            ls
             cd dr_scientist
             python3 ../pmtech/tools/build.py -all
