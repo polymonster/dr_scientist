@@ -13,7 +13,7 @@ jobs:
           name: install dependencies
           command: |
             cd ..
-            git clone https://github.com/polymonster/pmtech.git
+            git clone --recursive https://github.com/polymonster/pmtech.git
             ls
             cd repo
             python3 ../pmtech/tools/build.py -all
