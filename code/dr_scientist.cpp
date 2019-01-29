@@ -16,6 +16,7 @@
 #include "ces/ces_scene.h"
 #include "ces/ces_resources.h"
 #include "ces/ces_editor.h"
+#include "ces/ces_utilities.h"
 
 using namespace put;
 
@@ -32,11 +33,39 @@ namespace physics
     extern PEN_TRV physics_thread_main( void* params );
 }
 
+struct dr_char
+{
+    u32 root = 0;
+    u32 anim_idle;
+    u32 anim_walk;
+    u32 anim_run;
+};
+
+dr_char dr;
+
+void setup_character(put::ces::entity_scene* scene)
+{
+    // load main model
+    dr.root = ces::load_pmm("data/models/characters/doctor/Doctor.pmm", scene);
+    
+    // load anims
+    anim_handle idle = ces::load_pma("data/models/characters/doctor/anims/doctor_idle01.pma");
+    anim_handle walk = ces::load_pma("data/models/characters/doctor/anims/doctor_walk.pma");
+    anim_handle run = ces::load_pma("data/models/characters/doctor/anims/doctor_run.pma");
+    
+    // bind to rig
+    ces::bind_animation_to_rig_v2(scene, idle, dr.root);
+    ces::bind_animation_to_rig_v2(scene, walk, dr.root);
+    ces::bind_animation_to_rig_v2(scene, run, dr.root);
+    
+    // todo make bind return index
+    dr.anim_idle = 0;
+    dr.anim_walk = 1;
+    dr.anim_run = 2;
+}
+
 void update_character_controller(put::scene_controller* sc)
 {
-    static f32 blend = 0.0f;
-    ImGui::SliderFloat("Blend", &blend, 0.0f, 1.0f);
-    
     static vec3f pos = vec3f::zero();
     static vec3f dir = vec3f::unit_z();
     f32 vel = 0.0f;
@@ -77,11 +106,14 @@ void update_character_controller(put::scene_controller* sc)
         sc->scene->initial_transform[trajectory_node].rotation = rot;
     }
     
-    sc->scene->anim_controller[1].current_time += vel * 0.01f;
-    pos = sc->scene->local_matrices[1].get_translation();
+    ces::cmp_anim_controller_v2& controller = sc->scene->anim_controller_v2[dr.root];
     
-    sc->scene->anim_controller_v2[1].blend = blend;
+    controller.blend.anim_a = dr.anim_idle;
+    controller.blend.anim_b = dr.anim_walk;
+    controller.blend.ratio = abs(vel);
     
+    // debug
+    pos = sc->scene->local_matrices[trajectory_node].get_translation();
     put::dbg::add_line(pos, pos + dir, vec4f::blue());
     put::dbg::add_line(pos, pos + xz_dir);
     put::dbg::add_circle(vec3f::unit_y(), pos, 0.5f, vec4f::green());
@@ -150,6 +182,8 @@ PEN_TRV pen::user_entry( void* params )
 	put::vgt::init(main_scene);
     
     pmfx::init("data/configs/editor_renderer.jsn");
+    
+    setup_character(main_scene);
     
     while( 1 )
     {
