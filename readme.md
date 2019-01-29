@@ -1,4 +1,4 @@
-# dr_scientist [![CircleCI](https://circleci.com/gh/polymonster/dr_scientist.svg?style=svg)](https://circleci.com/gh/polymonster/dr_scientist)
+# dr_scientist [![CircleCI](https://circleci.com/gh/polymonster/dr_scientist.svg?style=svg&circle-token=4947316ae6ba47bee765c79654982d990b1dc5be)](https://circleci.com/gh/polymonster/dr_scientist)
 
 Follow work in progress: [trello](https://trello.com/b/MC3BGwCk/dr-scientist)
 
