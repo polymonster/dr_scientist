@@ -1,4 +1,4 @@
-# dr_scientist [![Build Status](https://travis-ci.org/polymonster/dr_scientist.svg?branch=master)](https://travis-ci.org/polymonster/dr_scientist) [![Build Status](https://ci.appveyor.com/api/projects/status/github/polymonster/dr_scientist?branch=master&svg=true&passingText=win32-passing&pendingText=win32-pending&failingText=win32-failing)](https://ci.appveyor.com/project/polymonster/dr-scientist)
+# dr_scientist [![CircleCI](https://circleci.com/gh/polymonster/dr_scientist.svg?style=svg&circle-token=4947316ae6ba47bee765c79654982d990b1dc5be)](https://circleci.com/gh/polymonster/dr_scientist)
 
 Follow work in progress: [trello](https://trello.com/b/MC3BGwCk/dr-scientist)
 

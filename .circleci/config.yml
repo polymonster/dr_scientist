@@ -1,0 +1,19 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.1
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: install dependencies
+          command: |
+            cd ..
+            git clone --recursive https://github.com/polymonster/pmtech.git
+            ls
+            cd repo
+            python3 ../pmtech/tools/build.py -all
