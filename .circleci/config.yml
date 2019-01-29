@@ -13,5 +13,6 @@ jobs:
           name: install dependencies
           command: |
             cd ..
-            ls
             git clone https://github.com/polymonster/pmtech.git
+            cd dr_scientist
+            python3 ../pmtech/tools/build.py -all
