@@ -10,8 +10,9 @@ jobs:
       - checkout
 
       - run:
-          name: install dependencies
+          name: build
           command: |
+            sudo apt-get -y intsall libglew-dev
             cd ..
             git clone --recursive https://github.com/polymonster/pmtech.git
             cd repo
