@@ -12,7 +12,7 @@ jobs:
       - run:
           name: build
           command: |
-            sudo apt-get libglew-dev
+            sudo apt-get update
             cd ..
             git clone --recursive https://github.com/polymonster/pmtech.git
             cd repo
