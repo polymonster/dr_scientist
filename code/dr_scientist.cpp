@@ -17,8 +17,10 @@
 #include "ces/ces_resources.h"
 #include "ces/ces_editor.h"
 #include "ces/ces_utilities.h"
+#include "data_struct.h"
 
 using namespace put;
+using namespace ces;
 
 pen::window_creation_params pen_window
 {
@@ -62,6 +64,98 @@ void setup_character(put::ces::entity_scene* scene)
     dr.anim_idle = 0;
     dr.anim_walk = 1;
     dr.anim_run = 2;
+}
+
+bool can_edit()
+{
+    if (pen::input_key(PK_MENU))
+        return false;
+    
+    if (dev_ui::want_capture())
+        return false;
+    
+    return true;
+}
+
+void update_level_editor(put::scene_controller* sc)
+{
+    ces::entity_scene* scene = sc->scene;
+    static material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
+    static geometry_resource* box = get_geometry_resource(PEN_HASH("cube"));
+    
+    static bool open = false;
+    static vec3i slice = vec3i(0, 0, 0);
+    static vec3f pN = vec3f::unit_y();
+    static vec3f p0 = vec3f::zero();
+    static vec3f* grid = nullptr;
+    
+    ImGui::BeginMainMenuBar();
+    if(ImGui::MenuItem(ICON_FA_BRIEFCASE))
+        open = !open;
+    ImGui::EndMainMenuBar();
+    
+    if(!open)
+        return;
+    
+    ImGui::Begin("Toolbox");
+    
+    ImGui::InputInt("Level", &slice[1]);
+    p0.y = slice.y;
+    
+    ImGui::End();
+    
+    pen::mouse_state ms = pen::input_get_mouse_state();
+    
+    // get a camera ray
+    vec2i vpi = vec2i(pen_window.width, pen_window.height);
+    ms.y = vpi.y - ms.y;
+    mat4  view_proj = sc->camera->proj * sc->camera->view;
+    vec3f r0 = maths::unproject_sc(vec3f(ms.x, ms.y, 0.0f), view_proj, vpi);
+    vec3f r1 = maths::unproject_sc(vec3f(ms.x, ms.y, 1.0f), view_proj, vpi);
+    vec3f rv = normalised(r1 - r0);
+    
+    // intersect with edit plane
+    vec3f ip = maths::ray_plane_intersect(r0, rv, p0, pN);
+    
+    // snap to grid
+    ip = floor(ip) + vec3f(0.5f);
+    ip.y = slice.y-0.5f;
+    
+    if(can_edit())
+    {
+        static bool debounce = false;
+        if(ms.buttons[PEN_MOUSE_L])
+        {
+            if(!debounce)
+            {
+                u32 b = get_new_node(scene);
+                scene->names[b] = "ground";
+                scene->transforms[b].translation = ip;
+                scene->transforms[b].rotation = quat();
+                scene->transforms[b].scale = vec3f(0.5f);
+                scene->entities[b] |= CMP_TRANSFORM;
+                scene->parents[b] = b;
+                instantiate_geometry(box, scene, b);
+                instantiate_material(default_material, scene, b);
+                instantiate_model_cbuffer(scene, b);
+                
+                //sb_push(grid, ip);
+                debounce = true;
+            }
+        }
+        else
+        {
+            debounce = false;
+        }
+        
+        put::dbg::add_aabb(ip - vec3f(0.5f), ip + vec3f(0.5f));
+    }
+    
+    u32 num_boxes = sb_count(grid);
+    for(u32 i = 0; i < num_boxes; ++i)
+    {
+        put::dbg::add_aabb(grid[i] - vec3f(0.5f), grid[i] + vec3f(0.5f), vec4f::red());
+    }
 }
 
 void update_character_controller(put::scene_controller* sc)
@@ -111,6 +205,9 @@ void update_character_controller(put::scene_controller* sc)
     controller.blend.anim_a = dr.anim_idle;
     controller.blend.anim_b = dr.anim_walk;
     controller.blend.ratio = abs(vel);
+    
+    // todo move
+    update_level_editor(sc);
     
     // debug
     pos = sc->scene->local_matrices[trajectory_node].get_translation();
