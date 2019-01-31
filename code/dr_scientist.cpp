@@ -45,6 +45,41 @@ struct dr_char
 
 dr_char dr;
 
+f32 user_thread_time = 0.0f;
+void mini_profiler()
+{
+    f32 render_gpu = 0.0f;
+    f32 render_cpu = 0.0f;
+    pen::renderer_get_present_time(render_cpu, render_gpu);
+
+    static f32 max_gpu = 0.0f;
+    static f32 max_render = 0.0f;
+    static f32 max_user = 0.0f;
+
+    max_gpu = max(render_gpu, max_gpu);
+    max_render = max(render_cpu, max_render);
+    max_user = max(user_thread_time, max_user);
+
+    ImGui::Separator();
+    ImGui::Text("Stats:");
+    ImGui::Text("User Thread: %2.2f ms", user_thread_time);
+    ImGui::Text("Render Thread: %2.2f ms", render_cpu);
+    ImGui::Text("GPU: %2.2f ms", render_gpu);
+
+    ImGui::Text("max_gpu: %2.2f ms", max_gpu);
+    ImGui::Text("max_render: %2.2f ms", max_render);
+    ImGui::Text("max_user: %2.2f ms", max_user);
+
+    if (ImGui::Button("Reset"))
+    {
+        max_gpu = 0.0f;
+        max_render = 0.0f;
+        max_user = 0.0f;
+    }
+
+    ImGui::Separator();
+}
+
 void setup_character(put::ces::entity_scene* scene)
 {
     // load main model
@@ -135,11 +170,14 @@ void update_level_editor(put::scene_controller* sc)
                 scene->transforms[b].scale = vec3f(0.5f);
                 scene->entities[b] |= CMP_TRANSFORM;
                 scene->parents[b] = b;
+                scene->physics_data[b].rigid_body.shape = physics::BOX;
+                scene->physics_data[b].rigid_body.mass = 0.0f;
+
                 instantiate_geometry(box, scene, b);
                 instantiate_material(default_material, scene, b);
                 instantiate_model_cbuffer(scene, b);
+                instantiate_rigid_body(scene, b);
                 
-                //sb_push(grid, ip);
                 debounce = true;
             }
         }
@@ -158,41 +196,71 @@ void update_level_editor(put::scene_controller* sc)
     }
 }
 
-void update_character_controller(put::scene_controller* sc)
+void control_character(put::scene_controller* sc, f32& dir, f32& vel)
 {
-    static vec3f pos = vec3f::zero();
-    static vec3f dir = vec3f::unit_z();
-    f32 vel = 0.0f;
-    
-    u32 trajectory_node = 5;
-    
+    vec3f left_stick = vec3f::zero();
+
     vec3f xz_dir = sc->camera->focus - sc->camera->pos;
     xz_dir.y = 0.0f;
     xz_dir = normalised(xz_dir);
-    
+
     f32 xz_angle = acos(dot(xz_dir, vec3f(0.0f, 0.0f, 1.0f)));
-    
+
     u32 num_pads = pen::input_get_num_gamepads();
-    if(num_pads > 0)
+    if (num_pads > 0)
     {
         pen::gamepad_state gs;
         pen::input_get_gamepad_state(0, gs);
-        
-        vec3f left_stick = vec3f(gs.axis[PGP_AXIS_LEFT_STICK_X], 0.0f, gs.axis[PGP_AXIS_LEFT_STICK_Y]);
-        
-        mat4 rot = mat::create_y_rotation(xz_angle);
-        
-        vec3f transfromed_left_stick = normalised(-rot.transform_vector(left_stick));
-        
-        if(mag(left_stick) > 0.2f)
-        {
-            vel = mag(left_stick);
-            dir = transfromed_left_stick;
-        }
+
+        left_stick = vec3f(gs.axis[PGP_AXIS_LEFT_STICK_X], 0.0f, gs.axis[PGP_AXIS_LEFT_STICK_Y]);
     }
-    
-    f32 dir_angle = atan2(dir.x, dir.z);
-    
+    else
+    {
+        if (pen::input_key(PK_W))
+        {
+            left_stick.z = -1.0f;
+        }
+        else if (pen::input_key(PK_S))
+        {
+            left_stick.z = 1.0f;
+        }
+
+        if (pen::input_key(PK_A))
+        {
+            left_stick.x = -1.0f;
+        }
+        else if (pen::input_key(PK_D))
+        {
+            left_stick.x = 1.0f;
+        }
+
+        normalise(left_stick);
+    }
+
+    mat4 rot = mat::create_y_rotation(xz_angle);
+
+    vec3f transfromed_left_stick = normalised(-rot.transform_vector(left_stick));
+    static vec3f v_dir = vec3f::zero();
+
+    if (mag(left_stick) > 0.2f)
+    {
+        vel = mag(left_stick);
+        v_dir = transfromed_left_stick;
+    }
+
+    dir = atan2(v_dir.x, v_dir.z);
+}
+
+void update_character_controller(put::scene_controller* sc)
+{
+    static vec3f pos = vec3f::zero();
+
+    u32 trajectory_node = 5;
+            
+    f32 dir_angle = 0.0f;
+    f32 vel = 0.0f;
+    control_character(sc, dir_angle, vel);
+
     if(sc->scene->num_nodes > trajectory_node)
     {
         quat rot;
@@ -210,9 +278,11 @@ void update_character_controller(put::scene_controller* sc)
     update_level_editor(sc);
     
     // debug
-    pos = sc->scene->local_matrices[trajectory_node].get_translation();
-    put::dbg::add_line(pos, pos + dir, vec4f::blue());
-    put::dbg::add_line(pos, pos + xz_dir);
+    pos = sc->scene->world_matrices[dr.root].get_translation();
+    
+    //put::dbg::add_line(pos, pos + dir, vec4f::blue());
+    //put::dbg::add_line(pos, pos + xz_dir);
+
     put::dbg::add_circle(vec3f::unit_y(), pos, 0.5f, vec4f::green());
     
 }
@@ -284,6 +354,9 @@ PEN_TRV pen::user_entry( void* params )
     
     while( 1 )
     {
+        static u32 frame_timer = pen::timer_create("user_thread");
+        pen::timer_start(frame_timer);
+
 		put::dev_ui::new_frame();
         
         pmfx::update();
@@ -304,6 +377,8 @@ PEN_TRV pen::user_entry( void* params )
         //msg from the engine we want to terminate
         if( pen::semaphore_try_wait( p_thread_info->p_sem_exit ) )
             break;
+
+        user_thread_time = pen::timer_elapsed_ms(frame_timer);
     }
     
     //clean up mem here
