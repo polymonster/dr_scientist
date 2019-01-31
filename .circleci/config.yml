@@ -15,7 +15,7 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install libglew-dev
-            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100
             cd ..
             git clone --recursive https://github.com/polymonster/pmtech.git
             cd repo
