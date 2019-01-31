@@ -14,7 +14,7 @@ jobs:
           name: build
           command: |
             sudo apt-get install software-properties-common
-            sudo add-apt-repository ppa:jonathonf/gcc-7.1
+            sudo add-apt-repository ppa:jonathonf/gcc-7.1 -y
             sudo apt-get update
             sudo apt-get install libglew-dev
             gcc --version
