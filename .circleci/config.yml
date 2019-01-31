@@ -13,6 +13,7 @@ jobs:
       - run:
           name: build
           command: |
+            sudo add-apt-repository ppa:jonathonf/gcc-7.1
             sudo apt-get update
             sudo apt-get install libglew-dev
             gcc --version
