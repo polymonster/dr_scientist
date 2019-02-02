@@ -196,7 +196,7 @@ void update_level_editor(put::scene_controller* sc)
     }
 }
 
-void control_character(put::scene_controller* sc, f32& dir, f32& vel)
+void control_character(put::scene_controller* sc, f32& dir, f32& vel, vec3f& v_dir)
 {
     vec3f left_stick = vec3f::zero();
 
@@ -240,7 +240,7 @@ void control_character(put::scene_controller* sc, f32& dir, f32& vel)
     mat4 rot = mat::create_y_rotation(xz_angle);
 
     vec3f transfromed_left_stick = normalised(-rot.transform_vector(left_stick));
-    static vec3f v_dir = vec3f::zero();
+
 
     if (mag(left_stick) > 0.2f)
     {
@@ -251,6 +251,17 @@ void control_character(put::scene_controller* sc, f32& dir, f32& vel)
     dir = atan2(v_dir.x, v_dir.z);
 }
 
+std::atomic<f32> rx;
+std::atomic<f32> ry;
+std::atomic<f32> rz;
+
+void rccb(const physics::ray_cast_result& result)
+{
+   rx = result.point.x;
+   ry = result.point.y;
+   rz = result.point.z;
+}
+
 void update_character_controller(put::scene_controller* sc)
 {
     static vec3f pos = vec3f::zero();
@@ -259,7 +270,8 @@ void update_character_controller(put::scene_controller* sc)
             
     f32 dir_angle = 0.0f;
     f32 vel = 0.0f;
-    control_character(sc, dir_angle, vel);
+    static vec3f v_dir = vec3f::unit_z();
+    control_character(sc, dir_angle, vel, v_dir);
 
     if(sc->scene->num_nodes > trajectory_node)
     {
@@ -273,18 +285,43 @@ void update_character_controller(put::scene_controller* sc)
     controller.blend.anim_a = dr.anim_idle;
     controller.blend.anim_b = dr.anim_walk;
     controller.blend.ratio = abs(vel);
-    
-    // todo move
+
+    vec3f ray_cast_pos = vec3f(rx, ry, rz);
+
+    // todo move to its own update
     update_level_editor(sc);
     
     // debug
     pos = sc->scene->world_matrices[dr.root].get_translation();
     
-    //put::dbg::add_line(pos, pos + dir, vec4f::blue());
-    //put::dbg::add_line(pos, pos + xz_dir);
+    vec3f r0 = pos + vec3f(0.0f, 0.5f, 0.0f);
 
+    vec3f cv = r0 - ray_cast_pos;
+
+    if (mag(cv) < 0.5f)
+    {
+        // collision
+        ImGui::Text("Collision");
+
+        f32 diff = 0.5f - mag(cv);
+        
+        sc->scene->transforms[dr.root].translation += normalised(cv) * diff;
+        sc->scene->entities[dr.root] |= CMP_TRANSFORM;
+    }
+
+    put::dbg::add_line(pos, pos + v_dir, vec4f::blue());
     put::dbg::add_circle(vec3f::unit_y(), pos, 0.5f, vec4f::green());
+    put::dbg::add_point(ray_cast_pos, 0.1f, vec4f::green());
+
+    // todo make this character controller
     
+    physics::ray_cast_params rcp;
+    rcp.start = r0;
+    rcp.end = r0 + v_dir * 1000.0f;
+    rcp.callback = rccb;
+    rcp.timestamp = pen::get_time_ms();
+
+    physics::cast_ray(rcp);
 }
 
 PEN_TRV pen::user_entry( void* params )
