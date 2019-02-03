@@ -80,6 +80,27 @@ void mini_profiler()
     ImGui::Separator();
 }
 
+void add_box(put::ces::entity_scene* scene, const vec3f& pos)
+{
+    static material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
+    static geometry_resource* box = get_geometry_resource(PEN_HASH("cube"));
+    
+    u32 b = get_new_node(scene);
+    scene->names[b] = "ground";
+    scene->transforms[b].translation = pos;
+    scene->transforms[b].rotation = quat();
+    scene->transforms[b].scale = vec3f(0.5f);
+    scene->entities[b] |= CMP_TRANSFORM;
+    scene->parents[b] = b;
+    scene->physics_data[b].rigid_body.shape = physics::BOX;
+    scene->physics_data[b].rigid_body.mass = 0.0f;
+    
+    instantiate_geometry(box, scene, b);
+    instantiate_material(default_material, scene, b);
+    instantiate_model_cbuffer(scene, b);
+    instantiate_rigid_body(scene, b);
+}
+
 void setup_character(put::ces::entity_scene* scene)
 {
     // load main model
@@ -99,6 +120,18 @@ void setup_character(put::ces::entity_scene* scene)
     dr.anim_idle = 0;
     dr.anim_walk = 1;
     dr.anim_run = 2;
+    
+    vec3f platform[] = {
+        vec3f(-0.5f, -0.5f, -0.5f),
+        vec3f(0.5f, -0.5f, -0.5f),
+        vec3f(-0.5f, -0.5f, 0.5f),
+        vec3f(0.5f, -0.5f, 0.5f)
+    };
+    
+    for(u32 i = 0; i < PEN_ARRAY_SIZE(platform); ++i)
+    {
+        add_box(scene, platform[i]);
+    }
 }
 
 bool can_edit()
@@ -115,8 +148,6 @@ bool can_edit()
 void update_level_editor(put::scene_controller* sc)
 {
     ces::entity_scene* scene = sc->scene;
-    static material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
-    static geometry_resource* box = get_geometry_resource(PEN_HASH("cube"));
     
     static bool open = false;
     static vec3i slice = vec3i(0, 0, 0);
@@ -163,20 +194,7 @@ void update_level_editor(put::scene_controller* sc)
         {
             if(!debounce)
             {
-                u32 b = get_new_node(scene);
-                scene->names[b] = "ground";
-                scene->transforms[b].translation = ip;
-                scene->transforms[b].rotation = quat();
-                scene->transforms[b].scale = vec3f(0.5f);
-                scene->entities[b] |= CMP_TRANSFORM;
-                scene->parents[b] = b;
-                scene->physics_data[b].rigid_body.shape = physics::BOX;
-                scene->physics_data[b].rigid_body.mass = 0.0f;
-
-                instantiate_geometry(box, scene, b);
-                instantiate_material(default_material, scene, b);
-                instantiate_model_cbuffer(scene, b);
-                instantiate_rigid_body(scene, b);
+                add_box(scene, ip);
                 
                 debounce = true;
             }
@@ -251,22 +269,18 @@ void control_character(put::scene_controller* sc, f32& dir, f32& vel, vec3f& v_d
     dir = atan2(v_dir.x, v_dir.z);
 }
 
-std::atomic<f32> rx;
-std::atomic<f32> ry;
-std::atomic<f32> rz;
-
-void rccb(const physics::ray_cast_result& result)
+struct character_cast
 {
-   rx = result.point.x;
-   ry = result.point.y;
-   rz = result.point.z;
-}
+    vec3f pos;
+    vec3f normal;
+};
 
 void sccb(const physics::sphere_cast_result& result)
 {
-    rx = result.point.x;
-    ry = result.point.y;
-    rz = result.point.z;
+    character_cast* cc = (character_cast*)result.user_data;
+    
+    cc->pos = result.point;
+    cc->normal = result.normal;
 }
 
 void update_character_controller(put::scene_controller* sc)
@@ -293,47 +307,61 @@ void update_character_controller(put::scene_controller* sc)
     controller.blend.anim_b = dr.anim_walk;
     controller.blend.ratio = abs(vel);
 
-    vec3f ray_cast_pos = vec3f(rx, ry, rz);
-
     // todo move to its own update
     update_level_editor(sc);
     
     // debug
     pos = sc->scene->world_matrices[dr.root].get_translation();
+    pos -= vec3f(0.0f, 0.1f, 0.0f);
     
-    vec3f r0 = pos + vec3f(0.0f, 0.5f, 0.0f);
-
-    vec3f cv = r0 - ray_cast_pos;
-
-    if (mag(cv) < 0.5f)
-    {
-        f32 diff = 0.5f - mag(cv);
-        
-        sc->scene->transforms[dr.root].translation += normalised(cv) * diff;
-        sc->scene->entities[dr.root] |= CMP_TRANSFORM;
-    }
+    sc->scene->transforms[dr.root].translation = pos;
+    sc->scene->entities[dr.root] |= CMP_TRANSFORM;
+    
+    vec3f r0 = sc->scene->transforms[dr.root].translation + vec3f(0.0f, 0.5f, 0.0f);
+    
+    character_cast wall_cast;
+    character_cast floor_cast;
 
     put::dbg::add_line(pos, pos + v_dir, vec4f::blue());
     put::dbg::add_circle(vec3f::unit_y(), pos, 0.5f, vec4f::green());
-    put::dbg::add_point(ray_cast_pos, 0.1f, vec4f::green());
 
     // todo make this character controller
-    
-    physics::ray_cast_params rcp;
-    rcp.start = r0;
-    rcp.end = r0 + v_dir * 1000.0f;
-    rcp.callback = rccb;
-    rcp.timestamp = pen::get_time_ms();
-
-    // physics::cast_ray(rcp);
 
     physics::sphere_cast_params scp;
     scp.from = r0;
     scp.to = r0 + v_dir * 1000.0f;
     scp.dimension = vec3f(0.3f);
     scp.callback = &sccb;
+    scp.user_data = &wall_cast;
 
     physics::cast_sphere(scp, true);
+    
+    scp.dimension = vec3f(0.2f);
+    scp.to = r0 + vec3f(0.0f, -10000.0f, 0.0f);
+    scp.user_data = &floor_cast;
+    
+    physics::cast_sphere(scp, true);
+    
+    // wall collisions
+    vec3f cv = r0 - wall_cast.pos;
+    if (mag(cv) < 0.5f)
+    {
+        f32 diff = 0.5f - mag(cv);
+        
+        sc->scene->transforms[dr.root].translation += normalised(cv) * diff;
+    }
+    
+    // floor collision
+    cv = r0 - floor_cast.pos;
+    if (mag(cv) < 0.5f)
+    {
+        f32 diff = 0.5f - mag(cv);
+        
+        sc->scene->transforms[dr.root].translation += normalised(cv) * diff;
+    }
+
+    put::dbg::add_point(wall_cast.pos, 0.1f, vec4f::green());
+    put::dbg::add_point(floor_cast.pos, 0.1f, vec4f::blue());
 }
 
 PEN_TRV pen::user_entry( void* params )
