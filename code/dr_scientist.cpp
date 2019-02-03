@@ -262,6 +262,13 @@ void rccb(const physics::ray_cast_result& result)
    rz = result.point.z;
 }
 
+void sccb(const physics::sphere_cast_result& result)
+{
+    rx = result.point.x;
+    ry = result.point.y;
+    rz = result.point.z;
+}
+
 void update_character_controller(put::scene_controller* sc)
 {
     static vec3f pos = vec3f::zero();
@@ -300,9 +307,6 @@ void update_character_controller(put::scene_controller* sc)
 
     if (mag(cv) < 0.5f)
     {
-        // collision
-        ImGui::Text("Collision");
-
         f32 diff = 0.5f - mag(cv);
         
         sc->scene->transforms[dr.root].translation += normalised(cv) * diff;
@@ -321,7 +325,15 @@ void update_character_controller(put::scene_controller* sc)
     rcp.callback = rccb;
     rcp.timestamp = pen::get_time_ms();
 
-    physics::cast_ray(rcp);
+    // physics::cast_ray(rcp);
+
+    physics::sphere_cast_params scp;
+    scp.from = r0;
+    scp.to = r0 + v_dir * 1000.0f;
+    scp.dimension = vec3f(0.3f);
+    scp.callback = &sccb;
+
+    physics::cast_sphere(scp, true);
 }
 
 PEN_TRV pen::user_entry( void* params )
