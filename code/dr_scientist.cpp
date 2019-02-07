@@ -311,9 +311,20 @@ void update_character_controller(put::scene_controller* sc)
     
     ces::cmp_anim_controller_v2& controller = sc->scene->anim_controller_v2[dr.root];
     
-    controller.blend.anim_a = dr.anim_idle;
-    controller.blend.anim_b = dr.anim_walk;
     controller.blend.ratio = abs(vel);
+
+    if (vel > 0.1)
+    {
+        // walk state
+        controller.blend.anim_a = dr.anim_walk;
+        controller.blend.anim_b = dr.anim_walk;
+    }
+    else
+    {
+        // idle state
+        controller.blend.anim_a = dr.anim_idle;
+        controller.blend.anim_b = dr.anim_walk;
+    }
 
     // todo move to its own update
     update_level_editor(sc);
