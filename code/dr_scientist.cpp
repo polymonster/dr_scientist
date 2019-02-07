@@ -283,6 +283,14 @@ void sccb(const physics::sphere_cast_result& result)
     cc->normal = result.normal;
 }
 
+void rccb(const physics::ray_cast_result& result)
+{
+    character_cast* cc = (character_cast*)result.user_data;
+
+    cc->pos = result.point;
+    cc->normal = result.normal;
+}
+
 void update_character_controller(put::scene_controller* sc)
 {
     static vec3f pos = vec3f::zero();
@@ -321,6 +329,7 @@ void update_character_controller(put::scene_controller* sc)
     
     character_cast wall_cast;
     character_cast floor_cast;
+    character_cast surface_cast;
 
     put::dbg::add_line(pos, pos + v_dir, vec4f::blue());
     put::dbg::add_circle(vec3f::unit_y(), pos, 0.5f, vec4f::green());
@@ -341,6 +350,14 @@ void update_character_controller(put::scene_controller* sc)
     scp.user_data = &floor_cast;
     
     physics::cast_sphere(scp, true);
+
+    physics::ray_cast_params rcp;
+    rcp.start = r0;
+    rcp.end = r0 + vec3f(0.0f, -10000.0f, 0.0f);
+    rcp.callback = &rccb;
+    rcp.user_data = &surface_cast;
+
+    physics::cast_ray(rcp, true);
     
     // wall collisions
     vec3f cv = r0 - wall_cast.pos;
@@ -352,16 +369,28 @@ void update_character_controller(put::scene_controller* sc)
     }
     
     // floor collision
-    cv = r0 - floor_cast.pos;
-    if (mag(cv) < 0.5f)
+    f32 cvm = mag(r0 - floor_cast.pos);
+    if (cvm < 0.5f)
     {
-        f32 diff = 0.5f - mag(cv);
-        
-        sc->scene->transforms[dr.root].translation += normalised(cv) * diff;
+        f32 cvm2 = mag(r0 - surface_cast.pos);
+
+        if (cvm2 < 0.5f)
+        {
+            f32 diff = 0.5f - cvm2;
+            sc->scene->transforms[dr.root].translation += vec3f::unit_y() * diff;
+        }
+        else
+        {
+            f32 diff = 0.5f - cvm;
+            sc->scene->transforms[dr.root].translation += floor_cast.normal * diff;
+        }
     }
 
+    put::dbg::add_point(surface_cast.pos, 0.1f, vec4f::green());
     put::dbg::add_point(wall_cast.pos, 0.1f, vec4f::green());
     put::dbg::add_point(floor_cast.pos, 0.1f, vec4f::blue());
+
+    put::dbg::add_line(floor_cast.pos, floor_cast.pos + floor_cast.normal, vec4f::magenta());
 }
 
 PEN_TRV pen::user_entry( void* params )
