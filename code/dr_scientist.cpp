@@ -318,6 +318,12 @@ void update_character_controller(put::scene_controller* sc)
         // walk state
         controller.blend.anim_a = dr.anim_walk;
         controller.blend.anim_b = dr.anim_walk;
+
+        if (pen::input_key(PK_CONTROL))
+        {
+            controller.blend.anim_a = dr.anim_run;
+            controller.blend.anim_b = dr.anim_run;
+        }
     }
     else
     {
@@ -397,11 +403,12 @@ void update_character_controller(put::scene_controller* sc)
         }
     }
 
+    /*
     put::dbg::add_point(surface_cast.pos, 0.1f, vec4f::green());
     put::dbg::add_point(wall_cast.pos, 0.1f, vec4f::green());
     put::dbg::add_point(floor_cast.pos, 0.1f, vec4f::blue());
-
     put::dbg::add_line(floor_cast.pos, floor_cast.pos + floor_cast.normal, vec4f::magenta());
+    */
 }
 
 PEN_TRV pen::user_entry( void* params )
