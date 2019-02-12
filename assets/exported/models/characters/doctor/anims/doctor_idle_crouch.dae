@@ -1,0 +1,2637 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Jake</author>
+      <authoring_tool>Maya2018 | ColladaMaya v3.04C PhyreEngine(TM) 3.22.0.0</authoring_tool>
+      <comments>Collada Maya Export Options: bakeTransforms=0;exportPolygonMeshes=0;relativePaths=1;bakeLighting=0;isSampling=0;
+curveConstrainSampling=0;removeStaticCurves=1;exportCameraAsLookat=0;
+exportLights=0;exportCameras=0;exportDefaultCameras=0;exportJointsAndSkin=1;
+exportAnimations=1;exportTriangles=1;exportInvisibleNodes=0;
+exportNormals=0;exportTexCoords=0;
+exportVertexColors=0;exportVertexColorsAnimation=0;exportTangents=0;
+exportTexTangents=0;exportConstraints=0;exportPhysics=1;exportXRefs=1;instanceDuplicateCurves=0;
+dereferenceXRefs=1;cameraXFov=0;cameraYFov=1;
+animationTime=0.000000</comments>
+      <source_data>file:///D:/Dev/NoMansSkyTrunk/Game/Assets/Source/Models/Common/Player/PlayerCharacter/Anims/doctor_idle_crouch.mb</source_data>
+    </contributor>
+    <created>2019-02-12T14:08:06Z</created>
+    <modified>2019-02-12T14:08:06Z</modified>
+    <unit meter="1" name="meter"/>
+    <up_axis>Y_UP</up_axis>
+  </asset>
+  <library_animations>
+    <animation id="Spine_01SHJnt.translate">
+      <source id="Spine_01SHJnt.translate_Spine_01SHJnt_translate-input">
+        <float_array id="Spine_01SHJnt.translate_Spine_01SHJnt_translate-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.translate_Spine_01SHJnt_translate-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_01SHJnt.translate_Spine_01SHJnt_translate-output">
+        <float_array id="Spine_01SHJnt.translate_Spine_01SHJnt_translate-output-array" count="6">0.0848235487937927 0.0155650014057755 0 0.0848235487937927 0.0155650014057755 0</float_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.translate_Spine_01SHJnt_translate-output-array" count="2" stride="3">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+            <param name="Z" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_01SHJnt.translate_Spine_01SHJnt_translate-interpolations">
+        <Name_array id="Spine_01SHJnt.translate_Spine_01SHJnt_translate-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.translate_Spine_01SHJnt_translate-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_01SHJnt.translate_Spine_01SHJnt_translate-sampler">
+        <input semantic="INPUT" source="#Spine_01SHJnt.translate_Spine_01SHJnt_translate-input"/>
+        <input semantic="OUTPUT" source="#Spine_01SHJnt.translate_Spine_01SHJnt_translate-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_01SHJnt.translate_Spine_01SHJnt_translate-interpolations"/>
+      </sampler>
+      <channel source="#Spine_01SHJnt.translate_Spine_01SHJnt_translate-sampler" target="Spine_01SHJnt/translate"/>
+    </animation>
+    <animation id="Spine_01SHJnt.rotateX">
+      <source id="Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-input">
+        <float_array id="Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-output">
+        <float_array id="Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-output-array" count="2">0 0</float_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-interpolations">
+        <Name_array id="Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-sampler">
+        <input semantic="INPUT" source="#Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#Spine_01SHJnt.rotateX_Spine_01SHJnt_rotateX.ANGLE-sampler" target="Spine_01SHJnt/rotateX.ANGLE"/>
+    </animation>
+    <animation id="Spine_01SHJnt.rotateY">
+      <source id="Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-input">
+        <float_array id="Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-output">
+        <float_array id="Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-output-array" count="2">0 0</float_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-interpolations">
+        <Name_array id="Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-sampler">
+        <input semantic="INPUT" source="#Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#Spine_01SHJnt.rotateY_Spine_01SHJnt_rotateY.ANGLE-sampler" target="Spine_01SHJnt/rotateY.ANGLE"/>
+    </animation>
+    <animation id="Spine_01SHJnt.rotateZ">
+      <source id="Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-input">
+        <float_array id="Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-output">
+        <float_array id="Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-output-array" count="2">-20.80084991455078 -20.80084991455078</float_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-interpolations">
+        <Name_array id="Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-sampler">
+        <input semantic="INPUT" source="#Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#Spine_01SHJnt.rotateZ_Spine_01SHJnt_rotateZ.ANGLE-sampler" target="Spine_01SHJnt/rotateZ.ANGLE"/>
+    </animation>
+    <animation id="Spine_02SHJnt.translate">
+      <source id="Spine_02SHJnt.translate_Spine_02SHJnt_translate-input">
+        <float_array id="Spine_02SHJnt.translate_Spine_02SHJnt_translate-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.translate_Spine_02SHJnt_translate-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_02SHJnt.translate_Spine_02SHJnt_translate-output">
+        <float_array id="Spine_02SHJnt.translate_Spine_02SHJnt_translate-output-array" count="6">0.0693508386611938 -0.0138517329469323 0 0.0693508386611938 -0.0138517329469323 0</float_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.translate_Spine_02SHJnt_translate-output-array" count="2" stride="3">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+            <param name="Z" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_02SHJnt.translate_Spine_02SHJnt_translate-interpolations">
+        <Name_array id="Spine_02SHJnt.translate_Spine_02SHJnt_translate-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.translate_Spine_02SHJnt_translate-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_02SHJnt.translate_Spine_02SHJnt_translate-sampler">
+        <input semantic="INPUT" source="#Spine_02SHJnt.translate_Spine_02SHJnt_translate-input"/>
+        <input semantic="OUTPUT" source="#Spine_02SHJnt.translate_Spine_02SHJnt_translate-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_02SHJnt.translate_Spine_02SHJnt_translate-interpolations"/>
+      </sampler>
+      <channel source="#Spine_02SHJnt.translate_Spine_02SHJnt_translate-sampler" target="Spine_02SHJnt/translate"/>
+    </animation>
+    <animation id="Spine_02SHJnt.rotateX">
+      <source id="Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-input">
+        <float_array id="Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-output">
+        <float_array id="Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-output-array" count="2">0 0</float_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-interpolations">
+        <Name_array id="Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-sampler">
+        <input semantic="INPUT" source="#Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#Spine_02SHJnt.rotateX_Spine_02SHJnt_rotateX.ANGLE-sampler" target="Spine_02SHJnt/rotateX.ANGLE"/>
+    </animation>
+    <animation id="Spine_02SHJnt.rotateY">
+      <source id="Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-input">
+        <float_array id="Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-output">
+        <float_array id="Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-output-array" count="2">0 0</float_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-interpolations">
+        <Name_array id="Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-sampler">
+        <input semantic="INPUT" source="#Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#Spine_02SHJnt.rotateY_Spine_02SHJnt_rotateY.ANGLE-sampler" target="Spine_02SHJnt/rotateY.ANGLE"/>
+    </animation>
+    <animation id="Spine_02SHJnt.rotateZ">
+      <source id="Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-input">
+        <float_array id="Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-output">
+        <float_array id="Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-output-array" count="2">-14.01778697967529 -14.01778697967529</float_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-interpolations">
+        <Name_array id="Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-sampler">
+        <input semantic="INPUT" source="#Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#Spine_02SHJnt.rotateZ_Spine_02SHJnt_rotateZ.ANGLE-sampler" target="Spine_02SHJnt/rotateZ.ANGLE"/>
+    </animation>
+    <animation id="Spine_TopSHJnt.translate">
+      <source id="Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-input">
+        <float_array id="Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-output">
+        <float_array id="Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-output-array" count="6">0.0689584463834762 0.0213781632483005 0 0.0689584463834762 0.0213781632483005 0</float_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-output-array" count="2" stride="3">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+            <param name="Z" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-interpolations">
+        <Name_array id="Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-sampler">
+        <input semantic="INPUT" source="#Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-input"/>
+        <input semantic="OUTPUT" source="#Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-interpolations"/>
+      </sampler>
+      <channel source="#Spine_TopSHJnt.translate_Spine_TopSHJnt_translate-sampler" target="Spine_TopSHJnt/translate"/>
+    </animation>
+    <animation id="Spine_TopSHJnt.rotateX">
+      <source id="Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-input">
+        <float_array id="Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-output">
+        <float_array id="Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-output-array" count="2">0 0</float_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-interpolations">
+        <Name_array id="Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-sampler">
+        <input semantic="INPUT" source="#Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#Spine_TopSHJnt.rotateX_Spine_TopSHJnt_rotateX.ANGLE-sampler" target="Spine_TopSHJnt/rotateX.ANGLE"/>
+    </animation>
+    <animation id="Spine_TopSHJnt.rotateY">
+      <source id="Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-input">
+        <float_array id="Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-output">
+        <float_array id="Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-output-array" count="2">0 0</float_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-interpolations">
+        <Name_array id="Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-sampler">
+        <input semantic="INPUT" source="#Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#Spine_TopSHJnt.rotateY_Spine_TopSHJnt_rotateY.ANGLE-sampler" target="Spine_TopSHJnt/rotateY.ANGLE"/>
+    </animation>
+    <animation id="Spine_TopSHJnt.rotateZ">
+      <source id="Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-input">
+        <float_array id="Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-output">
+        <float_array id="Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-output-array" count="2">-20.75105667114258 -20.75105667114258</float_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-interpolations">
+        <Name_array id="Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-sampler">
+        <input semantic="INPUT" source="#Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#Spine_TopSHJnt.rotateZ_Spine_TopSHJnt_rotateZ.ANGLE-sampler" target="Spine_TopSHJnt/rotateZ.ANGLE"/>
+    </animation>
+    <animation id="l_Arm_ClavicleSHJnt.translate">
+      <source id="l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-input">
+        <float_array id="l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-output">
+        <float_array id="l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-output-array" count="6">0 -0.0037541554775089 -0.0509681068360805 0 -0.0037541554775089 -0.0509681068360805</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-output-array" count="2" stride="3">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+            <param name="Z" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-interpolations">
+        <Name_array id="l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-sampler">
+        <input semantic="INPUT" source="#l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-input"/>
+        <input semantic="OUTPUT" source="#l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-output"/>
+        <input semantic="INTERPOLATION" source="#l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-interpolations"/>
+      </sampler>
+      <channel source="#l_Arm_ClavicleSHJnt.translate_l_Arm_ClavicleSHJnt_translate-sampler" target="l_Arm_ClavicleSHJnt/translate"/>
+    </animation>
+    <animation id="l_Arm_ClavicleSHJnt.rotateX">
+      <source id="l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-input">
+        <float_array id="l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-output">
+        <float_array id="l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-output-array" count="2">6.813318252563477 6.813318252563477</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-interpolations">
+        <Name_array id="l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-sampler">
+        <input semantic="INPUT" source="#l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#l_Arm_ClavicleSHJnt.rotateX_l_Arm_ClavicleSHJnt_rotateX.ANGLE-sampler" target="l_Arm_ClavicleSHJnt/rotateX.ANGLE"/>
+    </animation>
+    <animation id="l_Arm_ClavicleSHJnt.rotateY">
+      <source id="l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-input">
+        <float_array id="l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-output">
+        <float_array id="l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-output-array" count="2">-22.5395565032959 -22.5395565032959</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-interpolations">
+        <Name_array id="l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-sampler">
+        <input semantic="INPUT" source="#l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#l_Arm_ClavicleSHJnt.rotateY_l_Arm_ClavicleSHJnt_rotateY.ANGLE-sampler" target="l_Arm_ClavicleSHJnt/rotateY.ANGLE"/>
+    </animation>
+    <animation id="l_Arm_ClavicleSHJnt.rotateZ">
+      <source id="l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-input">
+        <float_array id="l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-output">
+        <float_array id="l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-output-array" count="2">-25.7015438079834 -25.7015438079834</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-interpolations">
+        <Name_array id="l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-sampler">
+        <input semantic="INPUT" source="#l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#l_Arm_ClavicleSHJnt.rotateZ_l_Arm_ClavicleSHJnt_rotateZ.ANGLE-sampler" target="l_Arm_ClavicleSHJnt/rotateZ.ANGLE"/>
+    </animation>
+    <animation id="l_Arm_ElbowSHJnt.translate">
+      <source id="l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-input">
+        <float_array id="l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-output">
+        <float_array id="l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-output-array" count="6">0.0886597484350204 0 0 0.0886597484350204 0 0</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-output-array" count="2" stride="3">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+            <param name="Z" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-interpolations">
+        <Name_array id="l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-sampler">
+        <input semantic="INPUT" source="#l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-input"/>
+        <input semantic="OUTPUT" source="#l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-output"/>
+        <input semantic="INTERPOLATION" source="#l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-interpolations"/>
+      </sampler>
+      <channel source="#l_Arm_ElbowSHJnt.translate_l_Arm_ElbowSHJnt_translate-sampler" target="l_Arm_ElbowSHJnt/translate"/>
+    </animation>
+    <animation id="l_Arm_ElbowSHJnt.rotateX">
+      <source id="l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-input">
+        <float_array id="l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-output">
+        <float_array id="l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-output-array" count="2">0 0</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-interpolations">
+        <Name_array id="l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-sampler">
+        <input semantic="INPUT" source="#l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#l_Arm_ElbowSHJnt.rotateX_l_Arm_ElbowSHJnt_rotateX.ANGLE-sampler" target="l_Arm_ElbowSHJnt/rotateX.ANGLE"/>
+    </animation>
+    <animation id="l_Arm_ElbowSHJnt.rotateY">
+      <source id="l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-input">
+        <float_array id="l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-output">
+        <float_array id="l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-output-array" count="2">-57.36455535888672 -57.36455535888672</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-interpolations">
+        <Name_array id="l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-sampler">
+        <input semantic="INPUT" source="#l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#l_Arm_ElbowSHJnt.rotateY_l_Arm_ElbowSHJnt_rotateY.ANGLE-sampler" target="l_Arm_ElbowSHJnt/rotateY.ANGLE"/>
+    </animation>
+    <animation id="l_Arm_ElbowSHJnt.rotateZ">
+      <source id="l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-input">
+        <float_array id="l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-output">
+        <float_array id="l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-output-array" count="2">0 0</float_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-interpolations">
+        <Name_array id="l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-sampler">
+        <input semantic="INPUT" source="#l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#l_Arm_ElbowSHJnt.rotateZ_l_Arm_ElbowSHJnt_rotateZ.ANGLE-sampler" target="l_Arm_ElbowSHJnt/rotateZ.ANGLE"/>
+    </animation>
+    <animation id="r_Arm_ClavicleSHJnt.translate">
+      <source id="r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-input">
+        <float_array id="r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-output">
+        <float_array id="r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-output-array" count="6">0 -0.0037541554775089 0.0509681068360805 0 -0.0037541554775089 0.0509681068360805</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-output-array" count="2" stride="3">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+            <param name="Z" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-interpolations">
+        <Name_array id="r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-sampler">
+        <input semantic="INPUT" source="#r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-input"/>
+        <input semantic="OUTPUT" source="#r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-output"/>
+        <input semantic="INTERPOLATION" source="#r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-interpolations"/>
+      </sampler>
+      <channel source="#r_Arm_ClavicleSHJnt.translate_r_Arm_ClavicleSHJnt_translate-sampler" target="r_Arm_ClavicleSHJnt/translate"/>
+    </animation>
+    <animation id="r_Arm_ClavicleSHJnt.rotateX">
+      <source id="r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-input">
+        <float_array id="r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-output">
+        <float_array id="r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-output-array" count="2">6.813318252563477 6.813318252563477</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-interpolations">
+        <Name_array id="r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-sampler">
+        <input semantic="INPUT" source="#r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#r_Arm_ClavicleSHJnt.rotateX_r_Arm_ClavicleSHJnt_rotateX.ANGLE-sampler" target="r_Arm_ClavicleSHJnt/rotateX.ANGLE"/>
+    </animation>
+    <animation id="r_Arm_ClavicleSHJnt.rotateY">
+      <source id="r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-input">
+        <float_array id="r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-output">
+        <float_array id="r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-output-array" count="2">-22.5395565032959 -22.5395565032959</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-interpolations">
+        <Name_array id="r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-sampler">
+        <input semantic="INPUT" source="#r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#r_Arm_ClavicleSHJnt.rotateY_r_Arm_ClavicleSHJnt_rotateY.ANGLE-sampler" target="r_Arm_ClavicleSHJnt/rotateY.ANGLE"/>
+    </animation>
+    <animation id="r_Arm_ClavicleSHJnt.rotateZ">
+      <source id="r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-input">
+        <float_array id="r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-output">
+        <float_array id="r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-output-array" count="2">-25.7015438079834 -25.7015438079834</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-interpolations">
+        <Name_array id="r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-sampler">
+        <input semantic="INPUT" source="#r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#r_Arm_ClavicleSHJnt.rotateZ_r_Arm_ClavicleSHJnt_rotateZ.ANGLE-sampler" target="r_Arm_ClavicleSHJnt/rotateZ.ANGLE"/>
+    </animation>
+    <animation id="r_Arm_ElbowSHJnt.translate">
+      <source id="r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-input">
+        <float_array id="r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-output">
+        <float_array id="r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-output-array" count="6">-0.0886597484350204 0 0 -0.0886597484350204 0 0</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-output-array" count="2" stride="3">
+            <param name="X" type="float"/>
+            <param name="Y" type="float"/>
+            <param name="Z" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-interpolations">
+        <Name_array id="r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-sampler">
+        <input semantic="INPUT" source="#r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-input"/>
+        <input semantic="OUTPUT" source="#r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-output"/>
+        <input semantic="INTERPOLATION" source="#r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-interpolations"/>
+      </sampler>
+      <channel source="#r_Arm_ElbowSHJnt.translate_r_Arm_ElbowSHJnt_translate-sampler" target="r_Arm_ElbowSHJnt/translate"/>
+    </animation>
+    <animation id="r_Arm_ElbowSHJnt.rotateX">
+      <source id="r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-input">
+        <float_array id="r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-output">
+        <float_array id="r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-output-array" count="2">0 0</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-interpolations">
+        <Name_array id="r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-sampler">
+        <input semantic="INPUT" source="#r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#r_Arm_ElbowSHJnt.rotateX_r_Arm_ElbowSHJnt_rotateX.ANGLE-sampler" target="r_Arm_ElbowSHJnt/rotateX.ANGLE"/>
+    </animation>
+    <animation id="r_Arm_ElbowSHJnt.rotateY">
+      <source id="r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-input">
+        <float_array id="r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-output">
+        <float_array id="r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-output-array" count="2">-57.36455535888672 -57.36455535888672</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-interpolations">
+        <Name_array id="r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-sampler">
+        <input semantic="INPUT" source="#r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#r_Arm_ElbowSHJnt.rotateY_r_Arm_ElbowSHJnt_rotateY.ANGLE-sampler" target="r_Arm_ElbowSHJnt/rotateY.ANGLE"/>
+    </animation>
+    <animation id="r_Arm_ElbowSHJnt.rotateZ">
+      <source id="r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-input">
+        <float_array id="r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-input-array" count="2">0 0.1666666716337204</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-input-array" count="2" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="MAYA">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-output">
+        <float_array id="r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-output-array" count="2">0 0</float_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-output-array" count="2" stride="1">
+            <param name="ANGLE" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-interpolations">
+        <Name_array id="r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-interpolations-array" count="2">LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-interpolations-array" count="2" stride="1">
+            <param name="INTERPOLATION" type="Name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-sampler">
+        <input semantic="INPUT" source="#r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-input"/>
+        <input semantic="OUTPUT" source="#r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-output"/>
+        <input semantic="INTERPOLATION" source="#r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-interpolations"/>
+      </sampler>
+      <channel source="#r_Arm_ElbowSHJnt.rotateZ_r_Arm_ElbowSHJnt_rotateZ.ANGLE-sampler" target="r_Arm_ElbowSHJnt/rotateZ.ANGLE"/>
+    </animation>
+  </library_animations>
+  <library_physics_scenes>
+    <physics_scene id="MayaNativePhysicsScene">
+      <technique_common>
+        <gravity>0 -980 0</gravity>
+        <time_step>0.0829999968409538</time_step>
+      </technique_common>
+    </physics_scene>
+  </library_physics_scenes>
+  <library_images>
+    <image id="file11" name="file11">
+      <init_from>../../../../../../../../../dr_scientist/assets/exported/textures/characters/doctor/DoctorBody.Diffuse.png</init_from>
+      <extra>
+        <technique profile="MAYA">
+          <dgnode_type>kFile</dgnode_type>
+          <image_sequence>0</image_sequence>
+        </technique>
+      </extra>
+    </image>
+    <image id="file12" name="file12">
+      <init_from>../../../../../../../../../dr_scientist/assets/exported/textures/characters/doctor/DoctorBody.Normal.png</init_from>
+      <extra>
+        <technique profile="MAYA">
+          <dgnode_type>kFile</dgnode_type>
+          <image_sequence>0</image_sequence>
+        </technique>
+      </extra>
+    </image>
+    <image id="file13" name="file13">
+      <init_from>../../../../../../../../../dr_scientist/assets/exported/textures/characters/doctor/DoctorBody.Roughness.png</init_from>
+      <extra>
+        <technique profile="MAYA">
+          <dgnode_type>kFile</dgnode_type>
+          <image_sequence>0</image_sequence>
+        </technique>
+      </extra>
+    </image>
+    <image id="file8" name="file8">
+      <init_from>../../../../../../../../../dr_scientist/assets/exported/textures/characters/doctor/DoctorHead.Diffuse.png</init_from>
+      <extra>
+        <technique profile="MAYA">
+          <dgnode_type>kFile</dgnode_type>
+          <image_sequence>0</image_sequence>
+        </technique>
+      </extra>
+    </image>
+    <image id="file9" name="file9">
+      <init_from>../../../../../../../../../dr_scientist/assets/exported/textures/characters/doctor/DoctorHead.Normal.png</init_from>
+      <extra>
+        <technique profile="MAYA">
+          <dgnode_type>kFile</dgnode_type>
+          <image_sequence>0</image_sequence>
+        </technique>
+      </extra>
+    </image>
+    <image id="file10" name="file10">
+      <init_from>../../../../../../../../../dr_scientist/assets/exported/textures/characters/doctor/DoctorHead.Roughness.png</init_from>
+      <extra>
+        <technique profile="MAYA">
+          <dgnode_type>kFile</dgnode_type>
+          <image_sequence>0</image_sequence>
+        </technique>
+      </extra>
+    </image>
+  </library_images>
+  <library_materials>
+    <material id="DrBody_Mat" name="DrBody_Mat">
+      <instance_effect url="#DrBody_Mat-fx"/>
+    </material>
+    <material id="DrHead_Mat" name="DrHead_Mat">
+      <instance_effect url="#DrHead_Mat-fx"/>
+    </material>
+    <material id="DoctorHeadPBR" name="DoctorHeadPBR">
+      <instance_effect url="#DoctorHeadPBR-fx"/>
+    </material>
+    <material id="DoctorBodyPBR" name="DoctorBodyPBR">
+      <instance_effect url="#DoctorBodyPBR-fx"/>
+    </material>
+  </library_materials>
+  <library_effects>
+    <effect id="DrBody_Mat-fx">
+      <profile_COMMON>
+        <newparam sid="file11-surface">
+          <surface type="2D">
+            <init_from>file11</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="file11-sampler">
+          <sampler2D>
+            <source>file11-surface</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+            <minfilter>NONE</minfilter>
+            <magfilter>NONE</magfilter>
+            <mipfilter>NONE</mipfilter>
+            <max_anisotropy>0</max_anisotropy>
+          </sampler2D>
+        </newparam>
+        <newparam sid="file12-surface">
+          <surface type="2D">
+            <init_from>file12</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="file12-sampler">
+          <sampler2D>
+            <source>file12-surface</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+            <minfilter>NONE</minfilter>
+            <magfilter>NONE</magfilter>
+            <mipfilter>NONE</mipfilter>
+            <max_anisotropy>0</max_anisotropy>
+          </sampler2D>
+        </newparam>
+        <newparam sid="file13-surface">
+          <surface type="2D">
+            <init_from>file13</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="file13-sampler">
+          <sampler2D>
+            <source>file13-surface</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+            <minfilter>NONE</minfilter>
+            <magfilter>NONE</magfilter>
+            <mipfilter>NONE</mipfilter>
+            <max_anisotropy>0</max_anisotropy>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="file11-sampler" texcoord="TEX0">
+                <extra>
+                  <technique profile="MAYA">
+                    <wrapU>1</wrapU>
+                    <wrapV>1</wrapV>
+                    <mirrorU>0</mirrorU>
+                    <mirrorV>0</mirrorV>
+                    <coverageU>1</coverageU>
+                    <coverageV>1</coverageV>
+                    <translateFrameU>0</translateFrameU>
+                    <translateFrameV>0</translateFrameV>
+                    <rotateFrame>0</rotateFrame>
+                    <stagger>0</stagger>
+                    <fast>0</fast>
+                    <repeatU>1</repeatU>
+                    <repeatV>1</repeatV>
+                    <offsetU>0</offsetU>
+                    <offsetV>0</offsetV>
+                    <rotateUV>0</rotateUV>
+                    <noiseU>0</noiseU>
+                    <noiseV>0</noiseV>
+                    <blend_mode>NONE</blend_mode>
+                  </technique>
+                </extra>
+              </texture>
+            </diffuse>
+            <specular>
+              <texture texture="file13-sampler" texcoord="TEX2">
+                <extra>
+                  <technique profile="MAYA">
+                    <wrapU>1</wrapU>
+                    <wrapV>1</wrapV>
+                    <mirrorU>0</mirrorU>
+                    <mirrorV>0</mirrorV>
+                    <coverageU>1</coverageU>
+                    <coverageV>1</coverageV>
+                    <translateFrameU>0</translateFrameU>
+                    <translateFrameV>0</translateFrameV>
+                    <rotateFrame>0</rotateFrame>
+                    <stagger>0</stagger>
+                    <fast>0</fast>
+                    <repeatU>1</repeatU>
+                    <repeatV>1</repeatV>
+                    <offsetU>0</offsetU>
+                    <offsetV>0</offsetV>
+                    <rotateUV>0</rotateUV>
+                    <noiseU>0</noiseU>
+                    <noiseV>0</noiseV>
+                    <blend_mode>NONE</blend_mode>
+                  </technique>
+                </extra>
+              </texture>
+            </specular>
+            <shininess>
+              <float>20</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <reflectivity>
+              <float>0.5</float>
+            </reflectivity>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="file12-sampler" texcoord="TEX1">
+                  <extra>
+                    <technique profile="MAYA">
+                      <wrapU>1</wrapU>
+                      <wrapV>1</wrapV>
+                      <mirrorU>0</mirrorU>
+                      <mirrorV>0</mirrorV>
+                      <coverageU>1</coverageU>
+                      <coverageV>1</coverageV>
+                      <translateFrameU>0</translateFrameU>
+                      <translateFrameV>0</translateFrameV>
+                      <rotateFrame>0</rotateFrame>
+                      <stagger>0</stagger>
+                      <fast>0</fast>
+                      <repeatU>1</repeatU>
+                      <repeatV>1</repeatV>
+                      <offsetU>0</offsetU>
+                      <offsetV>0</offsetV>
+                      <rotateUV>0</rotateUV>
+                      <noiseU>0</noiseU>
+                      <noiseV>0</noiseV>
+                      <blend_mode>NONE</blend_mode>
+                    </technique>
+                    <technique profile="MAX3D">
+                      <amount>1</amount>
+                      <bumpInterp>1</bumpInterp>
+                    </technique>
+                  </extra>
+                </texture>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="DrHead_Mat-fx">
+      <profile_COMMON>
+        <newparam sid="file8-surface">
+          <surface type="2D">
+            <init_from>file8</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="file8-sampler">
+          <sampler2D>
+            <source>file8-surface</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+            <minfilter>NONE</minfilter>
+            <magfilter>NONE</magfilter>
+            <mipfilter>NONE</mipfilter>
+            <max_anisotropy>0</max_anisotropy>
+          </sampler2D>
+        </newparam>
+        <newparam sid="file9-surface">
+          <surface type="2D">
+            <init_from>file9</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="file9-sampler">
+          <sampler2D>
+            <source>file9-surface</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+            <minfilter>NONE</minfilter>
+            <magfilter>NONE</magfilter>
+            <mipfilter>NONE</mipfilter>
+            <max_anisotropy>0</max_anisotropy>
+          </sampler2D>
+        </newparam>
+        <newparam sid="file10-surface">
+          <surface type="2D">
+            <init_from>file10</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="file10-sampler">
+          <sampler2D>
+            <source>file10-surface</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+            <minfilter>NONE</minfilter>
+            <magfilter>NONE</magfilter>
+            <mipfilter>NONE</mipfilter>
+            <max_anisotropy>0</max_anisotropy>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="file8-sampler" texcoord="TEX0">
+                <extra>
+                  <technique profile="MAYA">
+                    <wrapU>1</wrapU>
+                    <wrapV>1</wrapV>
+                    <mirrorU>0</mirrorU>
+                    <mirrorV>0</mirrorV>
+                    <coverageU>1</coverageU>
+                    <coverageV>1</coverageV>
+                    <translateFrameU>0</translateFrameU>
+                    <translateFrameV>0</translateFrameV>
+                    <rotateFrame>0</rotateFrame>
+                    <stagger>0</stagger>
+                    <fast>0</fast>
+                    <repeatU>1</repeatU>
+                    <repeatV>1</repeatV>
+                    <offsetU>0</offsetU>
+                    <offsetV>0</offsetV>
+                    <rotateUV>0</rotateUV>
+                    <noiseU>0</noiseU>
+                    <noiseV>0</noiseV>
+                    <blend_mode>NONE</blend_mode>
+                  </technique>
+                </extra>
+              </texture>
+            </diffuse>
+            <specular>
+              <texture texture="file10-sampler" texcoord="TEX2">
+                <extra>
+                  <technique profile="MAYA">
+                    <wrapU>1</wrapU>
+                    <wrapV>1</wrapV>
+                    <mirrorU>0</mirrorU>
+                    <mirrorV>0</mirrorV>
+                    <coverageU>1</coverageU>
+                    <coverageV>1</coverageV>
+                    <translateFrameU>0</translateFrameU>
+                    <translateFrameV>0</translateFrameV>
+                    <rotateFrame>0</rotateFrame>
+                    <stagger>0</stagger>
+                    <fast>0</fast>
+                    <repeatU>1</repeatU>
+                    <repeatV>1</repeatV>
+                    <offsetU>0</offsetU>
+                    <offsetV>0</offsetV>
+                    <rotateUV>0</rotateUV>
+                    <noiseU>0</noiseU>
+                    <noiseV>0</noiseV>
+                    <blend_mode>NONE</blend_mode>
+                  </technique>
+                </extra>
+              </texture>
+            </specular>
+            <shininess>
+              <float>20</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <reflectivity>
+              <float>0.5</float>
+            </reflectivity>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="file9-sampler" texcoord="TEX1">
+                  <extra>
+                    <technique profile="MAYA">
+                      <wrapU>1</wrapU>
+                      <wrapV>1</wrapV>
+                      <mirrorU>0</mirrorU>
+                      <mirrorV>0</mirrorV>
+                      <coverageU>1</coverageU>
+                      <coverageV>1</coverageV>
+                      <translateFrameU>0</translateFrameU>
+                      <translateFrameV>0</translateFrameV>
+                      <rotateFrame>0</rotateFrame>
+                      <stagger>0</stagger>
+                      <fast>0</fast>
+                      <repeatU>1</repeatU>
+                      <repeatV>1</repeatV>
+                      <offsetU>0</offsetU>
+                      <offsetV>0</offsetV>
+                      <rotateUV>0</rotateUV>
+                      <noiseU>0</noiseU>
+                      <noiseV>0</noiseV>
+                      <blend_mode>NONE</blend_mode>
+                    </technique>
+                    <technique profile="MAX3D">
+                      <amount>1</amount>
+                      <bumpInterp>1</bumpInterp>
+                    </technique>
+                  </extra>
+                </texture>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="DoctorHeadPBR-fx">
+      <profile_COMMON>
+        <technique sid="common">
+          <constant>
+            <emission>
+              <color>0 1 0 1</color>
+            </emission>
+            <reflective>
+              <color>1 1 1 1</color>
+            </reflective>
+            <reflectivity>
+              <float>1</float>
+            </reflectivity>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+            <index_of_refraction>
+              <float>1</float>
+            </index_of_refraction>
+          </constant>
+          <extra>
+            <technique profile="FCOLLADA"/>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="DoctorBodyPBR-fx">
+      <profile_COMMON>
+        <technique sid="common">
+          <constant>
+            <emission>
+              <color>0 1 0 1</color>
+            </emission>
+            <reflective>
+              <color>1 1 1 1</color>
+            </reflective>
+            <reflectivity>
+              <float>1</float>
+            </reflectivity>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+            <index_of_refraction>
+              <float>1</float>
+            </index_of_refraction>
+          </constant>
+          <extra>
+            <technique profile="FCOLLADA"/>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_visual_scenes>
+    <visual_scene id="VisualSceneNode" name="doctor_idle_crouch">
+      <node id="Doctor" name="Doctor" type="NODE">
+        <translate sid="rotatePivot">0 0.4836793839931488 0.0351793095469474</translate>
+        <rotate sid="rotateZ">0 0 1 0</rotate>
+        <rotate sid="rotateY">0 1 0 0</rotate>
+        <rotate sid="rotateX">1 0 0 0</rotate>
+        <translate sid="rotatePivotInverse">0 -0.4836793839931488 -0.0351793095469474</translate>
+        <translate sid="scalePivot">0 0.4836793839931488 0.0351793095469474</translate>
+        <translate sid="scalePivotInverse">0 -0.4836793839931488 -0.0351793095469474</translate>
+      </node>
+      <node id="ControlRig" name="ControlRig" type="NODE">
+        <rotate sid="rotateZ">0 0 1 0</rotate>
+        <rotate sid="rotateY">0 1 0 0</rotate>
+        <rotate sid="rotateX">1 0 0 0</rotate>
+        <node id="SHJntGrp" name="SHJntGrp" type="NODE">
+          <rotate sid="rotateZ">0 0 1 0</rotate>
+          <rotate sid="rotateY">0 1 0 0</rotate>
+          <rotate sid="rotateX">1 0 0 0</rotate>
+          <node id="TrajectorySHJnt" name="TrajectorySHJnt" type="JOINT">
+            <rotate sid="jointOrientZ">0 0 1 0</rotate>
+            <rotate sid="jointOrientY">0 1 0 0</rotate>
+            <rotate sid="jointOrientX">1 0 0 0</rotate>
+            <node id="ROOTSHJnt" name="ROOTSHJnt" type="JOINT">
+              <translate sid="translate">0 0.1706524640321732 0.0260347090661525</translate>
+              <rotate sid="jointOrientZ">0 0 1 90</rotate>
+              <rotate sid="jointOrientY">0 1 0 0</rotate>
+              <rotate sid="jointOrientX">1 0 0 -90</rotate>
+              <rotate sid="rotateZ">0 0 1 27.42105865478516</rotate>
+              <node id="Spine_01SHJnt" name="Spine_01SHJnt" type="JOINT">
+                <translate sid="translate">0.0848235487937927 0.0155650014057755 0</translate>
+                <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                <rotate sid="jointOrientY">0 1 0 0</rotate>
+                <rotate sid="jointOrientX">1 0 0 0</rotate>
+                <rotate sid="rotateZ">0 0 1 -20.80084991455078</rotate>
+                <rotate sid="rotateY">0 1 0 0</rotate>
+                <rotate sid="rotateX">1 0 0 0</rotate>
+                <node id="Spine_02SHJnt" name="Spine_02SHJnt" type="JOINT">
+                  <translate sid="translate">0.0693508386611938 -0.0138517329469323 0</translate>
+                  <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                  <rotate sid="rotateZ">0 0 1 -14.01778697967529</rotate>
+                  <rotate sid="rotateY">0 1 0 0</rotate>
+                  <rotate sid="rotateX">1 0 0 0</rotate>
+                  <node id="Spine_TopSHJnt" name="Spine_TopSHJnt" type="JOINT">
+                    <translate sid="translate">0.0689584463834762 0.0213781632483005 0</translate>
+                    <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                    <rotate sid="rotateZ">0 0 1 -20.75105667114258</rotate>
+                    <rotate sid="rotateY">0 1 0 0</rotate>
+                    <rotate sid="rotateX">1 0 0 0</rotate>
+                    <node id="l_Arm_ClavicleSHJnt" name="l_Arm_ClavicleSHJnt" type="JOINT">
+                      <translate sid="translate">0 -0.0037541554775089 -0.0509681068360805</translate>
+                      <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                      <rotate sid="jointOrientY">0 1 0 90</rotate>
+                      <rotate sid="jointOrientX">1 0 0 90</rotate>
+                      <rotate sid="rotateZ">0 0 1 -25.70154571533203</rotate>
+                      <rotate sid="rotateY">0 1 0 -22.53955841064453</rotate>
+                      <rotate sid="rotateX">1 0 0 6.813318252563477</rotate>
+                      <node id="l_Arm_ShoulderSHJnt" name="l_Arm_ShoulderSHJnt" type="JOINT">
+                        <translate sid="translate">0.0693166255950927 0 0</translate>
+                        <rotate sid="jointOrientZ">0 0 1 -45.6417350769043</rotate>
+                        <rotate sid="jointOrientY">0 1 0 6.047444343566895</rotate>
+                        <rotate sid="jointOrientX">1 0 0 -1.24618661403656</rotate>
+                        <rotate sid="rotateZ">0 0 1 38.08152770996094</rotate>
+                        <rotate sid="rotateY">0 1 0 -36.07871246337891</rotate>
+                        <rotate sid="rotateX">1 0 0 -20.7818603515625</rotate>
+                        <node id="l_Arm_ElbowSHJnt" name="l_Arm_ElbowSHJnt" type="JOINT">
+                          <translate sid="translate">0.0886597484350204 0 0</translate>
+                          <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                          <rotate sid="jointOrientY">0 1 0 -9.662235260009766</rotate>
+                          <rotate sid="jointOrientX">1 0 0 0</rotate>
+                          <rotate sid="rotateZ">0 0 1 0</rotate>
+                          <rotate sid="rotateY">0 1 0 -57.36455917358398</rotate>
+                          <rotate sid="rotateX">1 0 0 0</rotate>
+                          <node id="l_Arm_WristSHJnt" name="l_Arm_WristSHJnt" type="JOINT">
+                            <translate sid="translate">0.0886595770716667 0 0</translate>
+                            <rotate sid="jointOrientZ">0 0 1 -4.914604663848877</rotate>
+                            <rotate sid="jointOrientY">0 1 0 3.706084489822388</rotate>
+                            <rotate sid="jointOrientX">1 0 0 0.9253553152084351</rotate>
+                            <rotate sid="rotateZ">0 0 1 -24.74920272827148</rotate>
+                            <rotate sid="rotateY">0 1 0 -24.7835578918457</rotate>
+                            <rotate sid="rotateX">1 0 0 -4.918991088867188</rotate>
+                            <node id="l_Finger_01_01SHJnt" name="l_Finger_01_01SHJnt" type="JOINT">
+                              <translate sid="translate">0.0945432186126709 0.0035660900175571 0.0428136065602302</translate>
+                              <rotate sid="jointOrientZ">0 0 1 -11.26121520996094</rotate>
+                              <rotate sid="jointOrientY">0 1 0 -4.510398387908936</rotate>
+                              <rotate sid="jointOrientX">1 0 0 0.2998837232589722</rotate>
+                              <node id="l_Finger_01_02SHJnt" name="l_Finger_01_02SHJnt" type="JOINT">
+                                <translate sid="translate">0.0289433095604181 0.0013417423469945 0</translate>
+                                <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                <node id="l_Finger_01_03SHJnt" name="l_Finger_01_03SHJnt" type="JOINT">
+                                  <translate sid="translate">0.0198207460343837 -0.0004624586144927 0</translate>
+                                  <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                  <node id="l_Finger_01_04SHJnt" name="l_Finger_01_04SHJnt" type="JOINT">
+                                    <translate sid="translate">0.0216482151299715 -0.0017157825641334 0</translate>
+                                    <rotate sid="jointOrientZ">0 0 1 -5.743310451507568</rotate>
+                                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                    <extra>
+                                      <technique profile="MAYA">
+                                        <dynamic_attributes>
+                                          <origName short_name="origName" type="string">l_Finger_01_04SHJnt</origName>
+                                        </dynamic_attributes>
+                                        <segment_scale_compensate>1</segment_scale_compensate>
+                                      </technique>
+                                    </extra>
+                                  </node>
+                                  <extra>
+                                    <technique profile="MAYA">
+                                      <dynamic_attributes>
+                                        <origName short_name="origName" type="string">l_Finger_01_03SHJnt</origName>
+                                      </dynamic_attributes>
+                                      <segment_scale_compensate>1</segment_scale_compensate>
+                                    </technique>
+                                  </extra>
+                                </node>
+                                <extra>
+                                  <technique profile="MAYA">
+                                    <dynamic_attributes>
+                                      <origName short_name="origName" type="string">l_Finger_01_02SHJnt</origName>
+                                    </dynamic_attributes>
+                                    <segment_scale_compensate>1</segment_scale_compensate>
+                                  </technique>
+                                </extra>
+                              </node>
+                              <extra>
+                                <technique profile="MAYA">
+                                  <dynamic_attributes>
+                                    <origName short_name="origName" type="string">l_Finger_01_01SHJnt</origName>
+                                  </dynamic_attributes>
+                                  <segment_scale_compensate>1</segment_scale_compensate>
+                                </technique>
+                              </extra>
+                            </node>
+                            <node id="l_Finger_02_01SHJnt" name="l_Finger_02_01SHJnt" type="JOINT">
+                              <translate sid="translate">0.0972426608204841 0.0073256543837487 0.0146138593554496</translate>
+                              <rotate sid="jointOrientZ">0 0 1 -13.05744171142578</rotate>
+                              <rotate sid="jointOrientY">0 1 0 -1.02173113822937</rotate>
+                              <rotate sid="jointOrientX">1 0 0 0</rotate>
+                              <node id="l_Finger_02_02SHJnt" name="l_Finger_02_02SHJnt" type="JOINT">
+                                <translate sid="translate">0.0349773988127708 0 0</translate>
+                                <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                <node id="l_Finger_02_03SHJnt" name="l_Finger_02_03SHJnt" type="JOINT">
+                                  <translate sid="translate">0.0202675070613622 0 0</translate>
+                                  <rotate sid="jointOrientZ">0 0 1 -5.07536506652832</rotate>
+                                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                  <node id="l_Finger_02_04SHJnt" name="l_Finger_02_04SHJnt" type="JOINT">
+                                    <translate sid="translate">0.0279872622340917 0.0019301691791042 0</translate>
+                                    <rotate sid="jointOrientZ">0 0 1 4.00139045715332</rotate>
+                                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                    <extra>
+                                      <technique profile="MAYA">
+                                        <dynamic_attributes>
+                                          <origName short_name="origName" type="string">l_Finger_02_04SHJnt</origName>
+                                        </dynamic_attributes>
+                                        <segment_scale_compensate>1</segment_scale_compensate>
+                                      </technique>
+                                    </extra>
+                                  </node>
+                                  <extra>
+                                    <technique profile="MAYA">
+                                      <dynamic_attributes>
+                                        <origName short_name="origName" type="string">l_Finger_02_03SHJnt</origName>
+                                      </dynamic_attributes>
+                                      <segment_scale_compensate>1</segment_scale_compensate>
+                                    </technique>
+                                  </extra>
+                                </node>
+                                <extra>
+                                  <technique profile="MAYA">
+                                    <dynamic_attributes>
+                                      <origName short_name="origName" type="string">l_Finger_02_02SHJnt</origName>
+                                    </dynamic_attributes>
+                                    <segment_scale_compensate>1</segment_scale_compensate>
+                                  </technique>
+                                </extra>
+                              </node>
+                              <extra>
+                                <technique profile="MAYA">
+                                  <dynamic_attributes>
+                                    <origName short_name="origName" type="string">l_Finger_02_01SHJnt</origName>
+                                  </dynamic_attributes>
+                                  <segment_scale_compensate>1</segment_scale_compensate>
+                                </technique>
+                              </extra>
+                            </node>
+                            <node id="l_Finger_03_01SHJnt" name="l_Finger_03_01SHJnt" type="JOINT">
+                              <translate sid="translate">0.0957907438278198 0.0063085383735597 -0.0149064259603619</translate>
+                              <rotate sid="jointOrientZ">0 0 1 -13.55776119232178</rotate>
+                              <rotate sid="jointOrientY">0 1 0 1.173876285552979</rotate>
+                              <rotate sid="jointOrientX">1 0 0 -0.0722126737236976</rotate>
+                              <rotate sid="rotateY">0 1 0 -2.568753004074097</rotate>
+                              <node id="l_Finger_03_02SHJnt" name="l_Finger_03_02SHJnt" type="JOINT">
+                                <translate sid="translate">0.0357722640037536 0 0</translate>
+                                <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                <node id="l_Finger_03_03SHJnt" name="l_Finger_03_03SHJnt" type="JOINT">
+                                  <translate sid="translate">0.0197620242834091 0 0</translate>
+                                  <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                  <node id="l_Finger_03_04SHJnt" name="l_Finger_03_04SHJnt" type="JOINT">
+                                    <translate sid="translate">0.0230574216693639 0 0</translate>
+                                    <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                    <extra>
+                                      <technique profile="MAYA">
+                                        <dynamic_attributes>
+                                          <origName short_name="origName" type="string">l_Finger_03_04SHJnt</origName>
+                                        </dynamic_attributes>
+                                        <segment_scale_compensate>1</segment_scale_compensate>
+                                      </technique>
+                                    </extra>
+                                  </node>
+                                  <extra>
+                                    <technique profile="MAYA">
+                                      <dynamic_attributes>
+                                        <origName short_name="origName" type="string">l_Finger_03_03SHJnt</origName>
+                                      </dynamic_attributes>
+                                      <segment_scale_compensate>1</segment_scale_compensate>
+                                    </technique>
+                                  </extra>
+                                </node>
+                                <extra>
+                                  <technique profile="MAYA">
+                                    <dynamic_attributes>
+                                      <origName short_name="origName" type="string">l_Finger_03_02SHJnt</origName>
+                                    </dynamic_attributes>
+                                    <segment_scale_compensate>1</segment_scale_compensate>
+                                  </technique>
+                                </extra>
+                              </node>
+                              <extra>
+                                <technique profile="MAYA">
+                                  <dynamic_attributes>
+                                    <origName short_name="origName" type="string">l_Finger_03_01SHJnt</origName>
+                                  </dynamic_attributes>
+                                  <segment_scale_compensate>1</segment_scale_compensate>
+                                </technique>
+                              </extra>
+                            </node>
+                            <node id="l_Finger_04_01SHJnt" name="l_Finger_04_01SHJnt" type="JOINT">
+                              <translate sid="translate">0.0933789387345314 0.0016386915231123 -0.0400125607848167</translate>
+                              <rotate sid="jointOrientZ">0 0 1 -10.79173183441162</rotate>
+                              <rotate sid="jointOrientY">0 1 0 3.705578565597534</rotate>
+                              <rotate sid="jointOrientX">1 0 0 -0.1901184618473053</rotate>
+                              <node id="l_Finger_04_02SHJnt" name="l_Finger_04_02SHJnt" type="JOINT">
+                                <translate sid="translate">0.0291981063783168 0 0</translate>
+                                <rotate sid="jointOrientZ">0 0 1 -2.153098821640015</rotate>
+                                <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                <node id="l_Finger_04_03SHJnt" name="l_Finger_04_03SHJnt" type="JOINT">
+                                  <translate sid="translate">0.016005702316761 0 0</translate>
+                                  <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                  <node id="l_Finger_04_04SHJnt" name="l_Finger_04_04SHJnt" type="JOINT">
+                                    <translate sid="translate">0.0184747222810983 0 0</translate>
+                                    <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                    <extra>
+                                      <technique profile="MAYA">
+                                        <dynamic_attributes>
+                                          <origName short_name="origName" type="string">l_Finger_04_04SHJnt</origName>
+                                        </dynamic_attributes>
+                                        <segment_scale_compensate>1</segment_scale_compensate>
+                                      </technique>
+                                    </extra>
+                                  </node>
+                                  <extra>
+                                    <technique profile="MAYA">
+                                      <dynamic_attributes>
+                                        <origName short_name="origName" type="string">l_Finger_04_03SHJnt</origName>
+                                      </dynamic_attributes>
+                                      <segment_scale_compensate>1</segment_scale_compensate>
+                                    </technique>
+                                  </extra>
+                                </node>
+                                <extra>
+                                  <technique profile="MAYA">
+                                    <dynamic_attributes>
+                                      <origName short_name="origName" type="string">l_Finger_04_02SHJnt</origName>
+                                    </dynamic_attributes>
+                                    <segment_scale_compensate>1</segment_scale_compensate>
+                                  </technique>
+                                </extra>
+                              </node>
+                              <extra>
+                                <technique profile="MAYA">
+                                  <dynamic_attributes>
+                                    <origName short_name="origName" type="string">l_Finger_04_01SHJnt</origName>
+                                  </dynamic_attributes>
+                                  <segment_scale_compensate>1</segment_scale_compensate>
+                                </technique>
+                              </extra>
+                            </node>
+                            <node id="l_Thumb_01_01SHJnt" name="l_Thumb_01_01SHJnt" type="JOINT">
+                              <translate sid="translate">0.0348691828548908 -0.0144203398376703 0.0452050156891346</translate>
+                              <rotate sid="jointOrientZ">0 0 1 -15.1245641708374</rotate>
+                              <rotate sid="jointOrientY">0 1 0 -28.53314018249512</rotate>
+                              <rotate sid="jointOrientX">1 0 0 97.98385620117188</rotate>
+                              <node id="l_Thumb_01_02SHJnt" name="l_Thumb_01_02SHJnt" type="JOINT">
+                                <translate sid="translate">0.0337231494486331 -0.0000209545651159 -0.0004584333510138</translate>
+                                <rotate sid="jointOrientZ">0 0 1 -2.575707674026489</rotate>
+                                <rotate sid="jointOrientY">0 1 0 1.033231735229492</rotate>
+                                <rotate sid="jointOrientX">1 0 0 -2.665711402893066</rotate>
+                                <node id="l_Thumb_01_03SHJnt" name="l_Thumb_01_03SHJnt" type="JOINT">
+                                  <translate sid="translate">0.0210573207587003 0 0</translate>
+                                  <rotate sid="jointOrientZ">0 0 1 -6.315299510955811</rotate>
+                                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                  <node id="l_Thumb_01_04SHJnt" name="l_Thumb_01_04SHJnt" type="JOINT">
+                                    <translate sid="translate">0.0267632082104682 0 0</translate>
+                                    <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                    <extra>
+                                      <technique profile="MAYA">
+                                        <dynamic_attributes>
+                                          <origName short_name="origName" type="string">l_Thumb_01_04SHJnt</origName>
+                                        </dynamic_attributes>
+                                        <segment_scale_compensate>1</segment_scale_compensate>
+                                      </technique>
+                                    </extra>
+                                  </node>
+                                  <extra>
+                                    <technique profile="MAYA">
+                                      <dynamic_attributes>
+                                        <origName short_name="origName" type="string">l_Thumb_01_03SHJnt</origName>
+                                      </dynamic_attributes>
+                                      <segment_scale_compensate>1</segment_scale_compensate>
+                                    </technique>
+                                  </extra>
+                                </node>
+                                <extra>
+                                  <technique profile="MAYA">
+                                    <dynamic_attributes>
+                                      <origName short_name="origName" type="string">l_Thumb_01_02SHJnt</origName>
+                                    </dynamic_attributes>
+                                    <segment_scale_compensate>1</segment_scale_compensate>
+                                  </technique>
+                                </extra>
+                              </node>
+                              <extra>
+                                <technique profile="MAYA">
+                                  <dynamic_attributes>
+                                    <origName short_name="origName" type="string">l_Thumb_01_01SHJnt</origName>
+                                  </dynamic_attributes>
+                                  <segment_scale_compensate>1</segment_scale_compensate>
+                                </technique>
+                              </extra>
+                            </node>
+                            <extra>
+                              <technique profile="MAYA">
+                                <dynamic_attributes>
+                                  <hand short_name="hand" type="bool">0</hand>
+                                  <arm short_name="arm" type="bool">0</arm>
+                                  <origName short_name="origName" type="string">l_Arm_WristSHJnt</origName>
+                                </dynamic_attributes>
+                                <segment_scale_compensate>1</segment_scale_compensate>
+                              </technique>
+                            </extra>
+                          </node>
+                          <extra>
+                            <technique profile="MAYA">
+                              <dynamic_attributes>
+                                <arm short_name="arm" type="bool">0</arm>
+                                <forearm short_name="forearm" type="bool">0</forearm>
+                                <origName short_name="origName" type="string">l_Arm_ElbowSHJnt</origName>
+                              </dynamic_attributes>
+                              <segment_scale_compensate>1</segment_scale_compensate>
+                            </technique>
+                          </extra>
+                        </node>
+                        <extra>
+                          <technique profile="MAYA">
+                            <dynamic_attributes>
+                              <upperArm short_name="upperArm" type="bool">0</upperArm>
+                              <arm short_name="arm" type="bool">0</arm>
+                              <origName short_name="origName" type="string">l_Arm_ShoulderSHJnt</origName>
+                            </dynamic_attributes>
+                            <segment_scale_compensate>1</segment_scale_compensate>
+                          </technique>
+                        </extra>
+                      </node>
+                      <extra>
+                        <technique profile="MAYA">
+                          <dynamic_attributes>
+                            <shoulder short_name="shoulder" type="bool">0</shoulder>
+                            <arm short_name="arm" type="bool">0</arm>
+                            <origName short_name="origName" type="string">l_Arm_ClavicleSHJnt</origName>
+                          </dynamic_attributes>
+                          <segment_scale_compensate>1</segment_scale_compensate>
+                        </technique>
+                      </extra>
+                    </node>
+                    <node id="r_Arm_ClavicleSHJnt" name="r_Arm_ClavicleSHJnt" type="JOINT">
+                      <translate sid="translate">0 -0.0037541554775089 0.0509681068360805</translate>
+                      <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                      <rotate sid="jointOrientY">0 1 0 90</rotate>
+                      <rotate sid="jointOrientX">1 0 0 -90</rotate>
+                      <rotate sid="rotateZ">0 0 1 -25.70154571533203</rotate>
+                      <rotate sid="rotateY">0 1 0 -22.53955841064453</rotate>
+                      <rotate sid="rotateX">1 0 0 6.813318252563477</rotate>
+                      <node id="r_Arm_ShoulderSHJnt" name="r_Arm_ShoulderSHJnt" type="JOINT">
+                        <translate sid="translate">-0.0693166255950927 0 0</translate>
+                        <rotate sid="jointOrientZ">0 0 1 -45.6417350769043</rotate>
+                        <rotate sid="jointOrientY">0 1 0 6.047444343566895</rotate>
+                        <rotate sid="jointOrientX">1 0 0 -1.24618661403656</rotate>
+                        <rotate sid="rotateZ">0 0 1 38.08152770996094</rotate>
+                        <rotate sid="rotateY">0 1 0 -36.07871246337891</rotate>
+                        <rotate sid="rotateX">1 0 0 -20.7818603515625</rotate>
+                        <node id="r_Arm_ElbowSHJnt" name="r_Arm_ElbowSHJnt" type="JOINT">
+                          <translate sid="translate">-0.0886597484350204 0 0</translate>
+                          <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                          <rotate sid="jointOrientY">0 1 0 -9.662235260009766</rotate>
+                          <rotate sid="jointOrientX">1 0 0 0</rotate>
+                          <rotate sid="rotateZ">0 0 1 0</rotate>
+                          <rotate sid="rotateY">0 1 0 -57.36455917358398</rotate>
+                          <rotate sid="rotateX">1 0 0 0</rotate>
+                          <node id="r_Arm_WristSHJnt" name="r_Arm_WristSHJnt" type="JOINT">
+                            <translate sid="translate">-0.0886595770716667 0 0</translate>
+                            <rotate sid="jointOrientZ">0 0 1 -4.914604663848877</rotate>
+                            <rotate sid="jointOrientY">0 1 0 3.706084489822388</rotate>
+                            <rotate sid="jointOrientX">1 0 0 0.9253553152084351</rotate>
+                            <rotate sid="rotateZ">0 0 1 -24.74920272827148</rotate>
+                            <rotate sid="rotateY">0 1 0 -29.38549613952637</rotate>
+                            <node id="r_Finger_01_01SHJnt" name="r_Finger_01_01SHJnt" type="JOINT">
+                              <translate sid="translate">-0.0945432186126709 -0.0035660900175571 -0.0428136065602302</translate>
+                              <rotate sid="jointOrientZ">0 0 1 -11.26121520996094</rotate>
+                              <rotate sid="jointOrientY">0 1 0 -4.510398387908936</rotate>
+                              <rotate sid="jointOrientX">1 0 0 0.2998837232589722</rotate>
+                              <node id="r_Finger_01_02SHJnt" name="r_Finger_01_02SHJnt" type="JOINT">
+                                <translate sid="translate">-0.0289433095604181 -0.0013417423469945 0</translate>
+                                <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                <node id="r_Finger_01_03SHJnt" name="r_Finger_01_03SHJnt" type="JOINT">
+                                  <translate sid="translate">-0.0198207460343837 0.0004624586144927 0</translate>
+                                  <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                  <node id="r_Finger_01_04SHJnt" name="r_Finger_01_04SHJnt" type="JOINT">
+                                    <translate sid="translate">-0.0216482151299715 0.0017157825641334 0</translate>
+                                    <rotate sid="jointOrientZ">0 0 1 -5.743310451507568</rotate>
+                                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                    <extra>
+                                      <technique profile="MAYA">
+                                        <dynamic_attributes>
+                                          <origName short_name="origName" type="string">r_Finger_01_04SHJnt</origName>
+                                        </dynamic_attributes>
+                                        <segment_scale_compensate>1</segment_scale_compensate>
+                                      </technique>
+                                    </extra>
+                                  </node>
+                                  <extra>
+                                    <technique profile="MAYA">
+                                      <dynamic_attributes>
+                                        <origName short_name="origName" type="string">r_Finger_01_03SHJnt</origName>
+                                      </dynamic_attributes>
+                                      <segment_scale_compensate>1</segment_scale_compensate>
+                                    </technique>
+                                  </extra>
+                                </node>
+                                <extra>
+                                  <technique profile="MAYA">
+                                    <dynamic_attributes>
+                                      <origName short_name="origName" type="string">r_Finger_01_02SHJnt</origName>
+                                    </dynamic_attributes>
+                                    <segment_scale_compensate>1</segment_scale_compensate>
+                                  </technique>
+                                </extra>
+                              </node>
+                              <extra>
+                                <technique profile="MAYA">
+                                  <dynamic_attributes>
+                                    <origName short_name="origName" type="string">r_Finger_01_01SHJnt</origName>
+                                  </dynamic_attributes>
+                                  <segment_scale_compensate>1</segment_scale_compensate>
+                                </technique>
+                              </extra>
+                            </node>
+                            <node id="r_Finger_02_01SHJnt" name="r_Finger_02_01SHJnt" type="JOINT">
+                              <translate sid="translate">-0.0972426608204841 -0.0073256543837487 -0.0146138593554496</translate>
+                              <rotate sid="jointOrientZ">0 0 1 -13.05744171142578</rotate>
+                              <rotate sid="jointOrientY">0 1 0 -1.02173113822937</rotate>
+                              <rotate sid="jointOrientX">1 0 0 0</rotate>
+                              <node id="r_Finger_02_02SHJnt" name="r_Finger_02_02SHJnt" type="JOINT">
+                                <translate sid="translate">-0.0349773988127708 0 0</translate>
+                                <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                <node id="r_Finger_02_03SHJnt" name="r_Finger_02_03SHJnt" type="JOINT">
+                                  <translate sid="translate">-0.0202675070613622 0 0</translate>
+                                  <rotate sid="jointOrientZ">0 0 1 -5.07536506652832</rotate>
+                                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                  <node id="r_Finger_02_04SHJnt" name="r_Finger_02_04SHJnt" type="JOINT">
+                                    <translate sid="translate">-0.0279872622340917 -0.0019301691791042 0</translate>
+                                    <rotate sid="jointOrientZ">0 0 1 4.00139045715332</rotate>
+                                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                    <extra>
+                                      <technique profile="MAYA">
+                                        <dynamic_attributes>
+                                          <origName short_name="origName" type="string">r_Finger_02_04SHJnt</origName>
+                                        </dynamic_attributes>
+                                        <segment_scale_compensate>1</segment_scale_compensate>
+                                      </technique>
+                                    </extra>
+                                  </node>
+                                  <extra>
+                                    <technique profile="MAYA">
+                                      <dynamic_attributes>
+                                        <origName short_name="origName" type="string">r_Finger_02_03SHJnt</origName>
+                                      </dynamic_attributes>
+                                      <segment_scale_compensate>1</segment_scale_compensate>
+                                    </technique>
+                                  </extra>
+                                </node>
+                                <extra>
+                                  <technique profile="MAYA">
+                                    <dynamic_attributes>
+                                      <origName short_name="origName" type="string">r_Finger_02_02SHJnt</origName>
+                                    </dynamic_attributes>
+                                    <segment_scale_compensate>1</segment_scale_compensate>
+                                  </technique>
+                                </extra>
+                              </node>
+                              <extra>
+                                <technique profile="MAYA">
+                                  <dynamic_attributes>
+                                    <origName short_name="origName" type="string">r_Finger_02_01SHJnt</origName>
+                                  </dynamic_attributes>
+                                  <segment_scale_compensate>1</segment_scale_compensate>
+                                </technique>
+                              </extra>
+                            </node>
+                            <node id="r_Finger_03_01SHJnt" name="r_Finger_03_01SHJnt" type="JOINT">
+                              <translate sid="translate">-0.0957907438278198 -0.0063085383735597 0.0149064259603619</translate>
+                              <rotate sid="jointOrientZ">0 0 1 -13.55776119232178</rotate>
+                              <rotate sid="jointOrientY">0 1 0 1.173876285552979</rotate>
+                              <rotate sid="jointOrientX">1 0 0 -0.0722126737236976</rotate>
+                              <node id="r_Finger_03_02SHJnt" name="r_Finger_03_02SHJnt" type="JOINT">
+                                <translate sid="translate">-0.0357722640037536 0 0</translate>
+                                <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                <node id="r_Finger_03_03SHJnt" name="r_Finger_03_03SHJnt" type="JOINT">
+                                  <translate sid="translate">-0.0197620242834091 0 0</translate>
+                                  <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                  <node id="r_Finger_03_04SHJnt" name="r_Finger_03_04SHJnt" type="JOINT">
+                                    <translate sid="translate">-0.0230574216693639 0 0</translate>
+                                    <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                    <extra>
+                                      <technique profile="MAYA">
+                                        <dynamic_attributes>
+                                          <origName short_name="origName" type="string">r_Finger_03_04SHJnt</origName>
+                                        </dynamic_attributes>
+                                        <segment_scale_compensate>1</segment_scale_compensate>
+                                      </technique>
+                                    </extra>
+                                  </node>
+                                  <extra>
+                                    <technique profile="MAYA">
+                                      <dynamic_attributes>
+                                        <origName short_name="origName" type="string">r_Finger_03_03SHJnt</origName>
+                                      </dynamic_attributes>
+                                      <segment_scale_compensate>1</segment_scale_compensate>
+                                    </technique>
+                                  </extra>
+                                </node>
+                                <extra>
+                                  <technique profile="MAYA">
+                                    <dynamic_attributes>
+                                      <origName short_name="origName" type="string">r_Finger_03_02SHJnt</origName>
+                                    </dynamic_attributes>
+                                    <segment_scale_compensate>1</segment_scale_compensate>
+                                  </technique>
+                                </extra>
+                              </node>
+                              <extra>
+                                <technique profile="MAYA">
+                                  <dynamic_attributes>
+                                    <origName short_name="origName" type="string">r_Finger_03_01SHJnt</origName>
+                                  </dynamic_attributes>
+                                  <segment_scale_compensate>1</segment_scale_compensate>
+                                </technique>
+                              </extra>
+                            </node>
+                            <node id="r_Finger_04_01SHJnt" name="r_Finger_04_01SHJnt" type="JOINT">
+                              <translate sid="translate">-0.0933789387345314 -0.0016386915231123 0.0400125607848167</translate>
+                              <rotate sid="jointOrientZ">0 0 1 -10.79173183441162</rotate>
+                              <rotate sid="jointOrientY">0 1 0 3.705578565597534</rotate>
+                              <rotate sid="jointOrientX">1 0 0 -0.1901184618473053</rotate>
+                              <node id="r_Finger_04_02SHJnt" name="r_Finger_04_02SHJnt" type="JOINT">
+                                <translate sid="translate">-0.0291981063783168 0 0</translate>
+                                <rotate sid="jointOrientZ">0 0 1 -2.153098821640015</rotate>
+                                <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                <node id="r_Finger_04_03SHJnt" name="r_Finger_04_03SHJnt" type="JOINT">
+                                  <translate sid="translate">-0.016005702316761 0 0</translate>
+                                  <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                  <node id="r_Finger_04_04SHJnt" name="r_Finger_04_04SHJnt" type="JOINT">
+                                    <translate sid="translate">-0.0184747222810983 0 0</translate>
+                                    <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                    <extra>
+                                      <technique profile="MAYA">
+                                        <dynamic_attributes>
+                                          <origName short_name="origName" type="string">r_Finger_04_04SHJnt</origName>
+                                        </dynamic_attributes>
+                                        <segment_scale_compensate>1</segment_scale_compensate>
+                                      </technique>
+                                    </extra>
+                                  </node>
+                                  <extra>
+                                    <technique profile="MAYA">
+                                      <dynamic_attributes>
+                                        <origName short_name="origName" type="string">r_Finger_04_03SHJnt</origName>
+                                      </dynamic_attributes>
+                                      <segment_scale_compensate>1</segment_scale_compensate>
+                                    </technique>
+                                  </extra>
+                                </node>
+                                <extra>
+                                  <technique profile="MAYA">
+                                    <dynamic_attributes>
+                                      <origName short_name="origName" type="string">r_Finger_04_02SHJnt</origName>
+                                    </dynamic_attributes>
+                                    <segment_scale_compensate>1</segment_scale_compensate>
+                                  </technique>
+                                </extra>
+                              </node>
+                              <extra>
+                                <technique profile="MAYA">
+                                  <dynamic_attributes>
+                                    <origName short_name="origName" type="string">r_Finger_04_01SHJnt</origName>
+                                  </dynamic_attributes>
+                                  <segment_scale_compensate>1</segment_scale_compensate>
+                                </technique>
+                              </extra>
+                            </node>
+                            <node id="r_Thumb_01_01SHJnt" name="r_Thumb_01_01SHJnt" type="JOINT">
+                              <translate sid="translate">-0.0348691828548908 0.0144203398376703 -0.0452050156891346</translate>
+                              <rotate sid="jointOrientZ">0 0 1 -15.1245641708374</rotate>
+                              <rotate sid="jointOrientY">0 1 0 -28.53314018249512</rotate>
+                              <rotate sid="jointOrientX">1 0 0 97.98385620117188</rotate>
+                              <node id="r_Thumb_01_02SHJnt" name="r_Thumb_01_02SHJnt" type="JOINT">
+                                <translate sid="translate">-0.0337231494486331 0.0000209545651159 0.0004584333510138</translate>
+                                <rotate sid="jointOrientZ">0 0 1 -2.575707674026489</rotate>
+                                <rotate sid="jointOrientY">0 1 0 1.033231735229492</rotate>
+                                <rotate sid="jointOrientX">1 0 0 -2.665711402893066</rotate>
+                                <node id="r_Thumb_01_03SHJnt" name="r_Thumb_01_03SHJnt" type="JOINT">
+                                  <translate sid="translate">-0.0210573207587003 0 0</translate>
+                                  <rotate sid="jointOrientZ">0 0 1 -6.315299510955811</rotate>
+                                  <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                  <node id="r_Thumb_01_04SHJnt" name="r_Thumb_01_04SHJnt" type="JOINT">
+                                    <translate sid="translate">-0.0267632082104682 0 0</translate>
+                                    <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                                    <rotate sid="jointOrientY">0 1 0 0</rotate>
+                                    <rotate sid="jointOrientX">1 0 0 0</rotate>
+                                    <extra>
+                                      <technique profile="MAYA">
+                                        <dynamic_attributes>
+                                          <origName short_name="origName" type="string">r_Thumb_01_04SHJnt</origName>
+                                        </dynamic_attributes>
+                                        <segment_scale_compensate>1</segment_scale_compensate>
+                                      </technique>
+                                    </extra>
+                                  </node>
+                                  <extra>
+                                    <technique profile="MAYA">
+                                      <dynamic_attributes>
+                                        <origName short_name="origName" type="string">r_Thumb_01_03SHJnt</origName>
+                                      </dynamic_attributes>
+                                      <segment_scale_compensate>1</segment_scale_compensate>
+                                    </technique>
+                                  </extra>
+                                </node>
+                                <extra>
+                                  <technique profile="MAYA">
+                                    <dynamic_attributes>
+                                      <origName short_name="origName" type="string">r_Thumb_01_02SHJnt</origName>
+                                    </dynamic_attributes>
+                                    <segment_scale_compensate>1</segment_scale_compensate>
+                                  </technique>
+                                </extra>
+                              </node>
+                              <extra>
+                                <technique profile="MAYA">
+                                  <dynamic_attributes>
+                                    <origName short_name="origName" type="string">r_Thumb_01_01SHJnt</origName>
+                                  </dynamic_attributes>
+                                  <segment_scale_compensate>1</segment_scale_compensate>
+                                </technique>
+                              </extra>
+                            </node>
+                            <extra>
+                              <technique profile="MAYA">
+                                <dynamic_attributes>
+                                  <hand short_name="hand" type="bool">0</hand>
+                                  <arm short_name="arm" type="bool">0</arm>
+                                  <origName short_name="origName" type="string">r_Arm_WristSHJnt</origName>
+                                </dynamic_attributes>
+                                <segment_scale_compensate>1</segment_scale_compensate>
+                              </technique>
+                            </extra>
+                          </node>
+                          <extra>
+                            <technique profile="MAYA">
+                              <dynamic_attributes>
+                                <arm short_name="arm" type="bool">0</arm>
+                                <forearm short_name="forearm" type="bool">0</forearm>
+                                <origName short_name="origName" type="string">r_Arm_ElbowSHJnt</origName>
+                              </dynamic_attributes>
+                              <segment_scale_compensate>1</segment_scale_compensate>
+                            </technique>
+                          </extra>
+                        </node>
+                        <extra>
+                          <technique profile="MAYA">
+                            <dynamic_attributes>
+                              <upperArm short_name="upperArm" type="bool">0</upperArm>
+                              <arm short_name="arm" type="bool">0</arm>
+                              <origName short_name="origName" type="string">r_Arm_ShoulderSHJnt</origName>
+                            </dynamic_attributes>
+                            <segment_scale_compensate>1</segment_scale_compensate>
+                          </technique>
+                        </extra>
+                      </node>
+                      <extra>
+                        <technique profile="MAYA">
+                          <dynamic_attributes>
+                            <shoulder short_name="shoulder" type="bool">0</shoulder>
+                            <arm short_name="arm" type="bool">0</arm>
+                            <origName short_name="origName" type="string">r_Arm_ClavicleSHJnt</origName>
+                          </dynamic_attributes>
+                          <segment_scale_compensate>1</segment_scale_compensate>
+                        </technique>
+                      </extra>
+                    </node>
+                    <node id="Neck_01SHJnt" name="Neck_01SHJnt" type="JOINT">
+                      <translate sid="translate">0.0509856268763542 -0.009624321013689 0</translate>
+                      <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                      <rotate sid="jointOrientY">0 1 0 0</rotate>
+                      <rotate sid="jointOrientX">1 0 0 0</rotate>
+                      <rotate sid="rotateZ">0 0 1 -6.023725986480713</rotate>
+                      <node id="Neck_TopSHJnt" name="Neck_TopSHJnt" type="JOINT">
+                        <translate sid="translate">0.0509536415338516 0.003187654307112 0</translate>
+                        <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                        <rotate sid="jointOrientY">0 1 0 0</rotate>
+                        <rotate sid="jointOrientX">1 0 0 0</rotate>
+                        <node id="Head_JawSHJnt" name="Head_JawSHJnt" type="JOINT">
+                          <translate sid="translate">0.0600124970078468 -0.0596069805324077 0</translate>
+                          <rotate sid="jointOrientZ">0 0 1 -90</rotate>
+                          <rotate sid="jointOrientY">0 1 0 0</rotate>
+                          <rotate sid="jointOrientX">1 0 0 0</rotate>
+                          <rotate sid="rotateZ">0 0 1 12.73883438110352</rotate>
+                          <node id="Head_JawEndSHJnt" name="Head_JawEndSHJnt" type="JOINT">
+                            <translate sid="translate">0.1944324523210526 -0.0765206664800643 0</translate>
+                            <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                            <rotate sid="jointOrientY">0 1 0 0</rotate>
+                            <rotate sid="jointOrientX">1 0 0 0</rotate>
+                            <extra>
+                              <technique profile="MAYA">
+                                <dynamic_attributes>
+                                  <head short_name="head" type="bool">0</head>
+                                  <origName short_name="origName" type="string">Head_JawEndSHJnt</origName>
+                                </dynamic_attributes>
+                                <segment_scale_compensate>1</segment_scale_compensate>
+                              </technique>
+                            </extra>
+                          </node>
+                          <extra>
+                            <technique profile="MAYA">
+                              <dynamic_attributes>
+                                <head short_name="head" type="bool">0</head>
+                                <origName short_name="origName" type="string">Head_JawSHJnt</origName>
+                              </dynamic_attributes>
+                              <segment_scale_compensate>1</segment_scale_compensate>
+                            </technique>
+                          </extra>
+                        </node>
+                        <node id="Head_TopSHJnt" name="Head_TopSHJnt" type="JOINT">
+                          <translate sid="translate">0.3165290653705597 0.0604020580649375 0</translate>
+                          <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                          <rotate sid="jointOrientY">0 1 0 0</rotate>
+                          <rotate sid="jointOrientX">1 0 0 0</rotate>
+                          <rotate sid="rotateZ">0 0 1 12.73883438110352</rotate>
+                          <node id="l_Eye_01SHJnt" name="l_Eye_01SHJnt" type="JOINT">
+                            <translate sid="translate">-0.1802471131086349 -0.2151066362857819 -0.0887337103486061</translate>
+                            <rotate sid="jointOrientZ">0 0 1 -90</rotate>
+                            <rotate sid="jointOrientY">0 1 0 0</rotate>
+                            <rotate sid="jointOrientX">1 0 0 0</rotate>
+                            <extra>
+                              <technique profile="MAYA">
+                                <dynamic_attributes>
+                                  <origName short_name="origName" type="string">l_Eye_01SHJnt</origName>
+                                </dynamic_attributes>
+                                <segment_scale_compensate>1</segment_scale_compensate>
+                              </technique>
+                            </extra>
+                          </node>
+                          <node id="r_Eye_01SHJnt" name="r_Eye_01SHJnt" type="JOINT">
+                            <translate sid="translate">-0.1802471131086349 -0.2151066362857819 0.0887337103486061</translate>
+                            <rotate sid="jointOrientZ">0 0 1 -90</rotate>
+                            <rotate sid="jointOrientY">0 1 0 0</rotate>
+                            <rotate sid="jointOrientX">1 0 0 0</rotate>
+                            <extra>
+                              <technique profile="MAYA">
+                                <dynamic_attributes>
+                                  <origName short_name="origName" type="string">r_Eye_01SHJnt</origName>
+                                </dynamic_attributes>
+                                <segment_scale_compensate>1</segment_scale_compensate>
+                              </technique>
+                            </extra>
+                          </node>
+                          <extra>
+                            <technique profile="MAYA">
+                              <dynamic_attributes>
+                                <head short_name="head" type="bool">0</head>
+                                <origName short_name="origName" type="string">Head_TopSHJnt</origName>
+                              </dynamic_attributes>
+                              <segment_scale_compensate>1</segment_scale_compensate>
+                            </technique>
+                          </extra>
+                        </node>
+                        <extra>
+                          <technique profile="MAYA">
+                            <dynamic_attributes>
+                              <splineEnd short_name="splineEnd" type="bool">0</splineEnd>
+                              <origName short_name="origName" type="string">Neck_TopSHJnt</origName>
+                            </dynamic_attributes>
+                            <segment_scale_compensate>1</segment_scale_compensate>
+                          </technique>
+                        </extra>
+                      </node>
+                      <extra>
+                        <technique profile="MAYA">
+                          <dynamic_attributes>
+                            <splineStart short_name="splineStart" type="bool">0</splineStart>
+                            <origName short_name="origName" type="string">Neck_01SHJnt</origName>
+                          </dynamic_attributes>
+                          <segment_scale_compensate>1</segment_scale_compensate>
+                        </technique>
+                      </extra>
+                    </node>
+                    <extra>
+                      <technique profile="MAYA">
+                        <dynamic_attributes>
+                          <splineEnd short_name="splineEnd" type="bool">0</splineEnd>
+                          <origName short_name="origName" type="string">Spine_TopSHJnt</origName>
+                        </dynamic_attributes>
+                        <segment_scale_compensate>1</segment_scale_compensate>
+                      </technique>
+                    </extra>
+                  </node>
+                  <extra>
+                    <technique profile="MAYA">
+                      <dynamic_attributes>
+                        <origName short_name="origName" type="string">Spine_02SHJnt</origName>
+                      </dynamic_attributes>
+                      <segment_scale_compensate>1</segment_scale_compensate>
+                    </technique>
+                  </extra>
+                </node>
+                <extra>
+                  <technique profile="MAYA">
+                    <dynamic_attributes>
+                      <splineStart short_name="splineStart" type="bool">0</splineStart>
+                      <origName short_name="origName" type="string">Spine_01SHJnt</origName>
+                    </dynamic_attributes>
+                    <segment_scale_compensate>1</segment_scale_compensate>
+                  </technique>
+                </extra>
+              </node>
+              <node id="l_Leg_HipSHJnt" name="l_Leg_HipSHJnt" type="JOINT">
+                <translate sid="translate">-0.0331258587539196 0 -0.0826098620891571</translate>
+                <rotate sid="jointOrientZ">0 0 1 -177.1544189453125</rotate>
+                <rotate sid="jointOrientY">0 1 0 1.003630042076111</rotate>
+                <rotate sid="jointOrientX">1 0 0 -89.95011138916016</rotate>
+                <rotate sid="rotateZ">0 0 1 5.270660877227783</rotate>
+                <rotate sid="rotateY">0 1 0 13.84564781188965</rotate>
+                <rotate sid="rotateX">1 0 0 1.026442885398865</rotate>
+                <node id="l_Leg_KneeSHJnt" name="l_Leg_KneeSHJnt" type="JOINT">
+                  <translate sid="translate">0.1138381958007813 0 0</translate>
+                  <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                  <rotate sid="jointOrientY">0 1 0 13.01924991607666</rotate>
+                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                  <rotate sid="rotateY">0 1 0 134.5877990722656</rotate>
+                  <node id="l_Leg_AnkleSHJnt" name="l_Leg_AnkleSHJnt" type="JOINT">
+                    <translate sid="translate">0.0910307839512825 0 0</translate>
+                    <rotate sid="jointOrientZ">0 0 1 -1.02091908454895</rotate>
+                    <rotate sid="jointOrientY">0 1 0 -10.1725435256958</rotate>
+                    <rotate sid="jointOrientX">1 0 0 0.1803255081176758</rotate>
+                    <rotate sid="rotateZ">0 0 1 -167.9509887695313</rotate>
+                    <rotate sid="rotateY">0 1 0 -58.56780242919922</rotate>
+                    <rotate sid="rotateX">1 0 0 172.6848754882813</rotate>
+                    <node id="l_Leg_BallSHJnt" name="l_Leg_BallSHJnt" type="JOINT">
+                      <translate sid="translate">0.0922101363539695 0.0021852627396583 0.0796449333429336</translate>
+                      <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                      <rotate sid="jointOrientY">0 1 0 -90</rotate>
+                      <rotate sid="jointOrientX">1 0 0 0</rotate>
+                      <node id="l_Leg_ToeSHJnt" name="l_Leg_ToeSHJnt" type="JOINT">
+                        <translate sid="translate">0.071844145655632 0 0</translate>
+                        <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                        <rotate sid="jointOrientY">0 1 0 0</rotate>
+                        <rotate sid="jointOrientX">1 0 0 0</rotate>
+                        <extra>
+                          <technique profile="MAYA">
+                            <dynamic_attributes>
+                              <leg short_name="leg" type="bool">0</leg>
+                              <origName short_name="origName" type="string">l_Leg_ToeSHJnt</origName>
+                            </dynamic_attributes>
+                            <segment_scale_compensate>1</segment_scale_compensate>
+                          </technique>
+                        </extra>
+                      </node>
+                      <extra>
+                        <technique profile="MAYA">
+                          <dynamic_attributes>
+                            <leg short_name="leg" type="bool">0</leg>
+                            <toeBase short_name="toeBase" type="bool">0</toeBase>
+                            <origName short_name="origName" type="string">l_Leg_BallSHJnt</origName>
+                          </dynamic_attributes>
+                          <segment_scale_compensate>1</segment_scale_compensate>
+                        </technique>
+                      </extra>
+                    </node>
+                    <extra>
+                      <technique profile="MAYA">
+                        <dynamic_attributes>
+                          <foot short_name="foot" type="bool">0</foot>
+                          <leg short_name="leg" type="bool">0</leg>
+                          <origName short_name="origName" type="string">l_Leg_AnkleSHJnt</origName>
+                        </dynamic_attributes>
+                        <segment_scale_compensate>1</segment_scale_compensate>
+                      </technique>
+                    </extra>
+                  </node>
+                  <extra>
+                    <technique profile="MAYA">
+                      <dynamic_attributes>
+                        <leg short_name="leg" type="bool">0</leg>
+                        <knee short_name="knee" type="bool">0</knee>
+                        <origName short_name="origName" type="string">l_Leg_KneeSHJnt</origName>
+                      </dynamic_attributes>
+                      <segment_scale_compensate>1</segment_scale_compensate>
+                    </technique>
+                  </extra>
+                </node>
+                <extra>
+                  <technique profile="MAYA">
+                    <dynamic_attributes>
+                      <upLeg short_name="upLeg" type="bool">0</upLeg>
+                      <leg short_name="leg" type="bool">0</leg>
+                      <origName short_name="origName" type="string">l_Leg_HipSHJnt</origName>
+                    </dynamic_attributes>
+                    <segment_scale_compensate>1</segment_scale_compensate>
+                  </technique>
+                </extra>
+              </node>
+              <node id="r_Leg_HipSHJnt" name="r_Leg_HipSHJnt" type="JOINT">
+                <translate sid="translate">-0.0331258587539196 0 0.0826098620891571</translate>
+                <rotate sid="jointOrientZ">0 0 1 2.845556259155273</rotate>
+                <rotate sid="jointOrientY">0 1 0 1.003630042076111</rotate>
+                <rotate sid="jointOrientX">1 0 0 -89.95011138916016</rotate>
+                <rotate sid="rotateZ">0 0 1 4.129035472869873</rotate>
+                <rotate sid="rotateY">0 1 0 13.87099552154541</rotate>
+                <rotate sid="rotateX">1 0 0 1.593558788299561</rotate>
+                <node id="r_Leg_KneeSHJnt" name="r_Leg_KneeSHJnt" type="JOINT">
+                  <translate sid="translate">-0.1138381958007813 0 0</translate>
+                  <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                  <rotate sid="jointOrientY">0 1 0 13.01924991607666</rotate>
+                  <rotate sid="jointOrientX">1 0 0 0</rotate>
+                  <rotate sid="rotateY">0 1 0 134.5877990722656</rotate>
+                  <node id="r_Leg_AnkleSHJnt" name="r_Leg_AnkleSHJnt" type="JOINT">
+                    <translate sid="translate">-0.0910307839512825 0 0</translate>
+                    <rotate sid="jointOrientZ">0 0 1 -1.02091908454895</rotate>
+                    <rotate sid="jointOrientY">0 1 0 -10.17254447937012</rotate>
+                    <rotate sid="jointOrientX">1 0 0 0.1803255081176758</rotate>
+                    <rotate sid="rotateZ">0 0 1 -169.5470123291016</rotate>
+                    <rotate sid="rotateY">0 1 0 -58.59110260009766</rotate>
+                    <rotate sid="rotateX">1 0 0 172.9320068359375</rotate>
+                    <node id="r_Leg_BallSHJnt" name="r_Leg_BallSHJnt" type="JOINT">
+                      <translate sid="translate">-0.0922101363539695 -0.0021852627396583 -0.0796449333429336</translate>
+                      <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                      <rotate sid="jointOrientY">0 1 0 -90</rotate>
+                      <rotate sid="jointOrientX">1 0 0 0</rotate>
+                      <node id="r_Leg_ToeSHJnt" name="r_Leg_ToeSHJnt" type="JOINT">
+                        <translate sid="translate">-0.071844145655632 0 0</translate>
+                        <rotate sid="jointOrientZ">0 0 1 0</rotate>
+                        <rotate sid="jointOrientY">0 1 0 0</rotate>
+                        <rotate sid="jointOrientX">1 0 0 0</rotate>
+                        <extra>
+                          <technique profile="MAYA">
+                            <dynamic_attributes>
+                              <leg short_name="leg" type="bool">0</leg>
+                              <origName short_name="origName" type="string">r_Leg_ToeSHJnt</origName>
+                            </dynamic_attributes>
+                            <segment_scale_compensate>1</segment_scale_compensate>
+                          </technique>
+                        </extra>
+                      </node>
+                      <extra>
+                        <technique profile="MAYA">
+                          <dynamic_attributes>
+                            <leg short_name="leg" type="bool">0</leg>
+                            <toeBase short_name="toeBase" type="bool">0</toeBase>
+                            <origName short_name="origName" type="string">r_Leg_BallSHJnt</origName>
+                          </dynamic_attributes>
+                          <segment_scale_compensate>1</segment_scale_compensate>
+                        </technique>
+                      </extra>
+                    </node>
+                    <extra>
+                      <technique profile="MAYA">
+                        <dynamic_attributes>
+                          <foot short_name="foot" type="bool">0</foot>
+                          <leg short_name="leg" type="bool">0</leg>
+                          <origName short_name="origName" type="string">r_Leg_AnkleSHJnt</origName>
+                        </dynamic_attributes>
+                        <segment_scale_compensate>1</segment_scale_compensate>
+                      </technique>
+                    </extra>
+                  </node>
+                  <extra>
+                    <technique profile="MAYA">
+                      <dynamic_attributes>
+                        <leg short_name="leg" type="bool">0</leg>
+                        <knee short_name="knee" type="bool">0</knee>
+                        <origName short_name="origName" type="string">r_Leg_KneeSHJnt</origName>
+                      </dynamic_attributes>
+                      <segment_scale_compensate>1</segment_scale_compensate>
+                    </technique>
+                  </extra>
+                </node>
+                <extra>
+                  <technique profile="MAYA">
+                    <dynamic_attributes>
+                      <upLeg short_name="upLeg" type="bool">0</upLeg>
+                      <leg short_name="leg" type="bool">0</leg>
+                      <origName short_name="origName" type="string">r_Leg_HipSHJnt</origName>
+                    </dynamic_attributes>
+                    <segment_scale_compensate>1</segment_scale_compensate>
+                  </technique>
+                </extra>
+              </node>
+              <extra>
+                <technique profile="MAYA">
+                  <dynamic_attributes>
+                    <hips short_name="hips" type="bool">0</hips>
+                    <origName short_name="origName" type="string">ROOTSHJnt</origName>
+                  </dynamic_attributes>
+                  <segment_scale_compensate>1</segment_scale_compensate>
+                </technique>
+              </extra>
+            </node>
+            <extra>
+              <technique profile="MAYA">
+                <dynamic_attributes>
+                  <origName short_name="origName" type="string">TrajectorySHJnt</origName>
+                </dynamic_attributes>
+                <segment_scale_compensate>1</segment_scale_compensate>
+              </technique>
+            </extra>
+          </node>
+        </node>
+        <extra>
+          <technique profile="MAYA">
+            <dynamic_attributes>
+              <modRigConnection short_name="modRigConnection" type="string"/>
+              <singleHierarchy short_name="singleHierarchy" type="string">ROOTSHJnt</singleHierarchy>
+            </dynamic_attributes>
+          </technique>
+        </extra>
+      </node>
+      <extra>
+        <technique profile="FCOLLADA">
+          <layer name="SHJointsLayer">SHJntGrp</layer>
+          <start_time>0</start_time>
+          <end_time>0.1666666716337204</end_time>
+        </technique>
+      </extra>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_physics_scene url="#MayaNativePhysicsScene"/>
+    <instance_visual_scene url="#VisualSceneNode"/>
+  </scene>
+</COLLADA>
