@@ -42,8 +42,8 @@ struct dr_char
     u32 anim_idle;
     u32 anim_walk;
     u32 anim_run;
+    u32 anim_jump;
 };
-
 dr_char dr;
 
 f32 user_thread_time = 0.0f;
@@ -113,11 +113,13 @@ void setup_character(put::ces::entity_scene* scene)
     anim_handle idle = ces::load_pma("data/models/characters/doctor/anims/doctor_idle01.pma");
     anim_handle walk = ces::load_pma("data/models/characters/doctor/anims/doctor_walk.pma");
     anim_handle run = ces::load_pma("data/models/characters/doctor/anims/doctor_run.pma");
+    anim_handle jump = ces::load_pma("data/models/characters/doctor/anims/doctor_idle_jump.pma");
     
     // bind to rig
     ces::bind_animation_to_rig_v2(scene, idle, dr.root);
     ces::bind_animation_to_rig_v2(scene, walk, dr.root);
     ces::bind_animation_to_rig_v2(scene, run, dr.root);
+    ces::bind_animation_to_rig_v2(scene, jump, dr.root);
 
     // add capsule for collisions
     scene->physics_data[dr.root].rigid_body.shape = physics::CAPSULE;
@@ -136,6 +138,7 @@ void setup_character(put::ces::entity_scene* scene)
     dr.anim_idle = 0;
     dr.anim_walk = 1;
     dr.anim_run = 2;
+    dr.anim_jump = 3;
     
     // add a few quick bits of collision
     vec3f start = vec3f(-5.5f, -0.5f, -5.5f);
@@ -149,7 +152,7 @@ void setup_character(put::ces::entity_scene* scene)
     }
 
     // floors
-    for (u32 k = 0; k < 4; ++k)
+    for (u32 k = 0; k < 2; ++k)
     {
         pos.z = start.z;
 
@@ -422,8 +425,13 @@ void update_character_controller(put::scene_controller* sc)
     update_level_editor(sc);
     
     // debug
+    static vec3f prev_pos = pos;
     pos = sc->scene->world_matrices[dr.root].get_translation();
     pos -= vec3f(0.0f, 0.1f, 0.0f);
+
+    vec3f anim_vel = pos - prev_pos;
+
+    prev_pos = pos;
     
     sc->scene->transforms[dr.root].translation = pos;
     sc->scene->entities[dr.root] |= CMP_TRANSFORM;
@@ -476,9 +484,12 @@ void update_character_controller(put::scene_controller* sc)
     }
     
     // floor collision
+    static bool in_air = true;
     f32 cvm = mag(r0 - floor_cast.pos);
     if (cvm < 0.5f)
     {
+        in_air = false;
+
         f32 cvm2 = mag(r0 - surface_cast.pos);
 
         if (cvm2 < 0.5f)
@@ -494,8 +505,28 @@ void update_character_controller(put::scene_controller* sc)
     }
     else
     {
+        in_air = true;
+
         // let physics take over
         sc->scene->state_flags[dr.root] |= SF_SYNC_PHYSICS_TRANSFORM;
+    }
+
+    anim_vel.y = 0.0f;
+    if (pen::input_key(PK_Q) && !in_air)
+    {
+        anim_vel.y = 4.0f;
+
+        physics::set_v3(sc->scene->physics_handles[dr.root], anim_vel + v_dir * vel, physics::CMD_SET_LINEAR_VELOCITY);
+        
+        sc->scene->state_flags[dr.root] |= SF_SYNC_PHYSICS_TRANSFORM;
+    }
+
+    if (in_air)
+    {
+        physics::set_v3(sc->scene->physics_handles[dr.root], v_dir * vel, physics::CMD_SET_LINEAR_VELOCITY);
+
+        controller.blend.anim_a = dr.anim_idle;
+        controller.blend.anim_b = dr.anim_idle;
     }
 
     /*
