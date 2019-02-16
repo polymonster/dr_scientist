@@ -18,6 +18,7 @@
 #include "ces/ces_editor.h"
 #include "ces/ces_utilities.h"
 #include "data_struct.h"
+#include "maths/maths.h"
 
 using namespace put;
 using namespace ces;
@@ -94,7 +95,9 @@ void add_box(put::ces::entity_scene* scene, const vec3f& pos)
     scene->parents[b] = b;
     scene->physics_data[b].rigid_body.shape = physics::BOX;
     scene->physics_data[b].rigid_body.mass = 0.0f;
-    
+    scene->physics_data[b].rigid_body.group = 1;
+    scene->physics_data[b].rigid_body.mask = 0xffffffff;
+
     instantiate_geometry(box, scene, b);
     instantiate_material(default_material, scene, b);
     instantiate_model_cbuffer(scene, b);
@@ -115,23 +118,106 @@ void setup_character(put::ces::entity_scene* scene)
     ces::bind_animation_to_rig_v2(scene, idle, dr.root);
     ces::bind_animation_to_rig_v2(scene, walk, dr.root);
     ces::bind_animation_to_rig_v2(scene, run, dr.root);
-    
+
+    // add capsule for collisions
+    scene->physics_data[dr.root].rigid_body.shape = physics::CAPSULE;
+    scene->physics_data[dr.root].rigid_body.mass = 1.0f;
+    scene->physics_data[dr.root].rigid_body.group = 4;
+    scene->physics_data[dr.root].rigid_body.mask = ~1;
+    scene->physics_data[dr.root].rigid_body.dimensions = vec3f(0.33f, 0.33f, 0.33f);
+    scene->physics_data[dr.root].rigid_body.create_flags |= physics::CF_DIMENSIONS;
+
+    // drs feet are at 0.. offset collision to centre at 0.5
+    scene->physics_offset[dr.root].translation = vec3f(0.0f, 0.5f, 0.0f);
+
+    instantiate_rigid_body(scene, dr.root);
+
     // todo make bind return index
     dr.anim_idle = 0;
     dr.anim_walk = 1;
     dr.anim_run = 2;
     
-    vec3f platform[] = {
-        vec3f(-0.5f, -0.5f, -0.5f),
-        vec3f(0.5f, -0.5f, -0.5f),
-        vec3f(-0.5f, -0.5f, 0.5f),
-        vec3f(0.5f, -0.5f, 0.5f)
-    };
-    
-    for(u32 i = 0; i < PEN_ARRAY_SIZE(platform); ++i)
+    // add a few quick bits of collision
+    vec3f start = vec3f(-5.5f, -0.5f, -5.5f);
+    vec3f pos = start;
+
+    // a wall
+    for (u32 i = 0; i < 11; ++i)
     {
-        add_box(scene, platform[i]);
+        pos.z += 1.0f;
+        add_box(scene, pos + vec3f(0.0f, 1.0f, 0.0f));
     }
+
+    // floors
+    for (u32 k = 0; k < 4; ++k)
+    {
+        pos.z = start.z;
+
+        for (u32 i = 0; i < 11; ++i)
+        {
+            pos.x = start.x;
+
+            for (u32 j = 0; j < 11; ++j)
+            {
+                add_box(scene, pos);
+                pos.x += 1.0f;
+            }
+
+            pos.z += 1.0f;
+        }
+
+        pos.y -= 4.0f;
+        start.z -= 5.0f;
+    }
+
+    static material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
+    static geometry_resource* box = get_geometry_resource(PEN_HASH("cube"));
+
+    // some boxes to knock over
+    pos = vec3f(-3.0, 0.5f, 2.0f);
+
+    for (u32 k = 0; k < 4; ++k)
+    {
+        u32 b = get_new_node(scene);
+        scene->names[b] = "box";
+        scene->transforms[b].translation = pos;
+        scene->transforms[b].rotation = quat();
+        scene->transforms[b].scale = vec3f(0.25f);
+        scene->entities[b] |= CMP_TRANSFORM;
+        scene->parents[b] = b;
+        scene->physics_data[b].rigid_body.shape = physics::BOX;
+        scene->physics_data[b].rigid_body.mass = 0.1f;
+        scene->physics_data[b].rigid_body.group = 2;
+        scene->physics_data[b].rigid_body.mask = 0xffffffff;
+
+        instantiate_geometry(box, scene, b);
+        instantiate_material(default_material, scene, b);
+        instantiate_model_cbuffer(scene, b);
+        instantiate_rigid_body(scene, b);
+
+        pos.x += 0.5f;
+    }
+
+    // slope
+    u32 b = get_new_node(scene);
+    scene->names[b] = "slope";
+    scene->transforms[b].translation = vec3f(10.0f, -1.0f, 2.0f);
+    scene->transforms[b].rotation = quat(M_PI * 0.07f, 0.0f, 0.0f);
+    scene->transforms[b].scale = vec3f(10.0f, 0.5f, 3.0f);
+    scene->entities[b] |= CMP_TRANSFORM;
+    scene->parents[b] = b;
+    scene->physics_data[b].rigid_body.shape = physics::BOX;
+    scene->physics_data[b].rigid_body.mass = 0.0f;
+    scene->physics_data[b].rigid_body.group = 1;
+    scene->physics_data[b].rigid_body.mask = 0xffffffff;
+
+    instantiate_geometry(box, scene, b);
+    instantiate_material(default_material, scene, b);
+    instantiate_model_cbuffer(scene, b);
+    instantiate_rigid_body(scene, b);
+
+    physics::physics_consume_command_buffer();
+    pen::thread_sleep_ms(4);
 }
 
 bool can_edit()
@@ -359,6 +445,8 @@ void update_character_controller(put::scene_controller* sc)
     scp.dimension = vec3f(0.3f);
     scp.callback = &sccb;
     scp.user_data = &wall_cast;
+    scp.group = 1;
+    scp.mask = 1;
 
     physics::cast_sphere(scp, true);
     
@@ -373,6 +461,8 @@ void update_character_controller(put::scene_controller* sc)
     rcp.end = r0 + vec3f(0.0f, -10000.0f, 0.0f);
     rcp.callback = &rccb;
     rcp.user_data = &surface_cast;
+    rcp.group = 1;
+    rcp.mask = 1;
 
     physics::cast_ray(rcp, true);
     
@@ -401,6 +491,11 @@ void update_character_controller(put::scene_controller* sc)
             f32 diff = 0.5f - cvm;
             sc->scene->transforms[dr.root].translation += floor_cast.normal * diff;
         }
+    }
+    else
+    {
+        // let physics take over
+        sc->scene->state_flags[dr.root] |= SF_SYNC_PHYSICS_TRANSFORM;
     }
 
     /*
