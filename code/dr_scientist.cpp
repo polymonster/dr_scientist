@@ -116,10 +116,10 @@ void setup_character(put::ces::entity_scene* scene)
     anim_handle jump = ces::load_pma("data/models/characters/doctor/anims/doctor_idle_jump.pma");
     
     // bind to rig
-    ces::bind_animation_to_rig_v2(scene, idle, dr.root);
-    ces::bind_animation_to_rig_v2(scene, walk, dr.root);
-    ces::bind_animation_to_rig_v2(scene, run, dr.root);
-    ces::bind_animation_to_rig_v2(scene, jump, dr.root);
+    ces::bind_animation_to_rig(scene, idle, dr.root);
+    ces::bind_animation_to_rig(scene, walk, dr.root);
+    ces::bind_animation_to_rig(scene, run, dr.root);
+    ces::bind_animation_to_rig(scene, jump, dr.root);
 
     // add capsule for collisions
     scene->physics_data[dr.root].rigid_body.shape = physics::CAPSULE;
