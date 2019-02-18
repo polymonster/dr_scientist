@@ -551,7 +551,7 @@ void update_character_controller(put::scene_controller* sc)
     }
 
     anim_vel.y = 0.0f;
-    if (ci.actions & JUMP && !in_air)
+    if (ci.actions & JUMP && in_air <= 0)
     {
         anim_vel.y = 4.0f;
 
