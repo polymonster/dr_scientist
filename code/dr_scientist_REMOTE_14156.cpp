@@ -134,8 +134,6 @@ void setup_character(put::ces::entity_scene* scene)
 
     instantiate_rigid_body(scene, dr.root);
 
-    physics::set_v3(scene->physics_handles[dr.root], vec3f::zero(), physics::CMD_SET_ANGULAR_FACTOR);
-
     // todo make bind return index
     dr.anim_idle = 0;
     dr.anim_walk = 1;
@@ -523,11 +521,11 @@ void update_character_controller(put::scene_controller* sc)
     }
     
     // floor collision
-    static s32 in_air = 2;
+    static bool in_air = true;
     f32 cvm = mag(r0 - floor_cast.pos);
     if (cvm < 0.5f)
     {
-        in_air--;
+        in_air = false;
 
         f32 cvm2 = mag(r0 - surface_cast.pos);
 
@@ -544,7 +542,7 @@ void update_character_controller(put::scene_controller* sc)
     }
     else
     {
-        in_air = 2;
+        in_air = true;
 
         // let physics take over
         sc->scene->state_flags[dr.root] |= SF_SYNC_PHYSICS_TRANSFORM;
@@ -555,13 +553,14 @@ void update_character_controller(put::scene_controller* sc)
     {
         anim_vel.y = 4.0f;
 
-        physics::set_v3(sc->scene->physics_handles[dr.root], vec3f(0.0f, 1.0f, 0.0f) + ci.movement_dir * ci.movement_vel * 0.1f, physics::CMD_ADD_CENTRAL_IMPULSE);
+        physics::set_v3(sc->scene->physics_handles[dr.root], anim_vel + ci.movement_dir * ci.movement_vel, physics::CMD_SET_LINEAR_VELOCITY);
+        
         sc->scene->state_flags[dr.root] |= SF_SYNC_PHYSICS_TRANSFORM;
     }
 
-    if (in_air > 0)
+    if (in_air)
     {
-        physics::set_v3(sc->scene->physics_handles[dr.root], ci.movement_dir * ci.movement_vel * 0.1f, physics::CMD_ADD_CENTRAL_IMPULSE);
+        physics::set_v3(sc->scene->physics_handles[dr.root], ci.movement_dir * ci.movement_vel, physics::CMD_SET_LINEAR_VELOCITY);
 
         controller.blend.anim_a = dr.anim_idle;
         controller.blend.anim_b = dr.anim_idle;

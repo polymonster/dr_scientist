@@ -305,51 +305,23 @@ void update_level_editor(put::scene_controller* sc)
     }
 }
 
-enum e_contoller_actions
+void control_character(put::scene_controller* sc, f32& dir, f32& vel, vec3f& v_dir)
 {
-    JUMP = 1<<0,
-    RUN = 1<<1
-};
-
-struct controller_input
-{
-    vec3f movement_dir = vec3f(0.0f, 0.0f, 1.0f);
-    f32   dir_angle = 0.0f;
-    f32   movement_vel = 0.0f;
-    vec3f camera = vec3f::zero();
-    u8    actions = 0;
-};
-
-void get_controller_input(put::scene_controller* sc, controller_input& ci)
-{
-    // clear state
-    ci.actions = 0;
-    
     vec3f left_stick = vec3f::zero();
-    
+
     vec3f xz_dir = sc->camera->focus - sc->camera->pos;
     xz_dir.y = 0.0f;
     xz_dir = normalised(xz_dir);
-    
+
     f32 xz_angle = acos(dot(xz_dir, vec3f(0.0f, 0.0f, 1.0f)));
-    
+
     u32 num_pads = pen::input_get_num_gamepads();
     if (num_pads > 0)
     {
         pen::gamepad_state gs;
         pen::input_get_gamepad_state(0, gs);
-        
+
         left_stick = vec3f(gs.axis[PGP_AXIS_LEFT_STICK_X], 0.0f, gs.axis[PGP_AXIS_LEFT_STICK_Y]);
-        
-        if(gs.button[PGP_BUTTON_X])
-        {
-            ci.actions |= RUN;
-        }
-        
-        if(gs.button[PGP_BUTTON_A])
-        {
-            ci.actions |= JUMP;
-        }
     }
     else
     {
@@ -361,7 +333,7 @@ void get_controller_input(put::scene_controller* sc, controller_input& ci)
         {
             left_stick.z = 1.0f;
         }
-        
+
         if (pen::input_key(PK_A))
         {
             left_stick.x = -1.0f;
@@ -370,35 +342,22 @@ void get_controller_input(put::scene_controller* sc, controller_input& ci)
         {
             left_stick.x = 1.0f;
         }
-        
-        if (pen::input_key(PK_Q))
-        {
-             ci.actions |= JUMP;
-        }
-        
-        if (pen::input_key(PK_SHIFT))
-        {
-            ci.actions |= RUN;
-        }
-        
-        if(mag2(left_stick) > 0)
-            normalise(left_stick);
+
+        normalise(left_stick);
     }
-    
+
     mat4 rot = mat::create_y_rotation(xz_angle);
-    
-    if(mag(left_stick) > 0.2f)
+
+    vec3f transfromed_left_stick = normalised(-rot.transform_vector(left_stick));
+
+
+    if (mag(left_stick) > 0.2f)
     {
-        vec3f transfromed_left_stick = normalised(-rot.transform_vector(left_stick));
-        ci.movement_dir = transfromed_left_stick;
-        ci.movement_vel = mag(left_stick);
+        vel = mag(left_stick);
+        v_dir = transfromed_left_stick;
     }
-    else
-    {
-        ci.movement_vel = 0.0f;
-    }
-    
-    ci.dir_angle = atan2(ci.movement_dir.x, ci.movement_dir.z);
+
+    dir = atan2(v_dir.x, v_dir.z);
 }
 
 struct character_cast
@@ -428,29 +387,30 @@ void update_character_controller(put::scene_controller* sc)
     static vec3f pos = vec3f::zero();
 
     u32 trajectory_node = 5;
-    
-    static controller_input ci;
-    
-    get_controller_input(sc, ci);
-    
+            
+    f32 dir_angle = 0.0f;
+    f32 vel = 0.0f;
+    static vec3f v_dir = vec3f::unit_z();
+    control_character(sc, dir_angle, vel, v_dir);
+
     if(sc->scene->num_nodes > trajectory_node)
     {
         quat rot;
-        rot.euler_angles(0.0f, ci.dir_angle, 0.0f);
+        rot.euler_angles(0.0f, dir_angle, 0.0f);
         sc->scene->initial_transform[trajectory_node].rotation = rot;
     }
     
     ces::cmp_anim_controller_v2& controller = sc->scene->anim_controller_v2[dr.root];
     
-    controller.blend.ratio = abs(ci.movement_vel);
+    controller.blend.ratio = abs(vel);
 
-    if (ci.movement_vel > 0.1)
+    if (vel > 0.1)
     {
         // walk state
         controller.blend.anim_a = dr.anim_walk;
         controller.blend.anim_b = dr.anim_walk;
 
-        if (ci.actions & RUN)
+        if (pen::input_key(PK_CONTROL))
         {
             controller.blend.anim_a = dr.anim_run;
             controller.blend.anim_b = dr.anim_run;
@@ -484,11 +444,14 @@ void update_character_controller(put::scene_controller* sc)
     character_cast floor_cast;
     character_cast surface_cast;
 
+    put::dbg::add_line(pos, pos + v_dir, vec4f::blue());
+    put::dbg::add_circle(vec3f::unit_y(), pos, 0.5f, vec4f::green());
+
     // todo make this character controller
 
     physics::sphere_cast_params scp;
     scp.from = r0;
-    scp.to = r0 + ci.movement_dir * 1000.0f;
+    scp.to = r0 + v_dir * 1000.0f;
     scp.dimension = vec3f(0.3f);
     scp.callback = &sccb;
     scp.user_data = &wall_cast;
@@ -550,26 +513,22 @@ void update_character_controller(put::scene_controller* sc)
         sc->scene->state_flags[dr.root] |= SF_SYNC_PHYSICS_TRANSFORM;
     }
 
-    anim_vel.y = 0.0f;
-    if (ci.actions & JUMP && !in_air)
+    if (pen::input_key(PK_Q) && in_air <= 0)
     {
-        anim_vel.y = 4.0f;
-
-        physics::set_v3(sc->scene->physics_handles[dr.root], vec3f(0.0f, 1.0f, 0.0f) + ci.movement_dir * ci.movement_vel * 0.1f, physics::CMD_ADD_CENTRAL_IMPULSE);
+        physics::set_v3(sc->scene->physics_handles[dr.root], vec3f(0.0f, 1.0f, 0.0f) + v_dir * vel * 0.1f, physics::CMD_ADD_CENTRAL_IMPULSE);
+        
         sc->scene->state_flags[dr.root] |= SF_SYNC_PHYSICS_TRANSFORM;
     }
 
     if (in_air > 0)
     {
-        physics::set_v3(sc->scene->physics_handles[dr.root], ci.movement_dir * ci.movement_vel * 0.1f, physics::CMD_ADD_CENTRAL_IMPULSE);
+        physics::set_v3(sc->scene->physics_handles[dr.root], v_dir * vel * 0.1f, physics::CMD_ADD_CENTRAL_IMPULSE);
 
         controller.blend.anim_a = dr.anim_idle;
         controller.blend.anim_b = dr.anim_idle;
     }
 
     /*
-    put::dbg::add_line(pos, pos + ci.movement_dir, vec4f::blue());
-    put::dbg::add_circle(vec3f::unit_y(), pos, 0.5f, vec4f::green());
     put::dbg::add_point(surface_cast.pos, 0.1f, vec4f::green());
     put::dbg::add_point(wall_cast.pos, 0.1f, vec4f::green());
     put::dbg::add_point(floor_cast.pos, 0.1f, vec4f::blue());
