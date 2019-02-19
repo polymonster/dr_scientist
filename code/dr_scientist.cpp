@@ -318,11 +318,13 @@ struct controller_input
     f32   movement_vel = 0.0f;
     vec3f camera = vec3f::zero();
     u8    actions = 0;
+    u8    prev_actions = 0;
 };
 
 void get_controller_input(put::scene_controller* sc, controller_input& ci)
 {
     // clear state
+    ci.prev_actions = ci.actions;
     ci.actions = 0;
     
     vec3f left_stick = vec3f::zero();
@@ -467,13 +469,15 @@ void update_character_controller(put::scene_controller* sc)
     update_level_editor(sc);
     
     // debug
-    static vec3f prev_pos = pos;
     pos = sc->scene->world_matrices[dr.root].get_translation();
-    pos -= vec3f(0.0f, 0.1f, 0.0f);
-
-    vec3f anim_vel = pos - prev_pos;
-
-    prev_pos = pos;
+    
+    static vec3f motion_vel = vec3f::zero();
+    
+    // gravity
+    motion_vel *= vec3f(0.8f, 1.0f, 0.8f);
+    motion_vel.y -= 0.01f;
+    
+    pos += motion_vel;
     
     sc->scene->transforms[dr.root].translation = pos;
     sc->scene->entities[dr.root] |= CMP_TRANSFORM;
@@ -515,9 +519,9 @@ void update_character_controller(put::scene_controller* sc)
     
     // wall collisions
     vec3f cv = r0 - wall_cast.pos;
-    if (mag(cv) < 0.5f)
+    if (mag(cv) < 0.33f)
     {
-        f32 diff = 0.5f - mag(cv);
+        f32 diff = 0.33f - mag(cv);
         
         sc->scene->transforms[dr.root].translation += normalised(cv) * diff;
     }
@@ -525,9 +529,10 @@ void update_character_controller(put::scene_controller* sc)
     // floor collision
     static s32 in_air = 2;
     f32 cvm = mag(r0 - floor_cast.pos);
-    if (cvm < 0.5f)
+    f32 dp = dot(surface_cast.normal, vec3f::unit_y());
+    if (cvm <= 0.5f && dp > 0.7f)
     {
-        in_air--;
+        in_air = 0;
 
         f32 cvm2 = mag(r0 - surface_cast.pos);
 
@@ -535,6 +540,7 @@ void update_character_controller(put::scene_controller* sc)
         {
             f32 diff = 0.5f - cvm2;
             sc->scene->transforms[dr.root].translation += vec3f::unit_y() * diff;
+            motion_vel.y = 0.0f;
         }
         else
         {
@@ -544,29 +550,27 @@ void update_character_controller(put::scene_controller* sc)
     }
     else
     {
-        in_air = 2;
-
-        // let physics take over
-        sc->scene->state_flags[dr.root] |= SF_SYNC_PHYSICS_TRANSFORM;
+        // in air
+        in_air++;
     }
-
-    anim_vel.y = 0.0f;
-    if (ci.actions & JUMP && in_air <= 0)
+    
+    static s32 jump_time = 5;
+    static f32 jump_strength = 0.03f;
+    static f32 in_air_mov_strength = 0.02f;
+    
+    if (ci.actions & JUMP && in_air <= jump_time)
     {
-        anim_vel.y = 4.0f;
-
-        physics::set_v3(sc->scene->physics_handles[dr.root], vec3f(0.0f, 1.0f, 0.0f) + ci.movement_dir * ci.movement_vel * 0.1f, physics::CMD_ADD_CENTRAL_IMPULSE);
-        sc->scene->state_flags[dr.root] |= SF_SYNC_PHYSICS_TRANSFORM;
+        motion_vel.y += jump_strength;
     }
 
     if (in_air > 0)
     {
-        physics::set_v3(sc->scene->physics_handles[dr.root], ci.movement_dir * ci.movement_vel * 0.1f, physics::CMD_ADD_CENTRAL_IMPULSE);
-
+        motion_vel += ci.movement_dir * ci.movement_vel * in_air_mov_strength;
+        
         controller.blend.anim_a = dr.anim_idle;
         controller.blend.anim_b = dr.anim_idle;
     }
-
+    
     /*
     put::dbg::add_line(pos, pos + ci.movement_dir, vec4f::blue());
     put::dbg::add_circle(vec3f::unit_y(), pos, 0.5f, vec4f::green());
@@ -575,6 +579,16 @@ void update_character_controller(put::scene_controller* sc)
     put::dbg::add_point(floor_cast.pos, 0.1f, vec4f::blue());
     put::dbg::add_line(floor_cast.pos, floor_cast.pos + floor_cast.normal, vec4f::magenta());
     */
+    
+    ImGui::InputInt("jump_time", &jump_time);
+    ImGui::InputFloat("jump_strength", &jump_strength);
+    ImGui::InputFloat("in_air_mov_strength", &in_air_mov_strength);
+    
+    ImGui::Value("dp", dp);
+    ImGui::Value("in_air", in_air);
+    ImGui::InputFloat3("motion_vel", &motion_vel[0]);
+    ImGui::InputFloat3("movement_dir", &ci.movement_dir[0]);
+    ImGui::InputFloat("movement_vel", &ci.movement_vel);
 }
 
 PEN_TRV pen::user_entry( void* params )
