@@ -43,6 +43,8 @@ struct dr_char
     u32 anim_walk;
     u32 anim_run;
     u32 anim_jump;
+    u32 anim_run_l;
+    u32 anim_run_r;
 };
 dr_char dr;
 
@@ -114,12 +116,16 @@ void setup_character(put::ces::entity_scene* scene)
     anim_handle walk = ces::load_pma("data/models/characters/doctor/anims/doctor_walk.pma");
     anim_handle run = ces::load_pma("data/models/characters/doctor/anims/doctor_run.pma");
     anim_handle jump = ces::load_pma("data/models/characters/doctor/anims/doctor_idle_jump.pma");
+    anim_handle run_l = ces::load_pma("data/models/characters/doctor/anims/doctor_run_l.pma");
+    anim_handle run_r = ces::load_pma("data/models/characters/doctor/anims/doctor_run_r.pma");
     
     // bind to rig
     ces::bind_animation_to_rig(scene, idle, dr.root);
     ces::bind_animation_to_rig(scene, walk, dr.root);
     ces::bind_animation_to_rig(scene, run, dr.root);
     ces::bind_animation_to_rig(scene, jump, dr.root);
+    ces::bind_animation_to_rig(scene, run_l, dr.root);
+    ces::bind_animation_to_rig(scene, run_r, dr.root);
 
     // add capsule for collisions
     scene->physics_data[dr.root].rigid_body.shape = physics::CAPSULE;
@@ -141,6 +147,8 @@ void setup_character(put::ces::entity_scene* scene)
     dr.anim_walk = 1;
     dr.anim_run = 2;
     dr.anim_jump = 3;
+    dr.anim_run_l = 4;
+    dr.anim_run_r = 5;
     
     // add a few quick bits of collision
     vec3f start = vec3f(-5.5f, -0.5f, -5.5f);
@@ -316,6 +324,12 @@ struct controller_input
     vec3f movement_dir = vec3f(0.0f, 0.0f, 1.0f);
     f32   dir_angle = 0.0f;
     f32   movement_vel = 0.0f;
+    
+    // cur imple
+    f32   v2 = 0.0f;
+    f32   jv = 0.0f;
+    vec3f prev_pos = vec3f::zero();
+    
     vec3f camera = vec3f::zero();
     u8    actions = 0;
     u8    prev_actions = 0;
@@ -439,39 +453,55 @@ void update_character_controller(put::scene_controller* sc)
     {
         quat rot;
         rot.euler_angles(0.0f, ci.dir_angle, 0.0f);
-        sc->scene->initial_transform[trajectory_node].rotation = rot;
+        
+        quat cur = sc->scene->initial_transform[trajectory_node].rotation;
+        
+        sc->scene->initial_transform[trajectory_node].rotation = slerp(cur, rot, 0.9f);
     }
     
     ces::cmp_anim_controller_v2& controller = sc->scene->anim_controller_v2[dr.root];
     
     controller.blend.ratio = abs(ci.movement_vel);
-
-    if (ci.movement_vel > 0.1)
+    
+    if (ci.movement_vel >= 0.2)
     {
-        // walk state
-        controller.blend.anim_a = dr.anim_walk;
-        controller.blend.anim_b = dr.anim_walk;
-
-        if (ci.actions & RUN)
-        {
-            controller.blend.anim_a = dr.anim_run;
-            controller.blend.anim_b = dr.anim_run;
-        }
+        ci.v2 += ci.movement_vel * 0.1f;
+        ci.v2 = min(ci.v2, 5.0f);
     }
     else
+    {
+        ci.v2 *= 0.1f; // inertia
+        if(ci.v2 < 0.001f)
+            ci.v2 = 0.0f;
+    }
+    
+    if(ci.v2 == 0.0f)
     {
         // idle state
         controller.blend.anim_a = dr.anim_idle;
         controller.blend.anim_b = dr.anim_walk;
     }
+    else
+    {
+        // locomotion state
+        
+        controller.blend.anim_a = dr.anim_walk;
+        controller.blend.anim_b = dr.anim_run;
+        controller.blend.ratio = smooth_step(ci.v2, 0.0f, 5.0f, 0.0f, 1.0f);
+    }
 
-    // todo move to its own update
-    update_level_editor(sc);
-    
     // debug
     pos = sc->scene->world_matrices[dr.root].get_translation();
     
+    vec3f vvel = pos - ci.prev_pos;
+    ci.prev_pos = pos;
+    
     static vec3f motion_vel = vec3f::zero();
+    
+    if(pen::input_key(PK_O))
+    {
+        motion_vel.y = 0.0f;
+    }
     
     // gravity
     motion_vel *= vec3f(0.8f, 1.0f, 0.8f);
@@ -504,6 +534,7 @@ void update_character_controller(put::scene_controller* sc)
     scp.dimension = vec3f(0.2f);
     scp.to = r0 + vec3f(0.0f, -10000.0f, 0.0f);
     scp.user_data = &floor_cast;
+    scp.mask = 0xff;
     
     physics::cast_sphere(scp, true);
 
@@ -513,7 +544,7 @@ void update_character_controller(put::scene_controller* sc)
     rcp.callback = &rccb;
     rcp.user_data = &surface_cast;
     rcp.group = 1;
-    rcp.mask = 1;
+    rcp.mask = 0xff;
 
     physics::cast_ray(rcp, true);
     
@@ -555,17 +586,28 @@ void update_character_controller(put::scene_controller* sc)
     }
     
     static s32 jump_time = 5;
-    static f32 jump_strength = 0.03f;
-    static f32 in_air_mov_strength = 0.02f;
+    static f32 jump_strength = 0.035f;
+    static f32 min_jump_vel = 0.012f;
+    static f32 max_jump_vel = 0.028f;
     
     if (ci.actions & JUMP && in_air <= jump_time)
     {
         motion_vel.y += jump_strength;
+        
+        if(in_air == 0)
+        {
+            ci.jv = smooth_step(ci.v2, 0.0f, 5.0f, min_jump_vel, max_jump_vel);
+        }
+        
+        motion_vel += ci.movement_dir * ci.movement_vel * ci.jv;
+        
+        controller.blend.anim_a = dr.anim_idle;
+        controller.blend.anim_b = dr.anim_idle;
     }
 
     if (in_air > 0)
     {
-        motion_vel += ci.movement_dir * ci.movement_vel * in_air_mov_strength;
+        motion_vel += ci.movement_dir * ci.movement_vel * ci.jv;
         
         controller.blend.anim_a = dr.anim_idle;
         controller.blend.anim_b = dr.anim_idle;
@@ -581,10 +623,14 @@ void update_character_controller(put::scene_controller* sc)
     */
     
     ImGui::InputInt("jump_time", &jump_time);
-    ImGui::InputFloat("jump_strength", &jump_strength);
-    ImGui::InputFloat("in_air_mov_strength", &in_air_mov_strength);
+    ImGui::InputFloat("jump_vel", &jump_strength);
+    ImGui::InputFloat("min_jump_vel", &min_jump_vel);
+    ImGui::InputFloat("max_jump_vel", &max_jump_vel);
     
-    ImGui::Value("dp", dp);
+    f32 vvel_mag = mag(vvel);
+    ImGui::InputFloat("v2", &ci.v2);
+    ImGui::InputFloat("vv", &vvel_mag);
+    
     ImGui::Value("in_air", in_air);
     ImGui::InputFloat3("motion_vel", &motion_vel[0]);
     ImGui::InputFloat3("movement_dir", &ci.movement_dir[0]);
@@ -624,6 +670,13 @@ PEN_TRV pen::user_entry( void* params )
     character_controller.name = "model_viewer_camera";
     character_controller.id_name = PEN_HASH(character_controller.name.c_str());
     character_controller.scene = main_scene;
+    
+    put::scene_controller level_editor;
+    level_editor.camera = &main_camera;
+    level_editor.update_function = &update_level_editor;
+    level_editor.name = "model_viewer_camera";
+    level_editor.id_name = PEN_HASH(level_editor.name.c_str());
+    level_editor.scene = main_scene;
 
     put::scene_controller sc;
     sc.scene = main_scene;
@@ -647,6 +700,7 @@ PEN_TRV pen::user_entry( void* params )
     pmfx::register_scene_view_renderer(svr_editor);
 
     pmfx::register_scene_controller(character_controller);
+    pmfx::register_scene_controller(level_editor);
     pmfx::register_scene_controller(sc);
     pmfx::register_scene_controller(cc);
     
