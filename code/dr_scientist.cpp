@@ -327,11 +327,21 @@ struct controller_input
     vec2f cam_rot = vec2f::zero();
     u8    actions = 0;
     u8    prev_actions = 0;
-    
-    // cur imple.. into char struct
-    f32   v2 = 0.0f;
-    f32   jv = 0.0f;
-    vec3f prev_pos = vec3f::zero();
+};
+
+struct player_controller
+{
+    // tweakable constants
+
+    // dynamic vars
+    f32 loco_vel = 0.0f;
+    f32 air_vel = 0.0f;
+    f32 air = 0.0f;
+
+    vec3f pps = vec3f::zero(); // prev pos
+    vec3f pos = vec3f::zero();
+    vec3f vel = vec3f::zero();
+    vec3f acc = vec3f::zero();
 };
 
 void get_controller_input(put::scene_controller* sc, controller_input& ci)
@@ -359,7 +369,7 @@ void get_controller_input(put::scene_controller* sc, controller_input& ci)
         right_stick = vec2f(gs.axis[PGP_AXIS_RIGHT_STICK_X], gs.axis[PGP_AXIS_RIGHT_STICK_Y]);
         
         if(mag(right_stick) > 0.2f)
-            ci.cam_rot += vec2f(right_stick.y, -right_stick.x) * 0.1f;
+            ci.cam_rot += vec2f(-right_stick.y, -right_stick.x) * 0.05f;
         
         if(gs.button[PGP_BUTTON_X])
         {
@@ -446,43 +456,43 @@ void rccb(const physics::ray_cast_result& result)
 void update_character_controller(put::scene_controller* sc)
 {
     // tweakers and vars, move into struct
-    
-    static vec3f pos = vec3f::zero();
-    static s32 in_air = 2;
-    static vec3f motion_vel = vec3f::zero();
+
     static controller_input ci;
+    static player_controller pc;
     
-    static s32 jump_time = 5;
-    static f32 jump_strength = 0.035f;
-    static f32 min_jump_vel = 0.012f;
-    static f32 max_jump_vel = 0.028f;
-    static f32 gravity_strength = 0.01f;
-    static vec3f air_resistance = vec3f(0.8f, 1.0f, 0.8f);
+    static f32 gravity_strength = 18.0f;
+    static f32 jump_time = 0.2f;
+    static f32 jump_strength = 50.0f;
+    static f32 min_jump_vel = 20.0f;
+    static f32 max_jump_vel = 45.0f;
+    static f32 air_resistance = 40.0f;
     
     static bool debug_lines = false;
     static bool game_cam = false;
-    
+
     // controller ----------------------------------------------------------------------------------------------------------
     
     get_controller_input(sc, ci);
     
     if (ci.movement_vel >= 0.2)
     {
-        ci.v2 += ci.movement_vel * 0.1f;
-        ci.v2 = min(ci.v2, 5.0f);
+        pc.loco_vel += ci.movement_vel * 0.1f;
+        pc.loco_vel = min(pc.loco_vel, 5.0f);
     }
     else
     {
-        ci.v2 *= 0.1f; // inertia
-        if(ci.v2 < 0.001f)
-            ci.v2 = 0.0f;
+        pc.loco_vel *= 0.1f; // inertia
+        if(pc.loco_vel < 0.001f)
+            pc.loco_vel = 0.0f;
     }
-    
+
     // update state --------------------------------------------------------------------------------------------------------
     
     ces::cmp_anim_controller_v2& controller = sc->scene->anim_controller_v2[dr.root];
     
-    if(ci.v2 == 0.0f)
+    pc.acc = vec3f(0.0f, -gravity_strength, 0.0f);
+
+    if(pc.loco_vel == 0.0f)
     {
         // idle state
         controller.blend.anim_a = dr.anim_idle;
@@ -493,78 +503,69 @@ void update_character_controller(put::scene_controller* sc)
         // locomotion state
         controller.blend.anim_a = dr.anim_walk;
         controller.blend.anim_b = dr.anim_run;
-        controller.blend.ratio = smooth_step(ci.v2, 0.0f, 5.0f, 0.0f, 1.0f);
+        controller.blend.ratio = smooth_step(pc.loco_vel, 0.0f, 5.0f, 0.0f, 1.0f);
     }
-
-    quat rot;
-    rot.euler_angles(0.0f, ci.dir_angle, 0.0f);
-    quat cur = sc->scene->initial_transform[5].rotation;
-    sc->scene->initial_transform[5].rotation = slerp(cur, rot, 0.8f);
     
-    pos = sc->scene->world_matrices[dr.root].get_translation();
-    
-    vec3f vvel = pos - ci.prev_pos;
-    ci.prev_pos = pos;
-    
-    // gravity and resistance
-    motion_vel *= vec3f(0.8f, 1.0f, 0.8f);
-    motion_vel.y -= gravity_strength;
-    
-    if (ci.actions & JUMP && in_air <= jump_time)
+    if (ci.actions & JUMP && pc.air <= jump_time)
     {
-        motion_vel.y += jump_strength;
+        pc.acc.y += jump_strength;
         
-        if(in_air == 0)
+        if(pc.air == 0.0f)
         {
-            ci.jv = smooth_step(ci.v2, 0.0f, 5.0f, min_jump_vel, max_jump_vel);
+            pc.air_vel = smooth_step(pc.loco_vel, 0.0f, 5.0f, min_jump_vel, max_jump_vel);
         }
         
-        motion_vel += ci.movement_dir * ci.movement_vel * ci.jv;
-        
-        controller.blend.anim_a = dr.anim_idle;
-        controller.blend.anim_b = dr.anim_idle;
+        pc.air = max(pc.air, sc->dt);
     }
 
-    if (in_air > 0)
+    if (pc.air > 0.0f)
     {
-        motion_vel += ci.movement_dir * ci.movement_vel * ci.jv;
-        
-        controller.blend.anim_a = dr.anim_idle;
-        controller.blend.anim_b = dr.anim_idle;
+        pc.acc += ci.movement_dir * ci.movement_vel * pc.air_vel;
+
+        controller.blend.anim_a = dr.anim_jump;
+        controller.blend.anim_b = dr.anim_jump;
     }
     
-    pos += motion_vel;
-    
-    sc->scene->transforms[dr.root].translation = pos;
-    sc->scene->entities[dr.root] |= CMP_TRANSFORM;
-    
+    // euler integration
+
+    // update pos from anim
+    pc.pps = pc.pos;
+    pc.pos = sc->scene->world_matrices[dr.root].get_translation();
+
+    f32 dtt = sc->dt / (1.0f / 60.0f);
+    f32 ar = pow(0.8f, dtt);
+        
+    pc.vel *= vec3f(ar, 1.0f, ar);
+    pc.vel += pc.acc * sc->dt;
+    pc.pos += pc.vel * sc->dt;
+        
     // resolve collisions ---------------------------------------------------------------------------------------------------
-    
-    vec3f p0 = ci.prev_pos + vec3f(0.0f, 0.5f, 0.0f);
-    vec3f r0 = pos + vec3f(0.0f, 0.5f, 0.0f);
-    
+
+    vec3f p0 = pc.pps + vec3f(0.0f, 0.5f, 0.0f);
+    vec3f r0 = pc.pos + vec3f(0.0f, 0.5f, 0.0f);
+
     character_cast wall_cast;
     character_cast floor_cast;
     character_cast surface_cast;
-    
+
     physics::sphere_cast_params scp;
     scp.from = p0;
-    scp.to = p0 + motion_vel * 1000.0f;
+    scp.to = p0 + pc.vel * 1000.0f;
     scp.dimension = vec3f(0.33f);
     scp.callback = &sccb;
     scp.user_data = &wall_cast;
     scp.group = 1;
     scp.mask = 1;
-    
+
     physics::cast_sphere(scp, true);
-    
+
     scp.dimension = vec3f(0.33f);
     scp.to = p0 + vec3f(0.0f, -10000.0f, 0.0f);
     scp.user_data = &floor_cast;
     scp.mask = 0xff;
-    
+
     physics::cast_sphere(scp, true);
-    
+
     physics::ray_cast_params rcp;
     rcp.start = p0;
     rcp.end = p0 + vec3f(0.0f, -10000.0f, 0.0f);
@@ -572,58 +573,64 @@ void update_character_controller(put::scene_controller* sc)
     rcp.user_data = &surface_cast;
     rcp.group = 1;
     rcp.mask = 0xff;
-    
+
     physics::cast_ray(rcp, true);
-    
+
     // blocking collisions
     vec3f cv = r0 - wall_cast.pos;
     if (mag(cv) < 0.33f)
     {
         f32 diff = 0.33f - mag(cv);
-        sc->scene->transforms[dr.root].translation += normalised(cv) * diff;
+        pc.pos += normalised(cv) * diff;
     }
-    
+
     // floor collision
-    f32 cvm = mag(r0 - floor_cast.pos);
+    f32 cvm = r0.y - floor_cast.pos.y;
     f32 dp = dot(surface_cast.normal, vec3f::unit_y());
-    if (cvm <= 0.5f && dp > 0.7f)
+    if (cvm <= 0.5f && dp > 0.7f && pc.vel.y <= 0.0f)
     {
-        in_air = 0;
-        
+        pc.air = 0.0f;
+
         f32 cvm2 = mag(r0 - surface_cast.pos);
-        
+
         if (cvm2 < 0.5f)
         {
             f32 diff = 0.5f - cvm2;
-            sc->scene->transforms[dr.root].translation += vec3f::unit_y() * diff;
-            motion_vel.y = 0.0f;
+            pc.pos += vec3f::unit_y() * diff;
+            pc.vel.y = 0.0f;
         }
         else
         {
             f32 diff = 0.5f - cvm;
-            sc->scene->transforms[dr.root].translation += floor_cast.normal * diff;
+            pc.pos += floor_cast.normal * diff;
         }
     }
     else
     {
         // in air
-        in_air++;
+        pc.air += sc->dt;
     }
-    
+   
+    // set onto entity
+
+    sc->scene->initial_transform[5].rotation = quat(0.0f, ci.dir_angle, 0.0f);
+    sc->scene->transforms[dr.root].translation = pc.pos;
+    sc->scene->entities[dr.root] |= CMP_TRANSFORM;
+
     // camera
     if( game_cam )
     {
-        sc->camera->focus.x = pos.x;
-        sc->camera->focus.z = pos.z;
-    
+        sc->camera->focus.x = pc.pos.x;
+        sc->camera->focus.z = pc.pos.z;
         sc->camera->rot = ci.cam_rot;
     }
     
     // debug crap -----------------------------------------------------------------------------------------------------------
     
-    if(pen::input_key(PK_O))
-        motion_vel.y = 0.0f;
+    if (pen::input_key(PK_O))
+        pc.vel = vec3f::zero();
     
+    /*
     if(debug_lines)
     {
         put::dbg::add_line(pos, pos + ci.movement_dir, vec4f::blue());
@@ -633,25 +640,24 @@ void update_character_controller(put::scene_controller* sc)
         put::dbg::add_point(floor_cast.pos, 0.1f, vec4f::blue());
         put::dbg::add_line(floor_cast.pos, floor_cast.pos + floor_cast.normal, vec4f::magenta());
     }
+    */
     
     ImGui::Checkbox("debug_lines", &debug_lines);
     ImGui::Checkbox("game_cam", &game_cam);
     
     ImGui::InputFloat("gravity", &gravity_strength);
-    ImGui::InputInt("jump_time", &jump_time);
+    ImGui::InputFloat("jump_time", &jump_time);
     ImGui::InputFloat("jump_vel", &jump_strength);
     ImGui::InputFloat("min_jump_vel", &min_jump_vel);
     ImGui::InputFloat("max_jump_vel", &max_jump_vel);
-    ImGui::InputFloat3("air_resistance", &air_resistance[0]);
     
     ImGui::Separator();
     
-    f32 vvel_mag = mag(vvel);
-    ImGui::InputFloat("v2", &ci.v2);
-    ImGui::InputFloat("vv", &vvel_mag);
-    
-    ImGui::Value("in_air", in_air);
-    ImGui::InputFloat3("motion_vel", &motion_vel[0]);
+    ImGui::InputFloat("v2", &pc.loco_vel);
+    ImGui::InputFloat("air", &pc.air);
+    ImGui::InputFloat3("pc.vel", &pc.vel[0]);
+    ImGui::InputFloat3("pc.acc", &pc.acc[0]);
+    ImGui::InputFloat3("pc.pos", &pc.pos[0]);
     ImGui::InputFloat3("movement_dir", &ci.movement_dir[0]);
     ImGui::InputFloat("movement_vel", &ci.movement_vel);
 }
