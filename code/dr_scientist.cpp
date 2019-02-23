@@ -316,7 +316,8 @@ void update_level_editor(put::scene_controller* sc)
 enum e_contoller_actions
 {
     JUMP = 1<<0,
-    RUN = 1<<1
+    RUN = 1<<1,
+    DEBOUNCE_JUMP = 1<<2
 };
 
 struct controller_input
@@ -326,7 +327,6 @@ struct controller_input
     f32   movement_vel = 0.0f;
     vec2f cam_rot = vec2f::zero();
     u8    actions = 0;
-    u8    prev_actions = 0;
 };
 
 struct player_controller
@@ -342,12 +342,16 @@ struct player_controller
     vec3f pos = vec3f::zero();
     vec3f vel = vec3f::zero();
     vec3f acc = vec3f::zero();
+
+    vec3f cam_pos_target = vec3f::zero();
+    f32   cam_zoom_target;
+
+    u32   actions = 0;
 };
 
 void get_controller_input(put::scene_controller* sc, controller_input& ci)
 {
     // clear state
-    ci.prev_actions = ci.actions;
     ci.actions = 0;
     
     vec3f left_stick = vec3f::zero();
@@ -357,7 +361,9 @@ void get_controller_input(put::scene_controller* sc, controller_input& ci)
     xz_dir.y = 0.0f;
     xz_dir = normalised(xz_dir);
     
-    f32 xz_angle = acos(dot(xz_dir, vec3f(0.0f, 0.0f, 1.0f)));
+    //f32 xz_angle = acos(dot(xz_dir, vec3f(0.0f, 0.0f, 1.0f)));
+
+    f32 xz_angle = atan2(xz_dir.x, xz_dir.z);
     
     u32 num_pads = pen::input_get_num_gamepads();
     if (num_pads > 0)
@@ -368,8 +374,7 @@ void get_controller_input(put::scene_controller* sc, controller_input& ci)
         left_stick = vec3f(gs.axis[PGP_AXIS_LEFT_STICK_X], 0.0f, gs.axis[PGP_AXIS_LEFT_STICK_Y]);
         right_stick = vec2f(gs.axis[PGP_AXIS_RIGHT_STICK_X], gs.axis[PGP_AXIS_RIGHT_STICK_Y]);
         
-        if(mag(right_stick) > 0.2f)
-            ci.cam_rot += vec2f(-right_stick.y, -right_stick.x) * 0.05f;
+        ci.cam_rot = vec2f(-right_stick.y, right_stick.x);
         
         if(gs.button[PGP_BUTTON_X])
         {
@@ -466,6 +471,9 @@ void update_character_controller(put::scene_controller* sc)
     static f32 min_jump_vel = 20.0f;
     static f32 max_jump_vel = 45.0f;
     static f32 air_resistance = 40.0f;
+    static f32 min_zoom = 5.0f;
+    static f32 max_zoom = 10.0f;
+    static f32 camera_lerp = 3.0f;
     
     static bool debug_lines = false;
     static bool game_cam = false;
@@ -503,8 +511,22 @@ void update_character_controller(put::scene_controller* sc)
         // locomotion state
         controller.blend.anim_a = dr.anim_walk;
         controller.blend.anim_b = dr.anim_run;
+
         controller.blend.ratio = smooth_step(pc.loco_vel, 0.0f, 5.0f, 0.0f, 1.0f);
+
+        if (controller.blend.ratio >= 1.0)
+            controller.blend.anim_a = dr.anim_run;
+        else if (controller.blend.ratio <= 0.0)
+            controller.blend.anim_a = dr.anim_walk;
     }
+
+    // reset debounce jump
+    if (pc.air == 0 && !(ci.actions & JUMP))
+        pc.actions &= ~DEBOUNCE_JUMP;
+
+    // must debounce
+    if (pc.actions & DEBOUNCE_JUMP)
+        ci.actions &= ~JUMP;
     
     if (ci.actions & JUMP && pc.air <= jump_time)
     {
@@ -517,15 +539,23 @@ void update_character_controller(put::scene_controller* sc)
         
         pc.air = max(pc.air, sc->dt);
     }
+    else if(ci.actions & JUMP)
+    {
+        // must release to re-jump
+        pc.actions |= DEBOUNCE_JUMP;
+    }
 
     if (pc.air > 0.0f)
     {
         pc.acc += ci.movement_dir * ci.movement_vel * pc.air_vel;
 
-        controller.blend.anim_a = dr.anim_jump;
-        controller.blend.anim_b = dr.anim_jump;
+        if (pc.air > 1.0f/10.0f)
+        {
+            controller.blend.anim_a = dr.anim_jump;
+            controller.blend.anim_b = dr.anim_jump;
+        }
     }
-    
+
     // euler integration
 
     // update pos from anim
@@ -549,8 +579,8 @@ void update_character_controller(put::scene_controller* sc)
     character_cast surface_cast;
 
     physics::sphere_cast_params scp;
-    scp.from = p0;
-    scp.to = p0 + pc.vel * 1000.0f;
+    scp.from = r0;
+    scp.to = r0 + ci.movement_dir * 1000.0f;
     scp.dimension = vec3f(0.33f);
     scp.callback = &sccb;
     scp.user_data = &wall_cast;
@@ -560,15 +590,15 @@ void update_character_controller(put::scene_controller* sc)
     physics::cast_sphere(scp, true);
 
     scp.dimension = vec3f(0.33f);
-    scp.to = p0 + vec3f(0.0f, -10000.0f, 0.0f);
+    scp.to = r0 + vec3f(0.0f, -10000.0f, 0.0f);
     scp.user_data = &floor_cast;
     scp.mask = 0xff;
 
     physics::cast_sphere(scp, true);
 
     physics::ray_cast_params rcp;
-    rcp.start = p0;
-    rcp.end = p0 + vec3f(0.0f, -10000.0f, 0.0f);
+    rcp.start = r0;
+    rcp.end = r0 + vec3f(0.0f, -10000.0f, 0.0f);
     rcp.callback = &rccb;
     rcp.user_data = &surface_cast;
     rcp.group = 1;
@@ -581,7 +611,7 @@ void update_character_controller(put::scene_controller* sc)
     if (mag(cv) < 0.33f)
     {
         f32 diff = 0.33f - mag(cv);
-        pc.pos += normalised(cv) * diff;
+        pc.pos += wall_cast.normal * diff;
     }
 
     // floor collision
@@ -601,8 +631,8 @@ void update_character_controller(put::scene_controller* sc)
         }
         else
         {
-            f32 diff = 0.5f - cvm;
-            pc.pos += floor_cast.normal * diff;
+            //f32 diff = 0.5f - cvm;
+            //pc.pos += floor_cast.normal * diff;
         }
     }
     else
@@ -617,12 +647,24 @@ void update_character_controller(put::scene_controller* sc)
     sc->scene->transforms[dr.root].translation = pc.pos;
     sc->scene->entities[dr.root] |= CMP_TRANSFORM;
 
-    // camera
+    // camera ---------------------------------------------------------------------------------------------------------------
+
     if( game_cam )
     {
-        sc->camera->focus.x = pc.pos.x;
-        sc->camera->focus.z = pc.pos.z;
-        sc->camera->rot = ci.cam_rot;
+        f32 zl = smooth_step(pc.loco_vel, 0.0f, 5.0f, 0.0f, 1.0f);
+
+        pc.cam_pos_target = vec3f(pc.pos.x, 0.0f, pc.pos.z);
+        pc.cam_zoom_target = lerp(min_zoom, max_zoom, zl);
+
+        sc->camera->focus = lerp(sc->camera->focus, pc.cam_pos_target, camera_lerp * sc->dt);
+        sc->camera->zoom = lerp(sc->camera->zoom, pc.cam_zoom_target, camera_lerp * sc->dt);
+
+        if(mag(ci.cam_rot) > 0.2f)
+            sc->camera->rot += (ci.cam_rot * fabs(ci.cam_rot)) * sc->dt;
+
+        static f32 ulimit = -(M_PI / 2.0f) - M_PI * 0.02f;
+        static f32 llimit = -M_PI * 0.02f;
+        sc->camera->rot.x = min(max(sc->camera->rot.x, ulimit), llimit);
     }
     
     // debug crap -----------------------------------------------------------------------------------------------------------
@@ -630,17 +672,21 @@ void update_character_controller(put::scene_controller* sc)
     if (pen::input_key(PK_O))
         pc.vel = vec3f::zero();
     
-    /*
     if(debug_lines)
     {
-        put::dbg::add_line(pos, pos + ci.movement_dir, vec4f::blue());
-        put::dbg::add_circle(vec3f::unit_y(), pos, 0.5f, vec4f::green());
+        put::dbg::add_line(p0, p0 + ci.movement_dir, vec4f::blue());
+        put::dbg::add_circle(vec3f::unit_y(), p0, 0.5f, vec4f::green());
         put::dbg::add_point(surface_cast.pos, 0.1f, vec4f::green());
         put::dbg::add_point(wall_cast.pos, 0.1f, vec4f::green());
         put::dbg::add_point(floor_cast.pos, 0.1f, vec4f::blue());
         put::dbg::add_line(floor_cast.pos, floor_cast.pos + floor_cast.normal, vec4f::magenta());
+
+        vec3f xz_dir = sc->camera->focus - sc->camera->pos;
+        xz_dir.y = 0.0f;
+        xz_dir = normalised(xz_dir);
+
+        put::dbg::add_line(p0, p0 + xz_dir, vec4f::white());
     }
-    */
     
     ImGui::Checkbox("debug_lines", &debug_lines);
     ImGui::Checkbox("game_cam", &game_cam);
@@ -650,16 +696,22 @@ void update_character_controller(put::scene_controller* sc)
     ImGui::InputFloat("jump_vel", &jump_strength);
     ImGui::InputFloat("min_jump_vel", &min_jump_vel);
     ImGui::InputFloat("max_jump_vel", &max_jump_vel);
-    
+
+    ImGui::InputFloat("min_zoom", &min_zoom);
+    ImGui::InputFloat("max_zoom", &max_zoom);
+    ImGui::InputFloat("camera_lerp", &camera_lerp);
+
     ImGui::Separator();
     
-    ImGui::InputFloat("v2", &pc.loco_vel);
-    ImGui::InputFloat("air", &pc.air);
+    ImGui::InputFloat("pc.loco_vel", &pc.loco_vel);
+    ImGui::InputFloat("pc.air", &pc.air);
     ImGui::InputFloat3("pc.vel", &pc.vel[0]);
     ImGui::InputFloat3("pc.acc", &pc.acc[0]);
     ImGui::InputFloat3("pc.pos", &pc.pos[0]);
-    ImGui::InputFloat3("movement_dir", &ci.movement_dir[0]);
-    ImGui::InputFloat("movement_vel", &ci.movement_vel);
+
+    ImGui::InputFloat3("ci.movement_dir", &ci.movement_dir[0]);
+    ImGui::InputFloat("ci.movement_vel", &ci.movement_vel);
+    ImGui::InputFloat2("cam.rot", &sc->camera->rot[0]);
 }
 
 PEN_TRV pen::user_entry( void* params )
