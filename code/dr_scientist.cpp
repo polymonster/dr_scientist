@@ -463,6 +463,15 @@ void rccb(const physics::ray_cast_result& result)
         cc->set = true;
 }
 
+physics::contact* contacts = nullptr;
+void ctcb(const physics::contact_test_results& results)
+{
+    if(contacts)
+        sb_free(contacts);
+    
+    contacts = results.contacts;
+}
+
 void update_character_controller(put::scene_controller* sc)
 {
     // tweakers and vars, move into struct
@@ -475,7 +484,6 @@ void update_character_controller(put::scene_controller* sc)
     static f32 jump_strength = 50.0f;
     static f32 min_jump_vel = 20.0f;
     static f32 max_jump_vel = 45.0f;
-    static f32 air_resistance = 40.0f;
     static f32 min_zoom = 5.0f;
     static f32 max_zoom = 10.0f;
     static f32 camera_lerp = 3.0f;
@@ -615,6 +623,13 @@ void update_character_controller(put::scene_controller* sc)
     rcp.mask = 0xff;
 
     physics::cast_ray(rcp, true);
+    
+    // contacts
+    physics::contact_test_params ctp;
+    ctp.entity = sc->scene->physics_handles[dr.root];
+    ctp.callback = ctcb;
+    
+    // physics::contact_test(ctp, true);
 
     // blocking collisions
     vec3f cv = r0 - wall_cast.pos;
@@ -692,6 +707,16 @@ void update_character_controller(put::scene_controller* sc)
         put::dbg::add_point(wall_cast.pos, 0.1f, vec4f::green());
         put::dbg::add_point(floor_cast.pos, 0.1f, vec4f::blue());
         put::dbg::add_line(floor_cast.pos, floor_cast.pos + floor_cast.normal, vec4f::magenta());
+        
+        u32 num_contacts = sb_count(contacts);
+        for(u32 i = 0; i < num_contacts; ++i)
+        {
+            vec3f& p = contacts[i].pos;
+            vec3f& n = contacts[i].normal;
+            
+            put::dbg::add_line(p, p + n, vec4f::cyan());
+            put::dbg::add_point(p, 0.1f, vec4f::yellow());
+        }
 
         vec3f xz_dir = sc->camera->focus - sc->camera->pos;
         xz_dir.y = 0.0f;
