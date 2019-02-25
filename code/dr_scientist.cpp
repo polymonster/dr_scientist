@@ -133,7 +133,7 @@ void setup_character(put::ces::entity_scene* scene)
     scene->physics_data[dr.root].rigid_body.group = 4;
     scene->physics_data[dr.root].rigid_body.mask = ~1;
     scene->physics_data[dr.root].rigid_body.dimensions = vec3f(0.33f, 0.33f, 0.33f);
-    scene->physics_data[dr.root].rigid_body.create_flags |= physics::CF_DIMENSIONS;
+    scene->physics_data[dr.root].rigid_body.create_flags |= (physics::CF_DIMENSIONS | physics::CF_KINEMATIC);
 
     // drs feet are at 0.. offset collision to centre at 0.5
     scene->physics_offset[dr.root].translation = vec3f(0.0f, 0.5f, 0.0f);
@@ -361,8 +361,6 @@ void get_controller_input(put::scene_controller* sc, controller_input& ci)
     xz_dir.y = 0.0f;
     xz_dir = normalised(xz_dir);
     
-    //f32 xz_angle = acos(dot(xz_dir, vec3f(0.0f, 0.0f, 1.0f)));
-
     f32 xz_angle = atan2(xz_dir.x, xz_dir.z);
     
     u32 num_pads = pen::input_get_num_gamepads();
@@ -438,8 +436,9 @@ void get_controller_input(put::scene_controller* sc, controller_input& ci)
 
 struct character_cast
 {
-    vec3f pos;
-    vec3f normal;
+    vec3f   pos = vec3f::zero();
+    vec3f   normal = vec3f::zero();
+    bool    set = false;
 };
 
 void sccb(const physics::sphere_cast_result& result)
@@ -448,6 +447,9 @@ void sccb(const physics::sphere_cast_result& result)
     
     cc->pos = result.point;
     cc->normal = result.normal;
+
+    if(result.physics_handle != PEN_INVALID_HANDLE)
+        cc->set = true;
 }
 
 void rccb(const physics::ray_cast_result& result)
@@ -456,6 +458,9 @@ void rccb(const physics::ray_cast_result& result)
 
     cc->pos = result.point;
     cc->normal = result.normal;
+
+    if (result.physics_handle != PEN_INVALID_HANDLE)
+        cc->set = true;
 }
 
 void update_character_controller(put::scene_controller* sc)
@@ -560,26 +565,30 @@ void update_character_controller(put::scene_controller* sc)
 
     // update pos from anim
     pc.pps = pc.pos;
-    pc.pos = sc->scene->world_matrices[dr.root].get_translation();
+    pc.pos = sc->scene->transforms[dr.root].translation;
 
     f32 dtt = sc->dt / (1.0f / 60.0f);
     f32 ar = pow(0.8f, dtt);
-        
-    pc.vel *= vec3f(ar, 1.0f, ar);
-    pc.vel += pc.acc * sc->dt;
-    pc.pos += pc.vel * sc->dt;
-        
+    
+    if (!(sc->scene->flags & PAUSE_UPDATE))
+    {
+        pc.vel *= vec3f(ar, 1.0f, ar);
+        pc.vel += pc.acc * sc->dt;
+        pc.pos += pc.vel * sc->dt;
+    }
+
     // resolve collisions ---------------------------------------------------------------------------------------------------
 
     vec3f p0 = pc.pps + vec3f(0.0f, 0.5f, 0.0f);
     vec3f r0 = pc.pos + vec3f(0.0f, 0.5f, 0.0f);
+    vec3f e0 = pc.pos + vec3f(0.0f, 0.0f, 0.0f);
 
     character_cast wall_cast;
     character_cast floor_cast;
     character_cast surface_cast;
 
     physics::sphere_cast_params scp;
-    scp.from = r0;
+    scp.from = r0 - ci.movement_dir * 0.3f;
     scp.to = r0 + ci.movement_dir * 1000.0f;
     scp.dimension = vec3f(0.33f);
     scp.callback = &sccb;
@@ -590,7 +599,8 @@ void update_character_controller(put::scene_controller* sc)
     physics::cast_sphere(scp, true);
 
     scp.dimension = vec3f(0.33f);
-    scp.to = r0 + vec3f(0.0f, -10000.0f, 0.0f);
+    scp.from = e0;
+    scp.to = e0 + vec3f(0.0f, 1.0f, 0.0f);
     scp.user_data = &floor_cast;
     scp.mask = 0xff;
 
@@ -614,26 +624,26 @@ void update_character_controller(put::scene_controller* sc)
         pc.pos += wall_cast.normal * diff;
     }
 
+    // push away from edges
+    if (floor_cast.set)
+    {
+        cv = (r0 - floor_cast.pos) * vec3f(1.0f, 0.0f, 1.0f);
+        if (mag(cv) < 0.33f)
+        {
+            f32 diff = 0.33f - mag(cv);
+            pc.pos += normalised(cv) * diff;
+        }
+    }
+
     // floor collision
-    f32 cvm = r0.y - floor_cast.pos.y;
+    f32 cvm2 = mag(r0 - surface_cast.pos);
     f32 dp = dot(surface_cast.normal, vec3f::unit_y());
-    if (cvm <= 0.5f && dp > 0.7f && pc.vel.y <= 0.0f)
+    if (cvm2 <= 0.5f && dp > 0.7f && pc.vel.y <= 0.0f)
     {
         pc.air = 0.0f;
-
-        f32 cvm2 = mag(r0 - surface_cast.pos);
-
-        if (cvm2 < 0.5f)
-        {
-            f32 diff = 0.5f - cvm2;
-            pc.pos += vec3f::unit_y() * diff;
-            pc.vel.y = 0.0f;
-        }
-        else
-        {
-            //f32 diff = 0.5f - cvm;
-            //pc.pos += floor_cast.normal * diff;
-        }
+        f32 diff = 0.5f - cvm2;
+        pc.pos += vec3f::unit_y() * diff;
+        pc.vel.y = 0.0f;
     }
     else
     {
@@ -642,10 +652,12 @@ void update_character_controller(put::scene_controller* sc)
     }
    
     // set onto entity
-
-    sc->scene->initial_transform[5].rotation = quat(0.0f, ci.dir_angle, 0.0f);
-    sc->scene->transforms[dr.root].translation = pc.pos;
-    sc->scene->entities[dr.root] |= CMP_TRANSFORM;
+    if (!(sc->scene->flags & PAUSE_UPDATE))
+    {
+        sc->scene->initial_transform[5].rotation = quat(0.0f, ci.dir_angle, 0.0f);
+        sc->scene->transforms[dr.root].translation = pc.pos;
+        sc->scene->entities[dr.root] |= CMP_TRANSFORM;
+    }
 
     // camera ---------------------------------------------------------------------------------------------------------------
 
