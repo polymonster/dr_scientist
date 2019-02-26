@@ -132,7 +132,7 @@ void setup_character(put::ces::entity_scene* scene)
     scene->physics_data[dr.root].rigid_body.mass = 1.0f;
     scene->physics_data[dr.root].rigid_body.group = 4;
     scene->physics_data[dr.root].rigid_body.mask = ~1;
-    scene->physics_data[dr.root].rigid_body.dimensions = vec3f(0.33f, 0.33f, 0.33f);
+    scene->physics_data[dr.root].rigid_body.dimensions = vec3f(0.33f, 0.3f, 0.33f);
     scene->physics_data[dr.root].rigid_body.create_flags |= (physics::CF_DIMENSIONS | physics::CF_KINEMATIC);
 
     // drs feet are at 0.. offset collision to centre at 0.5
@@ -487,6 +487,7 @@ void update_character_controller(put::scene_controller* sc)
     static f32 min_zoom = 5.0f;
     static f32 max_zoom = 10.0f;
     static f32 camera_lerp = 3.0f;
+    static f32 capsule_radius = 0.33f;
     
     static bool debug_lines = false;
     static bool game_cam = false;
@@ -589,12 +590,18 @@ void update_character_controller(put::scene_controller* sc)
 
     vec3f p0 = pc.pps + vec3f(0.0f, 0.5f, 0.0f);
     vec3f r0 = pc.pos + vec3f(0.0f, 0.5f, 0.0f);
-    vec3f e0 = pc.pos + vec3f(0.0f, 0.0f, 0.0f);
 
+    // contacts / casts
+    physics::contact_test_params ctp;
     character_cast wall_cast;
-    character_cast floor_cast;
     character_cast surface_cast;
-
+    character_cast ceil_cast;
+    
+    ctp.entity = sc->scene->physics_handles[dr.root];
+    ctp.callback = ctcb;
+    
+    physics::contact_test(ctp, true);
+    
     physics::sphere_cast_params scp;
     scp.from = r0 - ci.movement_dir * 0.3f;
     scp.to = r0 + ci.movement_dir * 1000.0f;
@@ -605,13 +612,15 @@ void update_character_controller(put::scene_controller* sc)
     scp.mask = 1;
 
     physics::cast_sphere(scp, true);
-
+    
+    scp.from = r0;
+    scp.to = r0 + vec3f(0.0f, 10000.0f, 0.0f);
     scp.dimension = vec3f(0.33f);
-    scp.from = e0;
-    scp.to = e0 + vec3f(0.0f, 1.0f, 0.0f);
-    scp.user_data = &floor_cast;
-    scp.mask = 0xff;
-
+    scp.callback = &sccb;
+    scp.user_data = &ceil_cast;
+    scp.group = 1;
+    scp.mask = 1;
+    
     physics::cast_sphere(scp, true);
 
     physics::ray_cast_params rcp;
@@ -624,36 +633,18 @@ void update_character_controller(put::scene_controller* sc)
 
     physics::cast_ray(rcp, true);
     
-    // contacts
-    physics::contact_test_params ctp;
-    ctp.entity = sc->scene->physics_handles[dr.root];
-    ctp.callback = ctcb;
-    
-    // physics::contact_test(ctp, true);
-
-    // blocking collisions
+    // walls
     vec3f cv = r0 - wall_cast.pos;
-    if (mag(cv) < 0.33f)
+    if (mag(cv) < 0.33f && wall_cast.set)
     {
         f32 diff = 0.33f - mag(cv);
         pc.pos += wall_cast.normal * diff;
     }
-
-    // push away from edges
-    if (floor_cast.set)
-    {
-        cv = (r0 - floor_cast.pos) * vec3f(1.0f, 0.0f, 1.0f);
-        if (mag(cv) < 0.33f)
-        {
-            f32 diff = 0.33f - mag(cv);
-            pc.pos += normalised(cv) * diff;
-        }
-    }
-
-    // floor collision
+    
+    // floor collision from casts
     f32 cvm2 = mag(r0 - surface_cast.pos);
     f32 dp = dot(surface_cast.normal, vec3f::unit_y());
-    if (cvm2 <= 0.5f && dp > 0.7f && pc.vel.y <= 0.0f)
+    if (cvm2 <= 0.5f && dp > 0.7f && pc.vel.y <= 0.0f && surface_cast.set)
     {
         pc.air = 0.0f;
         f32 diff = 0.5f - cvm2;
@@ -664,6 +655,53 @@ void update_character_controller(put::scene_controller* sc)
     {
         // in air
         pc.air += sc->dt;
+    }
+    
+    // overlap
+    static vec3f last_e = vec3f::zero();
+    
+    u32 num_contacts = sb_count(contacts);
+    for(u32 i = 0; i < num_contacts; ++i)
+    {
+        vec3f& p = contacts[i].pos;
+        
+        vec3f pxz = vec3f(p.x, 0.0f, p.z);
+        vec3f qxz = vec3f(pc.pos.x, 0.0f, pc.pos.z);
+        
+        f32 m = mag(pxz - qxz);
+        if(m < capsule_radius)
+        {
+            f32 d = dot(contacts[i].normal, vec3f::unit_y());
+
+            if(abs(d) < 0.7f)
+            {
+                // walls
+                f32 diff = capsule_radius - m;
+                pc.pos += contacts[i].normal * diff;
+            }
+            else if(cvm2 > 0.6f && dp > 0.0f && contacts[i].normal.y > 0.0f)
+            {
+                // floor / edges
+                f32 dc = 1.0 - abs(pc.pos.y + 0.25f - p.y); // distance to cylinder part of the capsule
+                f32 rad = dc * 0.33f;
+                f32 diff = rad - m;
+                
+                pc.pos += normalised(contacts[i].normal * vec3f(1.0f, 0.0f, 1.0f)) * diff;
+            }
+            else if(contacts[i].normal.y < 0.0f)
+            {
+                // ceils
+                f32 m3 = mag(p - pc.pos);
+                if(m3 < capsule_radius)
+                {
+                    ImGui::Text("Ceil");
+                    
+                    f32 diff = capsule_radius - m3;
+                    pc.pos += normalised(contacts[i].normal) * diff;
+                    pc.vel.y *= 0.5f;
+                }
+            }
+        }
     }
    
     // set onto entity
@@ -705,9 +743,12 @@ void update_character_controller(put::scene_controller* sc)
         put::dbg::add_circle(vec3f::unit_y(), p0, 0.5f, vec4f::green());
         put::dbg::add_point(surface_cast.pos, 0.1f, vec4f::green());
         put::dbg::add_point(wall_cast.pos, 0.1f, vec4f::green());
-        put::dbg::add_point(floor_cast.pos, 0.1f, vec4f::blue());
-        put::dbg::add_line(floor_cast.pos, floor_cast.pos + floor_cast.normal, vec4f::magenta());
+        put::dbg::add_point(ceil_cast.pos, 0.1f, vec4f::yellow());
         
+        put::dbg::add_line(p0, p0 + last_e, vec4f::red());
+        
+        
+        /*
         u32 num_contacts = sb_count(contacts);
         for(u32 i = 0; i < num_contacts; ++i)
         {
@@ -717,7 +758,8 @@ void update_character_controller(put::scene_controller* sc)
             put::dbg::add_line(p, p + n, vec4f::cyan());
             put::dbg::add_point(p, 0.1f, vec4f::yellow());
         }
-
+        */
+        
         vec3f xz_dir = sc->camera->focus - sc->camera->pos;
         xz_dir.y = 0.0f;
         xz_dir = normalised(xz_dir);
