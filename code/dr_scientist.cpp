@@ -475,6 +475,8 @@ void ctcb(const physics::contact_test_results& results)
 
 void update_character_controller(put::scene_controller* sc)
 {
+    sc->dt = min(sc->dt, 1.0f / 10.0f);
+
     // tweakers and vars, move into struct
 
     static controller_input ci;
