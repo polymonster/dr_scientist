@@ -464,13 +464,22 @@ void rccb(const physics::ray_cast_result& result)
         cc->set = true;
 }
 
-physics::contact* contacts = nullptr;
+pen::multi_buffer<physics::contact*, 2> contacts;
 void ctcb(const physics::contact_test_results& results)
 {
-    if(contacts)
-        sb_free(contacts);
+    static bool init = true;
+    if(init)
+    {
+        init = false;
+        contacts._data[contacts._bb] = nullptr;
+    }
     
-    contacts = results.contacts;
+    if(contacts._data[contacts._bb])
+        sb_free(contacts._data[contacts._bb]);
+    
+    contacts._data[contacts._bb] = results.contacts;
+    
+    contacts.swap_buffers();
 }
 
 void update_character_controller(put::scene_controller* sc)
@@ -651,18 +660,19 @@ void update_character_controller(put::scene_controller* sc)
     ctp.entity = sc->scene->physics_handles[dr.root];
     ctp.callback = ctcb;
 
-    physics::contact_test(ctp, true);
+    physics::contact_test(ctp);
     
     // resolve overlaps
-    u32 num_contacts = sb_count(contacts);
+    const physics::contact* cb = contacts.frontbuffer();
+    u32 num_contacts = sb_count(cb);
     for(u32 i = 0; i < num_contacts; ++i)
     {
-        vec3f& p = contacts[i].pos;
-        vec3f& n = contacts[i].normal;
+        const vec3f& p = cb[i].pos;
+        const vec3f& n = cb[i].normal;
 
         vec3f pxz = vec3f(p.x, 0.0f, p.z);
         vec3f qxz = vec3f(pc.pos.x, 0.0f, pc.pos.z);
-        f32 d = dot(contacts[i].normal, vec3f::unit_y());
+        f32 d = dot(cb[i].normal, vec3f::unit_y());
 
         // walls
         f32 m = mag(pxz - qxz);
@@ -671,7 +681,7 @@ void update_character_controller(put::scene_controller* sc)
             if(abs(d) < 0.7f)
             {
                 f32 diff = capsule_radius - m;
-                pc.pos += contacts[i].normal * diff;
+                pc.pos += cb[i].normal * diff;
             }
             else if(n.y > 0.0f && cvm2 > 0.6f)
             {
@@ -680,7 +690,7 @@ void update_character_controller(put::scene_controller* sc)
                 f32 rad = dc * 0.33f;
                 f32 diff = rad - m;
 
-                pc.pos += normalised(contacts[i].normal * vec3f(1.0f, 0.0f, 1.0f)) * diff;
+                pc.pos += normalised(cb[i].normal * vec3f(1.0f, 0.0f, 1.0f)) * diff;
             }
         }
 
@@ -691,7 +701,7 @@ void update_character_controller(put::scene_controller* sc)
         {
             // ceil
             f32 diff = capsule_radius - m;
-            pc.pos += normalised(contacts[i].normal) * diff;
+            pc.pos += normalised(cb[i].normal) * diff;
             pc.vel.y *= 0.5f;
         }
     }
