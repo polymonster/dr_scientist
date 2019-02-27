@@ -592,7 +592,7 @@ void update_character_controller(put::scene_controller* sc)
 
     vec3f mid = pc.pos + vec3f(0.0f, 0.5f, 0.0f);       // mid pos
     vec3f head = pc.pos + vec3f(0.0f, 0.65f, 0.0f);     // position of head sphere
-    vec3f feet = pc.pos + vec3f(0.0f, 0.35f, 0.0f);     // position of lower sphere
+    vec3f feet = pc.pps + vec3f(0.0f, 0.35f, 0.0f);     // position of lower sphere
 
     // casts
     character_cast wall_cast;
