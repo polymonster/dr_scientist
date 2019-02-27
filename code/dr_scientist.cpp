@@ -482,6 +482,9 @@ void ctcb(const physics::contact_test_results& results)
     contacts.swap_buffers();
 }
 
+#define assert_nan(V) for(u32 i = 0; i < 3; ++i) \
+                            PEN_ASSERT(!std::isnan(V[i]))
+
 void update_character_controller(put::scene_controller* sc)
 {
     sc->dt = min(sc->dt, 1.0f / 10.0f);
@@ -598,6 +601,8 @@ void update_character_controller(put::scene_controller* sc)
         pc.vel += pc.acc * sc->dt;
         pc.pos += pc.vel * sc->dt;
     }
+    
+    assert_nan(pc.pos);
 
     // resolve collisions ---------------------------------------------------------------------------------------------------
 
@@ -636,6 +641,7 @@ void update_character_controller(put::scene_controller* sc)
     {
         f32 diff = 0.33f - mag(cv);
         pc.pos += wall_cast.normal * diff;
+        assert_nan(pc.pos);
     }
     
     // floor collision from casts
@@ -654,7 +660,7 @@ void update_character_controller(put::scene_controller* sc)
         pc.air += sc->dt;
     }
 
-    // get contacts
+    // get contacts.. 1 frame behhind because of async physics
     physics::contact_test_params ctp;
 
     ctp.entity = sc->scene->physics_handles[dr.root];
@@ -682,15 +688,20 @@ void update_character_controller(put::scene_controller* sc)
             {
                 f32 diff = capsule_radius - m;
                 pc.pos += cb[i].normal * diff;
+                assert_nan(pc.pos);
             }
             else if(n.y > 0.0f && cvm2 > 0.6f)
             {
                 // floor edges
                 f32 dc = 1.0 - abs(pc.pos.y + 0.35f - p.y); // distance to cylinder part of the capsule
-                f32 rad = dc * 0.33f;
+                f32 rad = dc * 0.3f;
                 f32 diff = rad - m;
 
-                pc.pos += normalised(cb[i].normal * vec3f(1.0f, 0.0f, 1.0f)) * diff;
+                vec3f vn = cb[i].normal * vec3f(1.0f, 0.0f, 1.0f);
+                if(mag2(vn) != 0.0f)
+                    pc.pos += normalised(vn) * diff;
+                
+                assert_nan(pc.pos);
             }
         }
 
@@ -703,17 +714,13 @@ void update_character_controller(put::scene_controller* sc)
             f32 diff = capsule_radius - m;
             pc.pos += normalised(cb[i].normal) * diff;
             pc.vel.y *= 0.5f;
+            assert_nan(pc.pos);
         }
     }
    
     // set onto entity
     if (!(sc->scene->flags & PAUSE_UPDATE))
     {
-        PEN_ASSERT(!std::isnan(ci.dir_angle));
-
-        for(u32 i = 0; i < 3; ++i)
-            PEN_ASSERT(!std::isnan(pc.pos[i]));
-
         sc->scene->initial_transform[5].rotation = quat(0.0f, ci.dir_angle, 0.0f);
         sc->scene->transforms[dr.root].translation = pc.pos;
         sc->scene->entities[dr.root] |= CMP_TRANSFORM;
