@@ -85,6 +85,13 @@ void mini_profiler()
 
 void add_box(put::ces::entity_scene* scene, const vec3f& pos)
 {
+    static u32 p = get_new_node(scene);
+    scene->transforms[p].translation = vec3f::zero();
+    scene->transforms[p].rotation = quat();
+    scene->transforms[p].scale = vec3f(1.0f);
+    scene->entities[p] |= CMP_TRANSFORM;
+    scene->names[p] = "basic_level";
+
     static material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
     static geometry_resource* box = get_geometry_resource(PEN_HASH("cube"));
     
@@ -94,7 +101,7 @@ void add_box(put::ces::entity_scene* scene, const vec3f& pos)
     scene->transforms[b].rotation = quat();
     scene->transforms[b].scale = vec3f(0.5f);
     scene->entities[b] |= CMP_TRANSFORM;
-    scene->parents[b] = b;
+    scene->parents[b] = p;
     scene->physics_data[b].rigid_body.shape = physics::BOX;
     scene->physics_data[b].rigid_body.mass = 0.0f;
     scene->physics_data[b].rigid_body.group = 1;
@@ -151,83 +158,10 @@ void setup_character(put::ces::entity_scene* scene)
     dr.anim_run_r = 5;
     
     // add a few quick bits of collision
-    vec3f start = vec3f(-5.5f, -0.5f, -5.5f);
-    vec3f pos = start;
-
-    // a wall
-    for (u32 i = 0; i < 11; ++i)
-    {
-        pos.z += 1.0f;
-        add_box(scene, pos + vec3f(0.0f, 1.0f, 0.0f));
-    }
-
-    // floors
-    for (u32 k = 0; k < 2; ++k)
-    {
-        pos.z = start.z;
-
-        for (u32 i = 0; i < 11; ++i)
-        {
-            pos.x = start.x;
-
-            for (u32 j = 0; j < 11; ++j)
-            {
-                add_box(scene, pos);
-                pos.x += 1.0f;
-            }
-
-            pos.z += 1.0f;
-        }
-
-        pos.y -= 4.0f;
-        start.z -= 5.0f;
-    }
-
-    static material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
-    static geometry_resource* box = get_geometry_resource(PEN_HASH("cube"));
-
-    // some boxes to knock over
-    pos = vec3f(-3.0, 0.5f, 2.0f);
-
-    for (u32 k = 0; k < 4; ++k)
-    {
-        u32 b = get_new_node(scene);
-        scene->names[b] = "box";
-        scene->transforms[b].translation = pos;
-        scene->transforms[b].rotation = quat();
-        scene->transforms[b].scale = vec3f(0.25f);
-        scene->entities[b] |= CMP_TRANSFORM;
-        scene->parents[b] = b;
-        scene->physics_data[b].rigid_body.shape = physics::BOX;
-        scene->physics_data[b].rigid_body.mass = 0.1f;
-        scene->physics_data[b].rigid_body.group = 2;
-        scene->physics_data[b].rigid_body.mask = 0xffffffff;
-
-        instantiate_geometry(box, scene, b);
-        instantiate_material(default_material, scene, b);
-        instantiate_model_cbuffer(scene, b);
-        instantiate_rigid_body(scene, b);
-
-        pos.x += 0.5f;
-    }
-
-    // slope
-    u32 b = get_new_node(scene);
-    scene->names[b] = "slope";
-    scene->transforms[b].translation = vec3f(10.0f, -1.0f, 2.0f);
-    scene->transforms[b].rotation = quat(M_PI * 0.07f, 0.0f, 0.0f);
-    scene->transforms[b].scale = vec3f(10.0f, 0.5f, 3.0f);
-    scene->entities[b] |= CMP_TRANSFORM;
-    scene->parents[b] = b;
-    scene->physics_data[b].rigid_body.shape = physics::BOX;
-    scene->physics_data[b].rigid_body.mass = 0.0f;
-    scene->physics_data[b].rigid_body.group = 1;
-    scene->physics_data[b].rigid_body.mask = 0xffffffff;
-
-    instantiate_geometry(box, scene, b);
-    instantiate_material(default_material, scene, b);
-    instantiate_model_cbuffer(scene, b);
-    instantiate_rigid_body(scene, b);
+    ces::load_scene("data/scene/basic_level.pms", scene, true);
+    ces::load_scene("data/scene/basic_level-2.pms", scene, true);
+    ces::load_scene("data/scene/basic_level-3.pms", scene, true);
+    ces::load_scene("data/scene/basic_level-4.pms", scene, true);
 
     physics::physics_consume_command_buffer();
     pen::thread_sleep_ms(4);
@@ -331,7 +265,7 @@ struct controller_input
 
 struct player_controller
 {
-    // tweakable constants
+    // tweakable constants.. todo
 
     // dynamic vars
     f32 loco_vel = 0.0f;
@@ -343,11 +277,15 @@ struct player_controller
     vec3f vel = vec3f::zero();
     vec3f acc = vec3f::zero();
 
+    u32   actions = 0;         // flags
+
+    vec3f surface_normal = vec3f::zero();
+    vec3f surface_perp = vec3f::zero();
+
+    // cam
     f32   cam_y_target = 0.0f;
     vec3f cam_pos_target = vec3f::zero();
     f32   cam_zoom_target;
-
-    u32   actions = 0;
 };
 
 void get_controller_input(put::scene_controller* sc, controller_input& ci)
@@ -431,8 +369,6 @@ void get_controller_input(put::scene_controller* sc, controller_input& ci)
     {
         ci.movement_vel = 0.0f;
     }
-    
-    ci.dir_angle = atan2(ci.movement_dir.x, ci.movement_dir.z);
 }
 
 struct character_cast
@@ -511,7 +447,7 @@ void update_character_controller(put::scene_controller* sc)
     // controller ----------------------------------------------------------------------------------------------------------
     
     get_controller_input(sc, ci);
-    
+
     if (ci.movement_vel >= 0.2)
     {
         pc.loco_vel += ci.movement_vel * 0.1f;
@@ -522,6 +458,11 @@ void update_character_controller(put::scene_controller* sc)
         pc.loco_vel *= 0.1f; // inertia
         if(pc.loco_vel < 0.001f)
             pc.loco_vel = 0.0f;
+    }
+
+    if (ci.movement_vel > 0.33)
+    {
+        ci.dir_angle = atan2(ci.movement_dir.x, ci.movement_dir.z);
     }
 
     // update state --------------------------------------------------------------------------------------------------------
@@ -586,12 +527,18 @@ void update_character_controller(put::scene_controller* sc)
         }
     }
 
-    // euler integration
-
     // update pos from anim
     pc.pps = pc.pos;
     pc.pos = sc->scene->transforms[dr.root].translation;
 
+    if (pc.air == 0.0f)
+    {
+        // transform loco.. todo use root motion vector
+        f32 vel = mag(pc.pos - pc.pps);
+        pc.pos = pc.pps + pc.surface_perp * vel;
+    }
+
+    // euler integration
     f32 dtt = sc->dt / (1.0f / 60.0f);
     f32 ar = pow(0.8f, dtt);
     
@@ -602,8 +549,6 @@ void update_character_controller(put::scene_controller* sc)
         pc.pos += pc.vel * sc->dt;
     }
     
-    assert_nan(pc.pos);
-
     // resolve collisions ---------------------------------------------------------------------------------------------------
 
     vec3f mid = pc.pos + vec3f(0.0f, 0.5f, 0.0f);       // mid pos
@@ -617,7 +562,7 @@ void update_character_controller(put::scene_controller* sc)
     physics::sphere_cast_params scp;
     scp.from = mid - ci.movement_dir * 0.3f;
     scp.to = mid + ci.movement_dir * 1000.0f;
-    scp.dimension = vec3f(0.33f);
+    scp.dimension = vec3f(0.3f);
     scp.callback = &sccb;
     scp.user_data = &wall_cast;
     scp.group = 1;
@@ -637,22 +582,28 @@ void update_character_controller(put::scene_controller* sc)
     
     // walls
     vec3f cv = mid - wall_cast.pos;
-    if (mag(cv) < 0.33f && wall_cast.set)
+    if (mag(cv) < 0.3f && wall_cast.set)
     {
-        f32 diff = 0.33f - mag(cv);
+        f32 diff = 0.3f - mag(cv);
         pc.pos += wall_cast.normal * diff;
-        assert_nan(pc.pos);
     }
     
     // floor collision from casts
     f32 cvm2 = mag(mid - surface_cast.pos);
     f32 dp = dot(surface_cast.normal, vec3f::unit_y());
-    if (cvm2 <= 0.5f && dp > 0.7f && pc.vel.y <= 0.0f && surface_cast.set)
+
+    // todo.. resolve magic numbers
+    if (cvm2 <= 0.6f && dp > 0.7f && pc.vel.y <= 0.0f && surface_cast.set)
     {
         pc.air = 0.0f;
         f32 diff = 0.5f - cvm2;
         pc.pos += vec3f::unit_y() * diff;
         pc.vel.y = 0.0f;
+
+        // normal and perp for transforming locomotion
+        pc.surface_normal = surface_cast.normal;
+        vec3f cp1 = cross(pc.surface_normal, ci.movement_dir);
+        pc.surface_perp = cross(cp1, pc.surface_normal);
     }
     else
     {
@@ -688,7 +639,6 @@ void update_character_controller(put::scene_controller* sc)
             {
                 f32 diff = capsule_radius - m;
                 pc.pos += cb[i].normal * diff;
-                assert_nan(pc.pos);
             }
             else if(n.y > 0.0f && cvm2 > 0.6f)
             {
@@ -700,8 +650,6 @@ void update_character_controller(put::scene_controller* sc)
                 vec3f vn = cb[i].normal * vec3f(1.0f, 0.0f, 1.0f);
                 if(mag2(vn) != 0.0f)
                     pc.pos += normalised(vn) * diff;
-                
-                assert_nan(pc.pos);
             }
         }
 
@@ -714,7 +662,6 @@ void update_character_controller(put::scene_controller* sc)
             f32 diff = capsule_radius - m;
             pc.pos += normalised(cb[i].normal) * diff;
             pc.vel.y *= 0.5f;
-            assert_nan(pc.pos);
         }
     }
    
@@ -755,6 +702,10 @@ void update_character_controller(put::scene_controller* sc)
     if(debug_lines)
     {
         put::dbg::add_point(surface_cast.pos, 0.1f, vec4f::green());
+        put::dbg::add_line(surface_cast.pos, surface_cast.pos + pc.surface_normal, vec4f::cyan());
+
+        vec3f smid = surface_cast.pos + vec3f(0.0f, 0.5f, 0.0f);
+        put::dbg::add_line(smid, smid + pc.surface_perp, vec4f::red());
 
         put::dbg::add_circle(vec3f::unit_y(), mid, 0.3f, vec4f::green());
         put::dbg::add_point(wall_cast.pos, 0.1f, vec4f::green());
