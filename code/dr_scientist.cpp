@@ -13,15 +13,15 @@
 #include "hash.h"
 #include "str_utilities.h"
 #include "input.h"
-#include "ces/ces_scene.h"
-#include "ces/ces_resources.h"
-#include "ces/ces_editor.h"
-#include "ces/ces_utilities.h"
+#include "ecs/ecs_scene.h"
+#include "ecs/ecs_resources.h"
+#include "ecs/ecs_editor.h"
+#include "ecs/ecs_utilities.h"
 #include "data_struct.h"
 #include "maths/maths.h"
 
 using namespace put;
-using namespace ces;
+using namespace ecs;
 
 pen::window_creation_params pen_window
 {
@@ -83,7 +83,7 @@ void mini_profiler()
     ImGui::Separator();
 }
 
-void add_box(put::ces::entity_scene* scene, const vec3f& pos)
+void add_box(put::ecs::ecs_scene* scene, const vec3f& pos)
 {
     static u32 p = get_new_node(scene);
     scene->transforms[p].translation = vec3f::zero();
@@ -113,26 +113,26 @@ void add_box(put::ces::entity_scene* scene, const vec3f& pos)
     instantiate_rigid_body(scene, b);
 }
 
-void setup_character(put::ces::entity_scene* scene)
+void setup_character(put::ecs::ecs_scene* scene)
 {
     // load main model
-    dr.root = ces::load_pmm("data/models/characters/doctor/Doctor.pmm", scene);
+    dr.root = load_pmm("data/models/characters/doctor/Doctor.pmm", scene);
     
     // load anims
-    anim_handle idle = ces::load_pma("data/models/characters/doctor/anims/doctor_idle01.pma");
-    anim_handle walk = ces::load_pma("data/models/characters/doctor/anims/doctor_walk.pma");
-    anim_handle run = ces::load_pma("data/models/characters/doctor/anims/doctor_run.pma");
-    anim_handle jump = ces::load_pma("data/models/characters/doctor/anims/doctor_idle_jump.pma");
-    anim_handle run_l = ces::load_pma("data/models/characters/doctor/anims/doctor_run_l.pma");
-    anim_handle run_r = ces::load_pma("data/models/characters/doctor/anims/doctor_run_r.pma");
+    anim_handle idle = load_pma("data/models/characters/doctor/anims/doctor_idle01.pma");
+    anim_handle walk = load_pma("data/models/characters/doctor/anims/doctor_walk.pma");
+    anim_handle run = load_pma("data/models/characters/doctor/anims/doctor_run.pma");
+    anim_handle jump = load_pma("data/models/characters/doctor/anims/doctor_idle_jump.pma");
+    anim_handle run_l = load_pma("data/models/characters/doctor/anims/doctor_run_l.pma");
+    anim_handle run_r = load_pma("data/models/characters/doctor/anims/doctor_run_r.pma");
     
     // bind to rig
-    ces::bind_animation_to_rig(scene, idle, dr.root);
-    ces::bind_animation_to_rig(scene, walk, dr.root);
-    ces::bind_animation_to_rig(scene, run, dr.root);
-    ces::bind_animation_to_rig(scene, jump, dr.root);
-    ces::bind_animation_to_rig(scene, run_l, dr.root);
-    ces::bind_animation_to_rig(scene, run_r, dr.root);
+    bind_animation_to_rig(scene, idle, dr.root);
+    bind_animation_to_rig(scene, walk, dr.root);
+    bind_animation_to_rig(scene, run, dr.root);
+    bind_animation_to_rig(scene, jump, dr.root);
+    bind_animation_to_rig(scene, run_l, dr.root);
+    bind_animation_to_rig(scene, run_r, dr.root);
 
     // add capsule for collisions
     scene->physics_data[dr.root].rigid_body.shape = physics::CAPSULE;
@@ -158,10 +158,10 @@ void setup_character(put::ces::entity_scene* scene)
     dr.anim_run_r = 5;
     
     // add a few quick bits of collision
-    ces::load_scene("data/scene/basic_level.pms", scene, true);
-    ces::load_scene("data/scene/basic_level-2.pms", scene, true);
-    ces::load_scene("data/scene/basic_level-3.pms", scene, true);
-    ces::load_scene("data/scene/basic_level-4.pms", scene, true);
+    load_scene("data/scene/basic_level.pms", scene, true);
+    load_scene("data/scene/basic_level-2.pms", scene, true);
+    load_scene("data/scene/basic_level-3.pms", scene, true);
+    load_scene("data/scene/basic_level-4.pms", scene, true);
 
     physics::physics_consume_command_buffer();
     pen::thread_sleep_ms(4);
@@ -180,7 +180,7 @@ bool can_edit()
 
 void update_level_editor(put::scene_controller* sc)
 {
-    ces::entity_scene* scene = sc->scene;
+    ecs_scene* scene = sc->scene;
     
     static bool open = false;
     static vec3i slice = vec3i(0, 0, 0);
@@ -467,7 +467,7 @@ void update_character_controller(put::scene_controller* sc)
 
     // update state --------------------------------------------------------------------------------------------------------
     
-    ces::cmp_anim_controller_v2& controller = sc->scene->anim_controller_v2[dr.root];
+    cmp_anim_controller_v2& controller = sc->scene->anim_controller_v2[dr.root];
     
     pc.acc = vec3f(0.0f, -gravity_strength, 0.0f);
 
@@ -763,12 +763,12 @@ PEN_TRV pen::user_entry( void* params )
 	put::camera_create_perspective( &main_camera, 60.0f, (f32)pen_window.width / (f32)pen_window.height, 0.1f, 1000.0f );
 
     //create the main scene and controller
-    put::ces::entity_scene* main_scene = put::ces::create_scene("main_scene");
-    put::ces::editor_init( main_scene );
+    ecs_scene* main_scene = create_scene("main_scene");
+    editor_init( main_scene );
     
 	put::scene_controller cc;
 	cc.camera = &main_camera;
-	cc.update_function = &ces::update_model_viewer_camera;
+	cc.update_function = &update_model_viewer_camera;
 	cc.name = "model_viewer_camera";
 	cc.id_name = PEN_HASH(cc.name.c_str());
 	cc.scene = main_scene;
@@ -789,7 +789,7 @@ PEN_TRV pen::user_entry( void* params )
 
     put::scene_controller sc;
     sc.scene = main_scene;
-    sc.update_function = &ces::update_model_viewer_scene;
+    sc.update_function = &update_model_viewer_scene;
     sc.name = "main_scene";
     sc.id_name = PEN_HASH(sc.name.c_str());
 	sc.camera = &main_camera;
@@ -798,12 +798,12 @@ PEN_TRV pen::user_entry( void* params )
     put::scene_view_renderer svr_main;
     svr_main.name = "ces_render_scene";
     svr_main.id_name = PEN_HASH(svr_main.name.c_str());
-    svr_main.render_function = &ces::render_scene_view;
+    svr_main.render_function = &render_scene_view;
     
     put::scene_view_renderer svr_editor;
     svr_editor.name = "ces_render_editor";
     svr_editor.id_name = PEN_HASH(svr_editor.name.c_str());
-    svr_editor.render_function = &ces::render_scene_editor;
+    svr_editor.render_function = &render_scene_editor;
     
     pmfx::register_scene_view_renderer(svr_main);
     pmfx::register_scene_view_renderer(svr_editor);
