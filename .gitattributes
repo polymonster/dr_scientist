@@ -1,3 +1,5 @@
 * text=auto
 *.pmfx linguist-language=hlsl
 *.jsn linguist-language=yaml
+*.png filter=lfs diff=lfs merge=lfs -text
+*.mb filter=lfs diff=lfs merge=lfs -text
