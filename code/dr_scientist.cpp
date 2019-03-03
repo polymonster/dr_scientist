@@ -36,6 +36,19 @@ namespace physics
     extern PEN_TRV physics_thread_main( void* params );
 }
 
+struct dr_ecs_exts
+{
+    cmp_array<u64> game_flags;
+};
+
+void dr_scene_browser_ui(ecs_scene* scene)
+{
+    if (ImGui::CollapsingHeader("Game Flags"))
+    {
+
+    }
+}
+
 struct dr_char
 {
     u32 root = 0;
@@ -765,6 +778,14 @@ PEN_TRV pen::user_entry( void* params )
     //create the main scene and controller
     ecs_scene* main_scene = create_scene("main_scene");
     editor_init( main_scene );
+
+    // game specific extensions
+    dr_ecs_exts dr_ext;
+    ecs_extension ext;
+    ext.components = (generic_cmp_array*)&dr_ext.game_flags;
+    ext.num_components = 1;
+    ext.browser_func = &dr_scene_browser_ui;
+    register_ecs_extentsions(main_scene, ext);
     
 	put::scene_controller cc;
 	cc.camera = &main_camera;
