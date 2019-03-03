@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Mote</author>
+      <authoring_tool>Maya2018 | ColladaMaya v3.04C PhyreEngine(TM) 3.22.0.0</authoring_tool>
+      <comments>Collada Maya Export Options: bakeTransforms=1;exportPolygonMeshes=1;relativePaths=1;bakeLighting=0;isSampling=0;
+curveConstrainSampling=0;removeStaticCurves=1;exportCameraAsLookat=0;
+exportLights=1;exportCameras=1;exportDefaultCameras=0;exportJointsAndSkin=1;
+exportAnimations=1;exportTriangles=1;exportInvisibleNodes=0;
+exportNormals=1;exportTexCoords=1;
+exportVertexColors=1;exportVertexColorsAnimation=0;exportTangents=0;
+exportTexTangents=0;exportConstraints=0;exportPhysics=1;exportXRefs=1;instanceDuplicateCurves=0;
+dereferenceXRefs=1;cameraXFov=0;cameraYFov=1;
+animationTime=0.000000</comments>
+      <source_data>file:///D:/Dev/dr_scientist/assets/source/models/environments/general/basic_top_center.mb</source_data>
+    </contributor>
+    <created>2019-03-03T12:15:02Z</created>
+    <modified>2019-03-03T12:15:02Z</modified>
+    <unit meter="1" name="meter"/>
+    <up_axis>Y_UP</up_axis>
+  </asset>
+  <library_physics_scenes>
+    <physics_scene id="MayaNativePhysicsScene">
+      <technique_common>
+        <gravity>0 -980 0</gravity>
+        <time_step>0.0829999968409538</time_step>
+      </technique_common>
+    </physics_scene>
+  </library_physics_scenes>
+  <library_images>
+    <image id="file1" name="file1">
+      <init_from>../../../textures/environments/lab/background/basic_mats.png</init_from>
+      <extra>
+        <technique profile="MAYA">
+          <dgnode_type>kFile</dgnode_type>
+          <image_sequence>0</image_sequence>
+        </technique>
+      </extra>
+    </image>
+  </library_images>
+  <library_materials>
+    <material id="BasicMat" name="BasicMat">
+      <instance_effect url="#BasicMat-fx"/>
+    </material>
+  </library_materials>
+  <library_effects>
+    <effect id="BasicMat-fx">
+      <profile_COMMON>
+        <newparam sid="file1-surface">
+          <surface type="2D">
+            <init_from>file1</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="file1-sampler">
+          <sampler2D>
+            <source>file1-surface</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+            <minfilter>NONE</minfilter>
+            <magfilter>NONE</magfilter>
+            <mipfilter>NONE</mipfilter>
+            <max_anisotropy>0</max_anisotropy>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="file1-sampler" texcoord="TEX0">
+                <extra>
+                  <technique profile="MAYA">
+                    <wrapU>1</wrapU>
+                    <wrapV>1</wrapV>
+                    <mirrorU>0</mirrorU>
+                    <mirrorV>0</mirrorV>
+                    <coverageU>1</coverageU>
+                    <coverageV>1</coverageV>
+                    <translateFrameU>0</translateFrameU>
+                    <translateFrameV>0</translateFrameV>
+                    <rotateFrame>0</rotateFrame>
+                    <stagger>0</stagger>
+                    <fast>0</fast>
+                    <repeatU>1</repeatU>
+                    <repeatV>1</repeatV>
+                    <offsetU>0</offsetU>
+                    <offsetV>0</offsetV>
+                    <rotateUV>0</rotateUV>
+                    <noiseU>0</noiseU>
+                    <noiseV>0</noiseV>
+                    <blend_mode>NONE</blend_mode>
+                  </technique>
+                </extra>
+              </texture>
+            </diffuse>
+            <specular>
+              <color>0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float>20</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <reflectivity>
+              <float>0.5</float>
+            </reflectivity>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA"/>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_geometries>
+    <geometry id="TopCenter3Shape" name="TopCenter3Shape">
+      <mesh>
+        <source id="TopCenter3Shape-positions" name="position">
+          <float_array id="TopCenter3Shape-positions-array" count="15">0.125 0.125 0.125 -0.125 0.125 0.125 0.125 0.125 -0.125 -0.125 0.125 0.0252899918705225 -0.125 0.125 -0.125</float_array>
+          <technique_common>
+            <accessor source="#TopCenter3Shape-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="TopCenter3Shape-normals" name="normal">
+          <float_array id="TopCenter3Shape-normals-array" count="15">0 1 0 0 1 0 0 1 0 0 1 0 0 1 0</float_array>
+          <technique_common>
+            <accessor source="#TopCenter3Shape-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="TopCenter3Shape-map1" name="map1">
+          <float_array id="TopCenter3Shape-map1-array" count="10">0.3348484635353088 0.274465799331665 0.3407415151596069 0.2708342671394348 0.3407415151596069 0.2708342671394348 0.3407415151596069 0.2708342671394348 0.3407415151596069 0.2708342671394348</float_array>
+          <technique_common>
+            <accessor source="#TopCenter3Shape-map1-array" count="5" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="TopCenter3Shape-vertices">
+          <input semantic="POSITION" source="#TopCenter3Shape-positions"/>
+          <input semantic="NORMAL" source="#TopCenter3Shape-normals"/>
+        </vertices>
+        <triangles material="phong15SG" count="3">
+          <input semantic="VERTEX" source="#TopCenter3Shape-vertices" offset="0"/>
+          <input semantic="TEXCOORD" source="#TopCenter3Shape-map1" offset="1" set="0"/>
+          <p>0 2 2 4 1 1 1 1 2 4 3 0 2 4 4 3 3 0</p>
+        </triangles>
+      </mesh>
+      <extra>
+        <technique profile="MAYA">
+          <double_sided>1</double_sided>
+        </technique>
+      </extra>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="VisualSceneNode" name="basic_top_center">
+      <node id="TopCenter" name="TopCenter" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#TopCenter3Shape">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="phong15SG" target="#BasicMat">
+                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+          <extra>
+            <technique profile="PHYRE">
+              <object_render_properties castsShadows="1" receiveShadows="1" visibleInReflections="1" visibleInRefractions="1" motionBlurEnabled="1"/>
+            </technique>
+          </extra>
+        </instance_geometry>
+      </node>
+      <extra>
+        <technique profile="FCOLLADA">
+          <start_time>0</start_time>
+          <end_time>0.6666666865348816</end_time>
+        </technique>
+      </extra>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_physics_scene url="#MayaNativePhysicsScene"/>
+    <instance_visual_scene url="#VisualSceneNode"/>
+  </scene>
+</COLLADA>
