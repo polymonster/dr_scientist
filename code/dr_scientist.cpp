@@ -38,15 +38,35 @@ namespace physics
 
 struct dr_ecs_exts
 {
-    cmp_array<u64> game_flags;
+    cmp_array<s32> game_flags;
 };
+dr_ecs_exts dr_ext;
 
 void dr_scene_browser_ui(ecs_scene* scene)
 {
-    if (ImGui::CollapsingHeader("Game Flags"))
+    if (sb_count(scene->selection_list) == 1)
     {
+        s32 si = scene->selection_list[0];
 
+        if (ImGui::CollapsingHeader("Game Flags"))
+        {
+            ImGui::InputInt("Flags", &dr_ext.game_flags[si]);
+        }
     }
+}
+
+void dr_copy_exts(ecs_scene* scene)
+{
+    dr_ecs_exts* exts = new dr_ecs_exts();
+
+    ecs_extension ext;
+    ext.extension = exts;
+    ext.components = (generic_cmp_array*)&exts->game_flags;
+    ext.num_components = 1;
+    ext.copy_exts_func = &dr_copy_exts;
+    ext.browser_func = &dr_scene_browser_ui;
+
+    register_ecs_extentsions(scene, ext);
 }
 
 struct dr_char
@@ -457,6 +477,11 @@ void update_character_controller(put::scene_controller* sc)
     static bool debug_lines = false;
     static bool game_cam = false;
 
+    static u32 hp = 0;
+    static f32 pos_hist_x[60];
+    static f32 pos_hist_y[60];
+    static f32 pos_hist_z[60];
+
     // controller ----------------------------------------------------------------------------------------------------------
     
     get_controller_input(sc, ci);
@@ -561,7 +586,7 @@ void update_character_controller(put::scene_controller* sc)
         pc.vel += pc.acc * sc->dt;
         pc.pos += pc.vel * sc->dt;
     }
-    
+
     // resolve collisions ---------------------------------------------------------------------------------------------------
 
     vec3f mid = pc.pos + vec3f(0.0f, 0.5f, 0.0f);       // mid pos
@@ -606,7 +631,7 @@ void update_character_controller(put::scene_controller* sc)
     f32 dp = dot(surface_cast.normal, vec3f::unit_y());
 
     // todo.. resolve magic numbers
-    if (cvm2 <= 0.6f && dp > 0.7f && pc.vel.y <= 0.0f && surface_cast.set)
+    if (cvm2 <= 0.51f && dp > 0.7f && pc.vel.y <= 0.0f && surface_cast.set)
     {
         pc.air = 0.0f;
         f32 diff = 0.5f - cvm2;
@@ -677,7 +702,7 @@ void update_character_controller(put::scene_controller* sc)
             pc.vel.y *= 0.5f;
         }
     }
-   
+
     // set onto entity
     if (!(sc->scene->flags & PAUSE_UPDATE))
     {
@@ -685,6 +710,19 @@ void update_character_controller(put::scene_controller* sc)
         sc->scene->transforms[dr.root].translation = pc.pos;
         sc->scene->entities[dr.root] |= CMP_TRANSFORM;
     }
+
+    pos_hist_x[hp] = pc.pos.x - pc.pps.x;
+    pos_hist_y[hp] = pc.pos.y - pc.pps.y;
+    pos_hist_z[hp] = pc.pos.z - pc.pps.z;
+
+    static f32 scale_min = -0.3f;
+    static f32 scale_max = 0.3f;
+
+    ImGui::PlotLines("X", &pos_hist_x[0], 60, hp, "", scale_min, scale_max);
+    ImGui::PlotLines("Y", &pos_hist_y[0], 60, hp, "", scale_min, scale_max);
+    ImGui::PlotLines("z", &pos_hist_z[0], 60, hp, "", scale_min, scale_max);
+
+    hp = (hp + 1) % 60;
 
     // camera ---------------------------------------------------------------------------------------------------------------
 
@@ -780,10 +818,10 @@ PEN_TRV pen::user_entry( void* params )
     editor_init( main_scene );
 
     // game specific extensions
-    dr_ecs_exts dr_ext;
     ecs_extension ext;
     ext.components = (generic_cmp_array*)&dr_ext.game_flags;
     ext.num_components = 1;
+    ext.copy_exts_func = &dr_copy_exts;
     ext.browser_func = &dr_scene_browser_ui;
     register_ecs_extentsions(main_scene, ext);
     
