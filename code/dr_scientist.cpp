@@ -36,34 +36,39 @@ namespace physics
     extern PEN_TRV physics_thread_main( void* params );
 }
 
+// ecs extension
+
 struct dr_ecs_exts
 {
     cmp_array<s32> game_flags;
 };
-dr_ecs_exts dr_ext;
 
-void dr_scene_browser_ui(ecs_scene* scene)
+void dr_scene_browser_ui(ecs_extension& extension, ecs_scene* scene)
 {
+    dr_ecs_exts* ext = (dr_ecs_exts*)extension.context;
+
     if (sb_count(scene->selection_list) == 1)
     {
         s32 si = scene->selection_list[0];
 
         if (ImGui::CollapsingHeader("Game Flags"))
         {
-            ImGui::InputInt("Flags", &dr_ext.game_flags[si]);
+            ImGui::InputInt("Flags", &ext->game_flags[si]);
         }
     }
 }
 
-void dr_copy_exts(ecs_scene* scene)
+void dr_ecs_extension(ecs_scene* scene)
 {
     dr_ecs_exts* exts = new dr_ecs_exts();
 
     ecs_extension ext;
-    ext.extension = exts;
+    ext.name = "dr_scientist";
+    ext.id_name = PEN_HASH(ext.name);
     ext.components = (generic_cmp_array*)&exts->game_flags;
+    ext.context = exts;
     ext.num_components = 1;
-    ext.copy_exts_func = &dr_copy_exts;
+    ext.ext_func = &dr_ecs_extension;
     ext.browser_func = &dr_scene_browser_ui;
 
     register_ecs_extentsions(scene, ext);
@@ -191,10 +196,12 @@ void setup_character(put::ecs::ecs_scene* scene)
     dr.anim_run_r = 5;
     
     // add a few quick bits of collision
-    load_scene("data/scene/basic_level.pms", scene, true);
-    load_scene("data/scene/basic_level-2.pms", scene, true);
-    load_scene("data/scene/basic_level-3.pms", scene, true);
+    //load_scene("data/scene/basic_level.pms", scene, true);
+    //load_scene("data/scene/basic_level-2.pms", scene, true);
+    //load_scene("data/scene/basic_level-3.pms", scene, true);
+
     load_scene("data/scene/basic_level-4.pms", scene, true);
+    load_scene("data/scene/basic_level-ex.pms", scene, true);
 
     physics::physics_consume_command_buffer();
     pen::thread_sleep_ms(4);
@@ -211,9 +218,9 @@ bool can_edit()
     return true;
 }
 
-void update_level_editor(put::scene_controller* sc)
+void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
-    ecs_scene* scene = sc->scene;
+    put::camera* camera = ecsc.camera;
     
     static bool open = false;
     static vec3i slice = vec3i(0, 0, 0);
@@ -241,7 +248,7 @@ void update_level_editor(put::scene_controller* sc)
     // get a camera ray
     vec2i vpi = vec2i(pen_window.width, pen_window.height);
     ms.y = vpi.y - ms.y;
-    mat4  view_proj = sc->camera->proj * sc->camera->view;
+    mat4  view_proj = camera->proj * camera->view;
     vec3f r0 = maths::unproject_sc(vec3f(ms.x, ms.y, 0.0f), view_proj, vpi);
     vec3f r1 = maths::unproject_sc(vec3f(ms.x, ms.y, 1.0f), view_proj, vpi);
     vec3f rv = normalised(r1 - r0);
@@ -321,7 +328,7 @@ struct player_controller
     f32   cam_zoom_target;
 };
 
-void get_controller_input(put::scene_controller* sc, controller_input& ci)
+void get_controller_input(camera* cam, controller_input& ci)
 {
     // clear state
     ci.actions = 0;
@@ -329,7 +336,7 @@ void get_controller_input(put::scene_controller* sc, controller_input& ci)
     vec3f left_stick = vec3f::zero();
     vec2f right_stick = vec2f::zero();
     
-    vec3f xz_dir = sc->camera->focus - sc->camera->pos;
+    vec3f xz_dir = cam->focus - cam->pos;
     xz_dir.y = 0.0f;
     xz_dir = normalised(xz_dir);
     
@@ -454,9 +461,11 @@ void ctcb(const physics::contact_test_results& results)
 #define assert_nan(V) for(u32 i = 0; i < 3; ++i) \
                             PEN_ASSERT(!std::isnan(V[i]))
 
-void update_character_controller(put::scene_controller* sc)
+void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
-    sc->dt = min(sc->dt, 1.0f / 10.0f);
+    put::camera* camera = ecsc.camera;
+
+    dt = min(dt, 1.0f / 10.0f);
 
     // tweakers and vars, move into struct
 
@@ -484,7 +493,7 @@ void update_character_controller(put::scene_controller* sc)
 
     // controller ----------------------------------------------------------------------------------------------------------
     
-    get_controller_input(sc, ci);
+    get_controller_input(camera, ci);
 
     if (ci.movement_vel >= 0.2)
     {
@@ -505,7 +514,7 @@ void update_character_controller(put::scene_controller* sc)
 
     // update state --------------------------------------------------------------------------------------------------------
     
-    cmp_anim_controller_v2& controller = sc->scene->anim_controller_v2[dr.root];
+    cmp_anim_controller_v2& controller = scene->anim_controller_v2[dr.root];
     
     pc.acc = vec3f(0.0f, -gravity_strength, 0.0f);
 
@@ -546,7 +555,7 @@ void update_character_controller(put::scene_controller* sc)
             pc.air_vel = smooth_step(pc.loco_vel, 0.0f, 5.0f, min_jump_vel, max_jump_vel);
         }
         
-        pc.air = max(pc.air, sc->dt);
+        pc.air = max(pc.air, dt);
     }
     else if(ci.actions & JUMP)
     {
@@ -567,24 +576,35 @@ void update_character_controller(put::scene_controller* sc)
 
     // update pos from anim
     pc.pps = pc.pos;
-    pc.pos = sc->scene->transforms[dr.root].translation;
+    pc.pos = scene->transforms[dr.root].translation;
 
     if (pc.air == 0.0f)
     {
+        vec3f xzdir = (pc.pos - pc.pps) * vec3f(1.0f, 0.0f, 1.0f);
+
         // transform loco.. todo use root motion vector
-        f32 vel = mag(pc.pos - pc.pps);
-        pc.pos = pc.pps + pc.surface_perp * vel;
+        f32 vel2 = mag2(xzdir);
+        if (vel2 > 0)
+        {
+            xzdir = normalised(xzdir);
+
+            vec3f cp1 = cross(pc.surface_normal, xzdir);
+            vec3f perp = cross(cp1, pc.surface_normal);
+
+            f32 vel = mag(pc.pos - pc.pps);
+            pc.pos = pc.pps + perp * vel;
+        }
     }
 
     // euler integration
-    f32 dtt = sc->dt / (1.0f / 60.0f);
+    f32 dtt = dt / (1.0f / 60.0f);
     f32 ar = pow(0.8f, dtt);
     
-    if (!(sc->scene->flags & PAUSE_UPDATE))
+    if (!(scene->flags & PAUSE_UPDATE))
     {
         pc.vel *= vec3f(ar, 1.0f, ar);
-        pc.vel += pc.acc * sc->dt;
-        pc.pos += pc.vel * sc->dt;
+        pc.vel += pc.acc * dt;
+        pc.pos += pc.vel * dt;
     }
 
     // resolve collisions ---------------------------------------------------------------------------------------------------
@@ -646,13 +666,13 @@ void update_character_controller(put::scene_controller* sc)
     else
     {
         // in air
-        pc.air += sc->dt;
+        pc.air += dt;
     }
 
     // get contacts.. 1 frame behhind because of async physics
     physics::contact_test_params ctp;
 
-    ctp.entity = sc->scene->physics_handles[dr.root];
+    ctp.entity = scene->physics_handles[dr.root];
     ctp.callback = ctcb;
 
     physics::contact_test(ctp);
@@ -704,11 +724,11 @@ void update_character_controller(put::scene_controller* sc)
     }
 
     // set onto entity
-    if (!(sc->scene->flags & PAUSE_UPDATE))
+    if (!(scene->flags & PAUSE_UPDATE))
     {
-        sc->scene->initial_transform[5].rotation = quat(0.0f, ci.dir_angle, 0.0f);
-        sc->scene->transforms[dr.root].translation = pc.pos;
-        sc->scene->entities[dr.root] |= CMP_TRANSFORM;
+        scene->initial_transform[5].rotation = quat(0.0f, ci.dir_angle, 0.0f);
+        scene->transforms[dr.root].translation = pc.pos;
+        scene->entities[dr.root] |= CMP_TRANSFORM;
     }
 
     pos_hist_x[hp] = pc.pos.x - pc.pps.x;
@@ -730,19 +750,19 @@ void update_character_controller(put::scene_controller* sc)
     {
         f32 zl = smooth_step(pc.loco_vel, 0.0f, 5.0f, 0.0f, 1.0f);
 
-        pc.cam_y_target = lerp(pc.cam_y_target, pc.pos.y, camera_lerp_y * sc->dt);
+        pc.cam_y_target = lerp(pc.cam_y_target, pc.pos.y, camera_lerp_y * dt);
         pc.cam_pos_target = vec3f(pc.pos.x, pc.cam_y_target, pc.pos.z);
         pc.cam_zoom_target = lerp(min_zoom, max_zoom, zl);
 
-        sc->camera->focus = lerp(sc->camera->focus, pc.cam_pos_target, camera_lerp * sc->dt);
-        sc->camera->zoom = lerp(sc->camera->zoom, pc.cam_zoom_target, camera_lerp * sc->dt);
+        camera->focus = lerp(camera->focus, pc.cam_pos_target, camera_lerp * dt);
+        camera->zoom = lerp(camera->zoom, pc.cam_zoom_target, camera_lerp * dt);
 
         if(mag(ci.cam_rot) > 0.2f)
-            sc->camera->rot += (ci.cam_rot * fabs(ci.cam_rot)) * sc->dt;
+            camera->rot += (ci.cam_rot * fabs(ci.cam_rot)) * dt;
 
         static f32 ulimit = -(M_PI / 2.0f) - M_PI * 0.02f;
         static f32 llimit = -M_PI * 0.02f;
-        sc->camera->rot.x = min(max(sc->camera->rot.x, ulimit), llimit);
+        camera->rot.x = min(max(camera->rot.x, ulimit), llimit);
     }
     
     // debug crap -----------------------------------------------------------------------------------------------------------
@@ -764,7 +784,7 @@ void update_character_controller(put::scene_controller* sc)
         put::dbg::add_point(head, 0.3f, vec4f::magenta());
         put::dbg::add_point(feet, 0.3f, vec4f::magenta());
                
-        vec3f xz_dir = sc->camera->focus - sc->camera->pos;
+        vec3f xz_dir = camera->focus - camera->pos;
         xz_dir.y = 0.0f;
         xz_dir = normalised(xz_dir);
 
@@ -794,7 +814,13 @@ void update_character_controller(put::scene_controller* sc)
 
     ImGui::InputFloat3("ci.movement_dir", &ci.movement_dir[0]);
     ImGui::InputFloat("ci.movement_vel", &ci.movement_vel);
-    ImGui::InputFloat2("cam.rot", &sc->camera->rot[0]);
+    ImGui::InputFloat2("cam.rot", &camera->rot[0]);
+}
+
+void update_game_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
+{
+    update_character_controller(ecsc, scene, dt);
+    update_level_editor(ecsc, scene, dt);
 }
 
 PEN_TRV pen::user_entry( void* params )
@@ -815,16 +841,22 @@ PEN_TRV pen::user_entry( void* params )
 
     //create the main scene and controller
     ecs_scene* main_scene = create_scene("main_scene");
+    
     editor_init( main_scene );
+    put::vgt::init(main_scene);
 
     // game specific extensions
-    ecs_extension ext;
-    ext.components = (generic_cmp_array*)&dr_ext.game_flags;
-    ext.num_components = 1;
-    ext.copy_exts_func = &dr_copy_exts;
-    ext.browser_func = &dr_scene_browser_ui;
-    register_ecs_extentsions(main_scene, ext);
+    dr_ecs_extension(main_scene);
     
+    // controllers
+    ecs::ecs_controller game_controller;
+    game_controller.camera = &main_camera;
+    game_controller.update_func = &update_game_controller;
+    game_controller.name = "dr_scientist_game_controller";
+    game_controller.id_name = PEN_HASH(game_controller.name.c_str());
+
+    ecs::register_ecs_controller(main_scene, game_controller);
+
 	put::scene_controller cc;
 	cc.camera = &main_camera;
 	cc.update_function = &update_model_viewer_camera;
@@ -832,26 +864,15 @@ PEN_TRV pen::user_entry( void* params )
 	cc.id_name = PEN_HASH(cc.name.c_str());
 	cc.scene = main_scene;
     
-    put::scene_controller character_controller;
-    character_controller.camera = &main_camera;
-    character_controller.update_function = &update_character_controller;
-    character_controller.name = "model_viewer_camera";
-    character_controller.id_name = PEN_HASH(character_controller.name.c_str());
-    character_controller.scene = main_scene;
-    
-    put::scene_controller level_editor;
-    level_editor.camera = &main_camera;
-    level_editor.update_function = &update_level_editor;
-    level_editor.name = "model_viewer_camera";
-    level_editor.id_name = PEN_HASH(level_editor.name.c_str());
-    level_editor.scene = main_scene;
-
     put::scene_controller sc;
     sc.scene = main_scene;
     sc.update_function = &update_model_viewer_scene;
     sc.name = "main_scene";
     sc.id_name = PEN_HASH(sc.name.c_str());
 	sc.camera = &main_camera;
+
+    pmfx::register_scene_controller(sc);
+    pmfx::register_scene_controller(cc);
     
     //create view renderers
     put::scene_view_renderer svr_main;
@@ -867,13 +888,6 @@ PEN_TRV pen::user_entry( void* params )
     pmfx::register_scene_view_renderer(svr_main);
     pmfx::register_scene_view_renderer(svr_editor);
 
-    pmfx::register_scene_controller(character_controller);
-    pmfx::register_scene_controller(level_editor);
-    pmfx::register_scene_controller(sc);
-    pmfx::register_scene_controller(cc);
-    
-	put::vgt::init(main_scene);
-    
     pmfx::init("data/configs/editor_renderer.jsn");
     
     setup_character(main_scene);
