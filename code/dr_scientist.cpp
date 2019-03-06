@@ -37,10 +37,28 @@ namespace physics
 }
 
 // ecs extension
+enum e_cmp_flags
+{
+    CMP_TILEBLOCK = 1
+};
+
+enum e_game_flags
+{
+    GF_NONE
+};
+
+struct tile_block
+{
+    u32 neighbour_mask; //x,y,z,-x,-y,-z.
+};
 
 struct dr_ecs_exts
 {
-    cmp_array<s32> game_flags;
+    cmp_array<s32>          cmp_flags;
+    cmp_array<s32>          game_flags;
+    cmp_array<tile_block>   tile_blocks;
+    
+    u32                     num_components = ((size_t)&num_components - (size_t)&cmp_flags) / sizeof(generic_cmp_array);
 };
 
 void dr_scene_browser_ui(ecs_extension& extension, ecs_scene* scene)
@@ -51,9 +69,19 @@ void dr_scene_browser_ui(ecs_extension& extension, ecs_scene* scene)
     {
         s32 si = scene->selection_list[0];
 
+        if (ImGui::CollapsingHeader("Game Compnent Flags"))
+        {
+            ImGui::InputInt("Flags", &ext->cmp_flags[si]);
+        }
+        
         if (ImGui::CollapsingHeader("Game Flags"))
         {
             ImGui::InputInt("Flags", &ext->game_flags[si]);
+        }
+        
+        if (ImGui::CollapsingHeader("Tile Blocks"))
+        {
+            ImGui::InputInt("Mask", (s32*)&ext->tile_blocks[si].neighbour_mask);
         }
     }
 }
@@ -65,9 +93,9 @@ void dr_ecs_extension(ecs_scene* scene)
     ecs_extension ext;
     ext.name = "dr_scientist";
     ext.id_name = PEN_HASH(ext.name);
-    ext.components = (generic_cmp_array*)&exts->game_flags;
+    ext.components = (generic_cmp_array*)&exts->cmp_flags;
     ext.context = exts;
-    ext.num_components = 1;
+    ext.num_components = exts->num_components;
     ext.ext_func = &dr_ecs_extension;
     ext.browser_func = &dr_scene_browser_ui;
 
@@ -218,6 +246,24 @@ bool can_edit()
     return true;
 }
 
+struct tilemap_cast
+{
+    vec3f   pos = vec3f::zero();
+    vec3f   normal = vec3f::zero();
+    bool    set = false;
+};
+
+void tilemap_ray_cast(const physics::ray_cast_result& result)
+{
+    tilemap_cast* cc = (tilemap_cast*)result.user_data;
+    
+    cc->pos = result.point;
+    cc->normal = result.normal;
+    
+    if (result.physics_handle != PEN_INVALID_HANDLE)
+        cc->set = true;
+}
+
 void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
     put::camera* camera = ecsc.camera;
@@ -226,7 +272,6 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     static vec3i slice = vec3i(0, 0, 0);
     static vec3f pN = vec3f::unit_y();
     static vec3f p0 = vec3f::zero();
-    static vec3f* grid = nullptr;
     
     ImGui::BeginMainMenuBar();
     if(ImGui::MenuItem(ICON_FA_BRIEFCASE))
@@ -280,11 +325,42 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         put::dbg::add_aabb(ip - vec3f(0.5f), ip + vec3f(0.5f));
     }
     
-    u32 num_boxes = sb_count(grid);
-    for(u32 i = 0; i < num_boxes; ++i)
+    // detect neighbours
+    vec3f np[6] = {
+        vec3f::unit_x(),
+        vec3f::unit_y(),
+        vec3f::unit_z(),
+        -vec3f::unit_x(),
+        -vec3f::unit_y(),
+        -vec3f::unit_z()
+    };
+    
+    for(u32 n = 0; n < 6; ++n)
     {
-        put::dbg::add_aabb(grid[i] - vec3f(0.5f), grid[i] + vec3f(0.5f), vec4f::red());
+        vec3f nip = ip + np[n];
+        
+        tilemap_cast cast;
+        
+        physics::ray_cast_params rcp;
+        rcp.start = ip;
+        rcp.end = nip;
+        rcp.callback = &tilemap_ray_cast;
+        rcp.user_data = &cast;
+        rcp.group = 1;
+        rcp.mask = 1;
+        
+        physics::cast_ray(rcp, true);
+        
+        // ..
+        if(cast.set)
+        {
+            dbg::add_point(cast.pos, 0.1f, vec4f::yellow());
+        }
+        
+        dbg::add_aabb(nip - vec3f(0.5f), nip + vec3f(0.5f), vec4f::red());
+        dbg::add_line(ip, nip, vec4f::green());
     }
+    
 }
 
 enum e_contoller_actions
@@ -832,18 +908,16 @@ PEN_TRV pen::user_entry( void* params )
     
     pen::jobs_create_job( physics::physics_thread_main, 1024*10, nullptr, pen::THREAD_START_DETACHED );
     
-	put::dev_ui::init();
-	put::dbg::init();
+	dev_ui::init();
+	dbg::init();
     
 	//create main camera and controller
 	put::camera main_camera;
-	put::camera_create_perspective( &main_camera, 60.0f, (f32)pen_window.width / (f32)pen_window.height, 0.1f, 1000.0f );
+	put::camera_create_perspective( &main_camera, 60.0f, k_use_window_aspect, 0.1f, 1000.0f );
 
     //create the main scene and controller
     ecs_scene* main_scene = create_scene("main_scene");
-    
-    editor_init( main_scene );
-    put::vgt::init(main_scene);
+    editor_init( main_scene, &main_camera );
 
     // game specific extensions
     dr_ecs_extension(main_scene);
@@ -856,23 +930,6 @@ PEN_TRV pen::user_entry( void* params )
     game_controller.id_name = PEN_HASH(game_controller.name.c_str());
 
     ecs::register_ecs_controller(main_scene, game_controller);
-
-	put::scene_controller cc;
-	cc.camera = &main_camera;
-	cc.update_function = &update_model_viewer_camera;
-	cc.name = "model_viewer_camera";
-	cc.id_name = PEN_HASH(cc.name.c_str());
-	cc.scene = main_scene;
-    
-    put::scene_controller sc;
-    sc.scene = main_scene;
-    sc.update_function = &update_model_viewer_scene;
-    sc.name = "main_scene";
-    sc.id_name = PEN_HASH(sc.name.c_str());
-	sc.camera = &main_camera;
-
-    pmfx::register_scene_controller(sc);
-    pmfx::register_scene_controller(cc);
     
     //create view renderers
     put::scene_view_renderer svr_main;
@@ -887,6 +944,8 @@ PEN_TRV pen::user_entry( void* params )
     
     pmfx::register_scene_view_renderer(svr_main);
     pmfx::register_scene_view_renderer(svr_editor);
+    pmfx::register_scene(main_scene, "main_scene");
+    pmfx::register_camera(&main_camera, "model_viewer_camera");
 
     pmfx::init("data/configs/editor_renderer.jsn");
     
@@ -899,7 +958,9 @@ PEN_TRV pen::user_entry( void* params )
 
 		put::dev_ui::new_frame();
         
-        pmfx::update();
+        //pmfx::update();
+        
+        ecs::update();
         
         pmfx::render();
         
