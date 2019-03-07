@@ -1,27 +1,4 @@
-#include "pen.h"
-#include "renderer.h"
-#include "timer.h"
-#include "file_system.h"
-#include "volume_generator.h"
-#include "pen_string.h"
-#include "loader.h"
-#include "dev_ui.h"
-#include "camera.h"
-#include "debug_render.h"
-#include "pmfx.h"
-#include "pen_json.h"
-#include "hash.h"
-#include "str_utilities.h"
-#include "input.h"
-#include "ecs/ecs_scene.h"
-#include "ecs/ecs_resources.h"
-#include "ecs/ecs_editor.h"
-#include "ecs/ecs_utilities.h"
-#include "data_struct.h"
-#include "maths/maths.h"
-
-using namespace put;
-using namespace ecs;
+#include "dr_scientist.h"
 
 pen::window_creation_params pen_window
 {
@@ -36,30 +13,12 @@ namespace physics
     extern PEN_TRV physics_thread_main( void* params );
 }
 
-// ecs extension
-enum e_cmp_flags
+namespace
 {
-    CMP_TILEBLOCK = 1
-};
-
-enum e_game_flags
-{
-    GF_NONE
-};
-
-struct tile_block
-{
-    u32 neighbour_mask; //x,y,z,-x,-y,-z.
-};
-
-struct dr_ecs_exts
-{
-    cmp_array<s32>          cmp_flags;
-    cmp_array<s32>          game_flags;
-    cmp_array<tile_block>   tile_blocks;
-    
-    u32                     num_components = ((size_t)&num_components - (size_t)&cmp_flags) / sizeof(generic_cmp_array);
-};
+    // loose..
+    dr_char dr;
+    f32 user_thread_time = 0.0f;
+}
 
 void dr_scene_browser_ui(ecs_extension& extension, ecs_scene* scene)
 {
@@ -86,7 +45,7 @@ void dr_scene_browser_ui(ecs_extension& extension, ecs_scene* scene)
     }
 }
 
-void dr_ecs_extension(ecs_scene* scene)
+void* dr_ecs_extension(ecs_scene* scene)
 {
     dr_ecs_exts* exts = new dr_ecs_exts();
 
@@ -100,21 +59,10 @@ void dr_ecs_extension(ecs_scene* scene)
     ext.browser_func = &dr_scene_browser_ui;
 
     register_ecs_extentsions(scene, ext);
+
+    return (void*)exts;
 }
 
-struct dr_char
-{
-    u32 root = 0;
-    u32 anim_idle;
-    u32 anim_walk;
-    u32 anim_run;
-    u32 anim_jump;
-    u32 anim_run_l;
-    u32 anim_run_r;
-};
-dr_char dr;
-
-f32 user_thread_time = 0.0f;
 void mini_profiler()
 {
     f32 render_gpu = 0.0f;
@@ -149,7 +97,7 @@ void mini_profiler()
     ImGui::Separator();
 }
 
-void add_box(put::ecs::ecs_scene* scene, const vec3f& pos)
+void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& pos)
 {
     static u32 p = get_new_node(scene);
     scene->transforms[p].translation = vec3f::zero();
@@ -173,10 +121,193 @@ void add_box(put::ecs::ecs_scene* scene, const vec3f& pos)
     scene->physics_data[b].rigid_body.group = 1;
     scene->physics_data[b].rigid_body.mask = 0xffffffff;
 
+    // ext flags
+    ext->cmp_flags[b] |= CMP_TILE_BLOCK;
+
     instantiate_geometry(box, scene, b);
     instantiate_material(default_material, scene, b);
     instantiate_model_cbuffer(scene, b);
     instantiate_rigid_body(scene, b);
+}
+
+void tilemap_ray_cast(const physics::ray_cast_result& result)
+{
+    cast_result* cc = (cast_result*)result.user_data;
+
+    cc->pos = result.point;
+    cc->normal = result.normal;
+
+    if (result.physics_handle != PEN_INVALID_HANDLE)
+        cc->set = true;
+}
+
+void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
+{
+    for (u32 n = 0; n < scene->num_nodes; ++n)
+    {
+        if (!(ext->cmp_flags[n] & CMP_TILE_BLOCK))
+            continue;
+
+        scene->state_flags[n] |= SF_HIDDEN;
+
+        // do casts to get neighbours
+        static vec3f np[6] = {
+             vec3f::unit_x(),
+             vec3f::unit_y(),
+             vec3f::unit_z(),
+            -vec3f::unit_x(),
+            -vec3f::unit_y(),
+            -vec3f::unit_z()
+        };
+
+        bool neighbour[6] = { 0 };
+        u32 nc = 0;
+
+        vec3f pos = scene->transforms[n].translation;
+
+        for (u32 b = 0; b < 6; ++b)
+        {
+            vec3f nip = pos + np[b];
+
+            cast_result cast;
+
+            physics::ray_cast_params rcp;
+            rcp.start = pos;
+            rcp.end = nip;
+            rcp.callback = &tilemap_ray_cast;
+            rcp.user_data = &cast;
+            rcp.group = 1;
+            rcp.mask = 1;
+
+            physics::cast_ray(rcp, true);
+
+            // ..
+            if (cast.set)
+            {
+                neighbour[b] = true;
+                nc++;
+            }
+        }
+
+        // centre block simply gets removed
+        if (nc == 6)
+            continue;
+
+        // piece can be a corner, an edge or a face in a 4x4x4 cube
+
+        // 8 corner tiles
+        static vec3f corner[8] = {
+            vec3f(-1.0f,  1.0f, -1.0f),
+            vec3f(-1.0f,  1.0f,  1.0f),
+            vec3f(1.0f,  1.0f,  1.0f),
+            vec3f(1.0f,  1.0f, -1.0f),
+            vec3f(-1.0f,  -1.0f, -1.0f),
+            vec3f(-1.0f,  -1.0f,  1.0f),
+            vec3f(1.0f,  -1.0f,  1.0f),
+            vec3f(1.0f,  -1.0f, -1.0f),
+        };
+
+        bool cn[8][3] = {
+            { neighbour[3], neighbour[1], neighbour[5] },
+            { neighbour[3], neighbour[1], neighbour[2] },
+            { neighbour[0], neighbour[1], neighbour[2] },
+            { neighbour[0], neighbour[1], neighbour[5] },
+            { neighbour[3], neighbour[4], neighbour[5] },
+            { neighbour[3], neighbour[4], neighbour[2] },
+            { neighbour[0], neighbour[4], neighbour[2] },
+            { neighbour[0], neighbour[4], neighbour[5] }
+        };
+
+        for (u32 c = 0; c < 8; ++c)
+        {
+            vec3f cp = pos + corner[c] * 0.5f;
+            vec3f cv = corner[c];
+
+            // remove corner covered by 3 neighbours
+            if (cn[c][0] && cn[c][1] && cn[c][2])
+                continue;
+
+            // if we have no neighbours on 3 sides we are a corner
+            if (!cn[c][0] && !cn[c][1] && !cn[c][2])
+            {
+                put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::yellow());
+                continue;
+            }
+
+            // we are a middle edge
+            if (!cn[c][0] && !cn[c][2] && cn[c][1])
+            {
+                put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::magenta());
+                continue;
+            }
+
+            // single side top edge
+            if (!cn[c][1])
+            {
+                if (!cn[c][0])
+                {
+                    // x facing
+                    put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::red());
+                    continue;
+                }
+                else if (!cn[c][2])
+                {
+                    // z facing
+                    put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::blue());
+                    continue;
+                }
+            }
+
+            // plain face 
+            put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::white());
+        }
+
+        // 12 edge tiles 
+        static vec3f edges[8] = {
+            vec3f(-1.0f, 1.0f,  0.0f),
+            vec3f( 0.0f, 1.0f, -1.0f),
+            vec3f( 1.0f, 1.0f,  0.0f),
+            vec3f( 0.0f, 1.0f,  1.0f),
+            vec3f(-1.0f, -1.0f, 0.0f),
+            vec3f(0.0f, -1.0f, -1.0f),
+            vec3f(1.0f, -1.0f,  0.0f),
+            vec3f(0.0f, -1.0f,  1.0f)
+        };
+
+        bool en[8][2] = {
+            { neighbour[3], neighbour[1] },
+            { neighbour[5], neighbour[1] },
+            { neighbour[0], neighbour[1] },
+            { neighbour[2], neighbour[1] },
+            { neighbour[3], neighbour[4] },
+            { neighbour[5], neighbour[4] },
+            { neighbour[0], neighbour[4] },
+            { neighbour[2], neighbour[4] }
+        };
+
+        for (u32 e = 0; e < 8; ++e)
+        {
+            vec3f ep = pos + edges[e] * 0.5f;
+            vec3f ev = edges[e];
+
+            if (en[e][1] && en[e][0])
+                continue;
+
+            if (!en[e][0] && !en[e][1])
+            {
+                put::dbg::add_aabb(ep - ev * 0.25f, ep, vec4f::cyan());
+                continue;
+            }
+
+            if (!en[e][0] && en[e][1])
+            {
+                put::dbg::add_aabb(ep - ev * 0.25f, ep, vec4f::white());
+                continue;
+            }
+        }
+
+        // face tiles
+    }
 }
 
 void setup_character(put::ecs::ecs_scene* scene)
@@ -227,9 +358,8 @@ void setup_character(put::ecs::ecs_scene* scene)
     //load_scene("data/scene/basic_level.pms", scene, true);
     //load_scene("data/scene/basic_level-2.pms", scene, true);
     //load_scene("data/scene/basic_level-3.pms", scene, true);
-
-    load_scene("data/scene/basic_level-4.pms", scene, true);
-    load_scene("data/scene/basic_level-ex.pms", scene, true);
+    //load_scene("data/scene/basic_level-4.pms", scene, true);
+    //load_scene("data/scene/basic_level-ex.pms", scene, true);
 
     physics::physics_consume_command_buffer();
     pen::thread_sleep_ms(4);
@@ -246,28 +376,11 @@ bool can_edit()
     return true;
 }
 
-struct tilemap_cast
-{
-    vec3f   pos = vec3f::zero();
-    vec3f   normal = vec3f::zero();
-    bool    set = false;
-};
-
-void tilemap_ray_cast(const physics::ray_cast_result& result)
-{
-    tilemap_cast* cc = (tilemap_cast*)result.user_data;
-    
-    cc->pos = result.point;
-    cc->normal = result.normal;
-    
-    if (result.physics_handle != PEN_INVALID_HANDLE)
-        cc->set = true;
-}
-
 void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
     put::camera* camera = ecsc.camera;
-    
+    dr_ecs_exts* ext = (dr_ecs_exts*)ecsc.context;
+
     static bool open = false;
     static vec3i slice = vec3i(0, 0, 0);
     static vec3f pN = vec3f::unit_y();
@@ -283,6 +396,17 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     
     ImGui::Begin("Toolbox");
     
+    static bool bake = false;
+    if (ImGui::Button("Bake"))
+    {
+        bake = true;
+    }
+
+    if (bake)
+    {
+        bake_tile_blocks(scene, ext);
+    }
+
     ImGui::InputInt("Level", &slice[1]);
     p0.y = slice.y;
     
@@ -312,7 +436,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         {
             if(!debounce)
             {
-                add_box(scene, ip);
+                add_tile_block(scene, ext, ip);
                 
                 debounce = true;
             }
@@ -339,7 +463,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     {
         vec3f nip = ip + np[n];
         
-        tilemap_cast cast;
+        cast_result cast;
         
         physics::ray_cast_params rcp;
         rcp.start = ip;
@@ -362,47 +486,6 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     }
     
 }
-
-enum e_contoller_actions
-{
-    JUMP = 1<<0,
-    RUN = 1<<1,
-    DEBOUNCE_JUMP = 1<<2
-};
-
-struct controller_input
-{
-    vec3f movement_dir = vec3f(0.0f, 0.0f, 1.0f);
-    f32   dir_angle = 0.0f;
-    f32   movement_vel = 0.0f;
-    vec2f cam_rot = vec2f::zero();
-    u8    actions = 0;
-};
-
-struct player_controller
-{
-    // tweakable constants.. todo
-
-    // dynamic vars
-    f32 loco_vel = 0.0f;
-    f32 air_vel = 0.0f;
-    f32 air = 0.0f;
-
-    vec3f pps = vec3f::zero(); // prev pos
-    vec3f pos = vec3f::zero();
-    vec3f vel = vec3f::zero();
-    vec3f acc = vec3f::zero();
-
-    u32   actions = 0;         // flags
-
-    vec3f surface_normal = vec3f::zero();
-    vec3f surface_perp = vec3f::zero();
-
-    // cam
-    f32   cam_y_target = 0.0f;
-    vec3f cam_pos_target = vec3f::zero();
-    f32   cam_zoom_target;
-};
 
 void get_controller_input(camera* cam, controller_input& ci)
 {
@@ -487,16 +570,9 @@ void get_controller_input(camera* cam, controller_input& ci)
     }
 }
 
-struct character_cast
-{
-    vec3f   pos = vec3f::zero();
-    vec3f   normal = vec3f::zero();
-    bool    set = false;
-};
-
 void sccb(const physics::sphere_cast_result& result)
 {
-    character_cast* cc = (character_cast*)result.user_data;
+    cast_result* cc = (cast_result*)result.user_data;
     
     cc->pos = result.point;
     cc->normal = result.normal;
@@ -507,7 +583,7 @@ void sccb(const physics::sphere_cast_result& result)
 
 void rccb(const physics::ray_cast_result& result)
 {
-    character_cast* cc = (character_cast*)result.user_data;
+    cast_result* cc = (cast_result*)result.user_data;
 
     cc->pos = result.point;
     cc->normal = result.normal;
@@ -690,8 +766,8 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     vec3f feet = pc.pps + vec3f(0.0f, 0.35f, 0.0f);     // position of lower sphere
 
     // casts
-    character_cast wall_cast;
-    character_cast surface_cast;
+    cast_result wall_cast;
+    cast_result surface_cast;
         
     physics::sphere_cast_params scp;
     scp.from = mid - ci.movement_dir * 0.3f;
@@ -919,14 +995,15 @@ PEN_TRV pen::user_entry( void* params )
     ecs_scene* main_scene = create_scene("main_scene");
     editor_init( main_scene, &main_camera );
 
-    // game specific extensions
-    dr_ecs_extension(main_scene);
+    // create and register game specific extensions
+    dr_ecs_exts* exts = (dr_ecs_exts*)dr_ecs_extension(main_scene);
     
     // controllers
     ecs::ecs_controller game_controller;
     game_controller.camera = &main_camera;
     game_controller.update_func = &update_game_controller;
     game_controller.name = "dr_scientist_game_controller";
+    game_controller.context = exts;
     game_controller.id_name = PEN_HASH(game_controller.name.c_str());
 
     ecs::register_ecs_controller(main_scene, game_controller);
