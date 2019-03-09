@@ -199,12 +199,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
         static vec3f corner[8] = {
             vec3f(-1.0f,  1.0f, -1.0f),
             vec3f(-1.0f,  1.0f,  1.0f),
-            vec3f(1.0f,  1.0f,  1.0f),
-            vec3f(1.0f,  1.0f, -1.0f),
-            vec3f(-1.0f,  -1.0f, -1.0f),
-            vec3f(-1.0f,  -1.0f,  1.0f),
-            vec3f(1.0f,  -1.0f,  1.0f),
-            vec3f(1.0f,  -1.0f, -1.0f),
+            vec3f( 1.0f,  1.0f,  1.0f),
+            vec3f( 1.0f,  1.0f, -1.0f),
+            vec3f(-1.0f, -1.0f, -1.0f),
+            vec3f(-1.0f, -1.0f,  1.0f),
+            vec3f( 1.0f, -1.0f,  1.0f),
+            vec3f( 1.0f, -1.0f, -1.0f),
         };
 
         bool cn[8][3] = {
@@ -222,6 +222,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
         {
             vec3f cp = pos + corner[c] * 0.5f;
             vec3f cv = corner[c];
+            vec3f cpc = cp - cv * 0.125f;
 
             // remove corner covered by 3 neighbours
             if (cn[c][0] && cn[c][1] && cn[c][2])
@@ -230,6 +231,10 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // if we have no neighbours on 3 sides we are a corner
             if (!cn[c][0] && !cn[c][1] && !cn[c][2])
             {
+                u32 corner = load_pmm("data/models/environments/general/basic_top_corner.pmm", scene);
+                scene->transforms[corner].translation = cpc;
+                scene->entities[corner] |= CMP_TRANSFORM;
+
                 put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::yellow());
                 continue;
             }
@@ -237,6 +242,10 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // we are a middle edge
             if (!cn[c][0] && !cn[c][2] && cn[c][1])
             {
+                u32 tile = load_pmm("data/models/environments/general/basic_middle_side.pmm", scene);
+                scene->transforms[tile].translation = cpc;
+                scene->entities[tile] |= CMP_TRANSFORM;
+
                 put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::magenta());
                 continue;
             }
@@ -246,12 +255,20 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             {
                 if (!cn[c][0])
                 {
+                    u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
+                    scene->transforms[tile].translation = cpc;
+                    scene->entities[tile] |= CMP_TRANSFORM;
+
                     // x facing
                     put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::red());
                     continue;
                 }
                 else if (!cn[c][2])
                 {
+                    u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
+                    scene->transforms[tile].translation = cpc;
+                    scene->entities[tile] |= CMP_TRANSFORM;
+
                     // z facing
                     put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::blue());
                     continue;
@@ -259,6 +276,10 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             }
 
             // plain face 
+            u32 tile = load_pmm("data/models/environments/general/basic_top_center.pmm", scene);
+            scene->transforms[tile].translation = cpc;
+            scene->entities[tile] |= CMP_TRANSFORM;
+
             put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::white());
         }
 
@@ -289,24 +310,48 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
         {
             vec3f ep = pos + edges[e] * 0.5f;
             vec3f ev = edges[e];
+            vec3f epc = ep - ev * 0.125f;
 
             if (en[e][1] && en[e][0])
                 continue;
 
             if (!en[e][0] && !en[e][1])
             {
+                u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
+                scene->transforms[tile].translation = epc;
+                scene->entities[tile] |= CMP_TRANSFORM;
+
                 put::dbg::add_aabb(ep - ev * 0.25f, ep, vec4f::cyan());
                 continue;
             }
 
             if (!en[e][0] && en[e][1])
             {
+                u32 tile = load_pmm("data/models/environments/general/basic_middle_side.pmm", scene);
+                scene->transforms[tile].translation = epc;
+                scene->entities[tile] |= CMP_TRANSFORM;
+
                 put::dbg::add_aabb(ep - ev * 0.25f, ep, vec4f::white());
                 continue;
             }
         }
 
         // face tiles
+        for (u32 f = 0; f < 6; ++f)
+        {
+            vec3f fp = pos + np[f] * 0.5f;
+            vec3f fv = np[f];
+            vec3f fpc = fp - fv * 0.125f;
+
+            if (neighbour[f])
+                continue;
+
+            u32 tile = load_pmm("data/models/environments/general/basic_top_center.pmm", scene);
+            scene->transforms[tile].translation = fpc;
+            scene->entities[tile] |= CMP_TRANSFORM;
+
+            put::dbg::add_point(fp, 0.5f);
+        }
     }
 }
 
@@ -399,7 +444,8 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     static bool bake = false;
     if (ImGui::Button("Bake"))
     {
-        bake = true;
+        //bake = true;
+        bake_tile_blocks(scene, ext);
     }
 
     if (bake)
