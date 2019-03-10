@@ -143,6 +143,9 @@ void tilemap_ray_cast(const physics::ray_cast_result& result)
 
 void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
 {
+    static const f32 ninety = M_PI/2.0f;
+    static const f32 one_eighty = M_PI;
+    
     for (u32 n = 0; n < scene->num_nodes; ++n)
     {
         if (!(ext->cmp_flags[n] & CMP_TILE_BLOCK))
@@ -151,6 +154,8 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
         scene->state_flags[n] |= SF_HIDDEN;
 
         // do casts to get neighbours
+        
+        // cube axis
         static vec3f np[6] = {
              vec3f::unit_x(),
              vec3f::unit_y(),
@@ -159,7 +164,27 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             -vec3f::unit_y(),
             -vec3f::unit_z()
         };
-
+        
+        // axis tangent
+        static vec3f nt[6] = {
+            vec3f::unit_y(),
+            vec3f::unit_x(),
+            vec3f::unit_x(),
+            vec3f::unit_y(),
+            vec3f::unit_x(),
+            vec3f::unit_x()
+        };
+        
+        // axis bi tangent
+        static vec3f nbt[6] = {
+            -vec3f::unit_z(),
+            vec3f::unit_z(),
+            vec3f::unit_y(),
+            vec3f::unit_z(),
+            -vec3f::unit_z(),
+            -vec3f::unit_y()
+        };
+        
         bool neighbour[6] = { 0 };
         u32 nc = 0;
 
@@ -217,7 +242,18 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             { neighbour[0], neighbour[4], neighbour[2] },
             { neighbour[0], neighbour[4], neighbour[5] }
         };
-
+        
+        static quat corner_rotation[] = {
+            quat(0.0f, M_PI, 0.0f),
+            quat(0.0f, -M_PI / 2.0f, 0.0f),
+            quat(0.0f, 0.0f, 0.0f),
+            quat(0.0f, M_PI / 2.0f, 0.0f),
+            quat(0.0f, 0.0f, one_eighty) * quat(0.0f, -ninety, 0.0f),
+            quat(0.0f, 0.0f, one_eighty) * quat(0.0f, one_eighty, 0.0f),
+            quat(0.0f, 0.0f, one_eighty) * quat(0.0f, ninety, 0.0f),
+            quat(0.0f, 0.0f, one_eighty)
+        };
+        
         for (u32 c = 0; c < 8; ++c)
         {
             vec3f cp = pos + corner[c] * 0.5f;
@@ -233,9 +269,9 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             {
                 u32 corner = load_pmm("data/models/environments/general/basic_top_corner.pmm", scene);
                 scene->transforms[corner].translation = cpc;
+                scene->transforms[corner].rotation = corner_rotation[c];
                 scene->entities[corner] |= CMP_TRANSFORM;
 
-                put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::yellow());
                 continue;
             }
 
@@ -244,9 +280,9 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             {
                 u32 tile = load_pmm("data/models/environments/general/basic_middle_side.pmm", scene);
                 scene->transforms[tile].translation = cpc;
+                scene->transforms[tile].rotation = corner_rotation[c];
                 scene->entities[tile] |= CMP_TRANSFORM;
 
-                put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::magenta());
                 continue;
             }
 
@@ -257,20 +293,32 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 {
                     u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
                     scene->transforms[tile].translation = cpc;
+                    scene->transforms[tile].rotation = quat(0.0f, 0.0f, 0.0f);
+                    
+                    if(cv.x < 0.0f)
+                        scene->transforms[tile].rotation *= quat(0.0f, one_eighty, 0.0f);
+                    
+                    if(cv.y < 0.0f)
+                        scene->transforms[tile].rotation *= quat(-ninety, 0.0f, 0.0f);
+                    
                     scene->entities[tile] |= CMP_TRANSFORM;
 
-                    // x facing
-                    put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::red());
                     continue;
                 }
                 else if (!cn[c][2])
                 {
                     u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
                     scene->transforms[tile].translation = cpc;
+                    scene->transforms[tile].rotation = quat(0.0f, -ninety, 0.0f);
+                    
+                    if(cv.z < 0.0f)
+                        scene->transforms[tile].rotation *= quat(0.0f, one_eighty, 0.0f);
+                    
+                    if(cv.y < 0.0f)
+                        scene->transforms[tile].rotation *= quat( -ninety, 0.0f, 0.0f);
+                    
                     scene->entities[tile] |= CMP_TRANSFORM;
 
-                    // z facing
-                    put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::blue());
                     continue;
                 }
             }
@@ -278,24 +326,47 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // plain face 
             u32 tile = load_pmm("data/models/environments/general/basic_top_center.pmm", scene);
             scene->transforms[tile].translation = cpc;
+            
+            if(cv.y < 0.0f)
+                scene->transforms[tile].rotation = quat(one_eighty, 0.0f, 0.0f);
+            
             scene->entities[tile] |= CMP_TRANSFORM;
-
-            put::dbg::add_aabb(cp - cv * 0.25f, cp, vec4f::white());
         }
 
-        // 12 edge tiles 
-        static vec3f edges[8] = {
-            vec3f(-1.0f, 1.0f,  0.0f),
-            vec3f( 0.0f, 1.0f, -1.0f),
-            vec3f( 1.0f, 1.0f,  0.0f),
-            vec3f( 0.0f, 1.0f,  1.0f),
-            vec3f(-1.0f, -1.0f, 0.0f),
-            vec3f(0.0f, -1.0f, -1.0f),
-            vec3f(1.0f, -1.0f,  0.0f),
-            vec3f(0.0f, -1.0f,  1.0f)
+        // 8 edge tiles
+        static vec3f edges[] = {
+            vec3f(-1.0f, 1.0f,  0.0f), //-x
+            vec3f( 0.0f, 1.0f, -1.0f), //-z
+            vec3f( 1.0f, 1.0f,  0.0f), //+x
+            vec3f( 0.0f, 1.0f,  1.0f), //+z
+            vec3f(-1.0f, -1.0f, 0.0f), //-x -y
+            vec3f(0.0f, -1.0f, -1.0f), //-z -y
+            vec3f(1.0f, -1.0f,  0.0f), //+x -y
+            vec3f(0.0f, -1.0f,  1.0f), //+z -y
+            vec3f(1.0f, 0.0f, 1.0f),   //+xz mid
+            vec3f(-1.0f, 0.0f, 1.0f),  //-x+z mid
+            
+            vec3f(-1.0f, 0.0f, -1.0f),  //-x-z mid
+            vec3f(1.0f, 0.0f, -1.0f)  //+x-z mid
+        };
+        
+        //edge tangent
+        static vec3f et[] = {
+            vec3f( 0.0f, 0.0f, 1.0f),
+            vec3f( 1.0f, 0.0f, 0.0f),
+            vec3f( 0.0f, 0.0f, 1.0f),
+            vec3f( 1.0f, 0.0f, 0.0f),
+            vec3f( 0.0f, 0.0f, 1.0f),
+            vec3f( 1.0f, 0.0f, 0.0f),
+            vec3f( 0.0f, 0.0f, 1.0f),
+            vec3f( 1.0f, 0.0f, 0.0f),
+            vec3f( 0.0f, 1.0f, 0.0f),
+            vec3f( 0.0f, 1.0f, 0.0f),
+            vec3f( 0.0f, 1.0f, 0.0f),
+            vec3f( 0.0f, 1.0f, 0.0f),
         };
 
-        bool en[8][2] = {
+        bool en[][2] = {
             { neighbour[3], neighbour[1] },
             { neighbour[5], neighbour[1] },
             { neighbour[0], neighbour[1] },
@@ -303,52 +374,116 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             { neighbour[3], neighbour[4] },
             { neighbour[5], neighbour[4] },
             { neighbour[0], neighbour[4] },
-            { neighbour[2], neighbour[4] }
+            { neighbour[2], neighbour[4] },
+            { neighbour[2], neighbour[0] },
+            { neighbour[3], neighbour[2] },
+            { neighbour[3], neighbour[5] },
+            { neighbour[5], neighbour[0] }
+        };
+        
+        static quat edge_rotation[] = {
+            quat(0.0f, M_PI, 0.0f),
+            quat(0.0f, M_PI / 2.0f, 0.0f),
+            quat(0.0f, 0.0f, 0.0f),
+            quat(0.0f, -M_PI / 2.0f, 0.0f),
+            quat(-M_PI/2.0f, 0.0f, -M_PI),
+            quat(0.0f,  ninety, 0.0f) * quat(-ninety, 0.0f, 0.0f),
+            quat(-M_PI/2.0f, 0.0f, 0.0f),
+            quat(0.0f, -ninety, 0.0f) * quat(-ninety, 0.0f, 0.0f),
+            quat(0.0f, 0.0f, 0.0f),
+            quat(0.0f, -ninety, 0.0f),
+            quat(0.0f, one_eighty, 0.0f),
+            quat(0.0f, ninety, 0.0f)
         };
 
-        for (u32 e = 0; e < 8; ++e)
+        for (u32 e = 0; e < 12; ++e)
         {
             vec3f ep = pos + edges[e] * 0.5f;
             vec3f ev = edges[e];
             vec3f epc = ep - ev * 0.125f;
-
-            if (en[e][1] && en[e][0])
+            
+            vec3f esubp[] = {
+                epc + et[e] * 0.125f,
+                epc + et[e] * -0.125f
+            };
+            
+            Str model = "";
+            
+            if(en[e][1] && e < 8)
                 continue;
 
-            if (!en[e][0] && !en[e][1])
+            quat rot_r = edge_rotation[e];
+            
+            if (en[e][0] && e < 4)
             {
-                u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
-                scene->transforms[tile].translation = epc;
-                scene->entities[tile] |= CMP_TRANSFORM;
-
-                put::dbg::add_aabb(ep - ev * 0.25f, ep, vec4f::cyan());
-                continue;
+                model = "data/models/environments/general/basic_top_center.pmm";
             }
-
-            if (!en[e][0] && en[e][1])
+            else if(en[e][0])
             {
-                u32 tile = load_pmm("data/models/environments/general/basic_middle_side.pmm", scene);
-                scene->transforms[tile].translation = epc;
-                scene->entities[tile] |= CMP_TRANSFORM;
-
-                put::dbg::add_aabb(ep - ev * 0.25f, ep, vec4f::white());
-                continue;
+                model = "data/models/environments/general/basic_middle_side.pmm";
+            }
+            else if (!en[e][0] && !en[e][1])
+            {
+                model = "data/models/environments/general/basic_top_side.pmm";
+                
+                if(e >= 8)
+                    model = "data/models/environments/general/basic_middle_corner.pmm";
+                
+            }
+            else if (!en[e][0] && en[e][1])
+            {
+                model = "data/models/environments/general/basic_middle_side.pmm";
+            }
+            
+            if(!model.empty())
+            {
+                for(u32 i = 0; i < 2; ++i)
+                {
+                    u32 tile = load_pmm(model.c_str(), scene);
+                    scene->transforms[tile].translation = esubp[i];
+                    scene->transforms[tile].rotation = rot_r;
+                    scene->entities[tile] |= CMP_TRANSFORM;
+                }
             }
         }
 
         // face tiles
+        static quat face_rotation[] = {
+            quat(-M_PI/2.0f, 0.0f, 0.0f),
+            quat(0.0f, 0.0f, 0.0f),
+            quat(0.0f, 0.0f, M_PI/2.0f),
+            quat(M_PI/2.0f, 0.0f, 0.0f),
+            quat(M_PI, 0.0f, 0.0f),
+            quat(0.0f, 0.0f, -M_PI/2.0f)
+        };
+        
         for (u32 f = 0; f < 6; ++f)
         {
             vec3f fp = pos + np[f] * 0.5f;
             vec3f fv = np[f];
-            vec3f fpc = fp - fv * 0.125f;
+            vec3f fpc = fp + fv * -0.125f;
+            
+            vec3f u = nt[f];
+            vec3f v = nbt[f];
+            
+            vec3f fpsub[] = {
+                fpc + (-u - v) * 0.125f,
+                fpc + (-u + v) * 0.125f,
+                fpc + (u + v) * 0.125f,
+                fpc + (u - v) * 0.125f
+            };
 
             if (neighbour[f])
                 continue;
-
-            u32 tile = load_pmm("data/models/environments/general/basic_top_center.pmm", scene);
-            scene->transforms[tile].translation = fpc;
-            scene->entities[tile] |= CMP_TRANSFORM;
+            
+            // add 4
+            for(u32 i = 0; i < 4; ++i)
+            {
+                u32 tile = load_pmm("data/models/environments/general/basic_top_center.pmm", scene);
+                scene->transforms[tile].translation = fpsub[i];
+                scene->transforms[tile].rotation = face_rotation[f];
+                scene->entities[tile] |= CMP_TRANSFORM;
+            }
 
             put::dbg::add_point(fp, 0.5f);
         }
