@@ -254,6 +254,17 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             quat(0.0f, 0.0f, one_eighty)
         };
         
+        quat corner_face_rotations[8][3] = {
+            { { quat(0.0f, one_eighty, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, ninety, 0.0f) } },     // -x -z .
+            { { quat(0.0f, one_eighty, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, -ninety, 0.0f) } },    // -x +z .
+            { { quat(0.0f, 0.0f, 0.0f) },       { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, -ninety, 0.0f) } },    // +x +z .
+            { { quat(0.0f, 0.0f, 0.0f) },       { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, ninety, 0.0f) } },     // +x -z .
+            { { quat(0.0f, one_eighty, 0.0f) }, { quat(0.0f, 0.0f, one_eighty) }, { quat(0.0f, ninety, 0.0f) } },     // .
+            { { quat(0.0f, one_eighty, 0.0f) }, { quat(0.0f, 0.0f, one_eighty) }, { quat(0.0f, -ninety, 0.0f) } },    // .
+            { { quat(0.0f, 0.0f, 0.0f) },       { quat(0.0f, 0.0f, one_eighty) }, { quat(0.0f, -ninety, 0.0f) } },    // .
+            { { quat(0.0f, 0.0f, 0.0f) },       { quat(0.0f, 0.0f, one_eighty) }, { quat(0.0f, ninety, 0.0f) } }      // .
+        };
+        
         for (u32 c = 0; c < 8; ++c)
         {
             vec3f cp = pos + corner[c] * 0.5f;
@@ -275,10 +286,10 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 continue;
             }
 
-            // we are a middle edge
+            // middle edge
             if (!cn[c][0] && !cn[c][2] && cn[c][1])
             {
-                u32 tile = load_pmm("data/models/environments/general/basic_middle_side.pmm", scene);
+                u32 tile = load_pmm("data/models/environments/general/basic_middle_corner.pmm", scene);
                 scene->transforms[tile].translation = cpc;
                 scene->transforms[tile].rotation = corner_rotation[c];
                 scene->entities[tile] |= CMP_TRANSFORM;
@@ -286,7 +297,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 continue;
             }
 
-            // single side top edge
+            // top edge
             if (!cn[c][1])
             {
                 if (!cn[c][0])
@@ -323,17 +334,29 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 }
             }
 
-            // plain face 
-            u32 tile = load_pmm("data/models/environments/general/basic_top_center.pmm", scene);
+            // plain face..
+            
+            // rotations can be in 3 positions depending on neighbors
+            u32 rot_i = 0;
+            Str model = "data/models/environments/general/basic_middle_side.pmm";
+            
+            if(!cn[c][1])
+            {
+                model = "data/models/environments/general/basic_top_center.pmm";
+                rot_i = 1;
+            }
+            else if(!cn[c][2])
+            {
+                rot_i = 2;
+            }
+
+            u32 tile = load_pmm(model.c_str(), scene);
             scene->transforms[tile].translation = cpc;
-            
-            if(cv.y < 0.0f)
-                scene->transforms[tile].rotation = quat(one_eighty, 0.0f, 0.0f);
-            
+            scene->transforms[tile].rotation = corner_face_rotations[c][rot_i];
             scene->entities[tile] |= CMP_TRANSFORM;
         }
 
-        // 8 edge tiles
+        // 12 edge tiles
         static vec3f edges[] = {
             vec3f(-1.0f, 1.0f,  0.0f), //-x
             vec3f( 0.0f, 1.0f, -1.0f), //-z
@@ -343,11 +366,10 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             vec3f(0.0f, -1.0f, -1.0f), //-z -y
             vec3f(1.0f, -1.0f,  0.0f), //+x -y
             vec3f(0.0f, -1.0f,  1.0f), //+z -y
-            vec3f(1.0f, 0.0f, 1.0f),   //+xz mid
+            vec3f(1.0f, 0.0f, 1.0f),   //+x+z mid
             vec3f(-1.0f, 0.0f, 1.0f),  //-x+z mid
-            
-            vec3f(-1.0f, 0.0f, -1.0f),  //-x-z mid
-            vec3f(1.0f, 0.0f, -1.0f)  //+x-z mid
+            vec3f(-1.0f, 0.0f, -1.0f), //-x-z mid
+            vec3f(1.0f, 0.0f, -1.0f)   //+x-z mid
         };
         
         //edge tangent
@@ -395,9 +417,34 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             quat(0.0f, one_eighty, 0.0f),
             quat(0.0f, ninety, 0.0f)
         };
+        
+        // side edge rotations can be in 2 positions
+        static quat side_edge_rotation[] = {
+            quat(0.0f, 0.0f, 0.0f),
+            quat(0.0f, -ninety, 0.0f),
+            quat(0.0f, ninety, 0.0f),
+            quat(0.0f, 0.0f, 0.0f),
+        };
+        
+        static quat side_edge_rotation_2[] = {
+            quat(0.0f, -ninety, 0.0f),
+            quat(0.0f, -one_eighty, 0.0f),
+            quat(0.0f, one_eighty, 0.0f),
+            quat(0.0f, ninety, 0.0f),
+        };
+        
+        static quat bottom_edge_rotation[] = {
+            quat(0.0f, one_eighty, 0.0f),
+            quat(0.0f, ninety, 0.0f),
+            quat(0.0f, 0.0f, 0.0f),
+            quat(0.0f, -ninety, 0.0f),
+        };
 
         for (u32 e = 0; e < 12; ++e)
         {
+            if(en[e][0] && en[e][1])
+                continue;
+            
             vec3f ep = pos + edges[e] * 0.5f;
             vec3f ev = edges[e];
             vec3f epc = ep - ev * 0.125f;
@@ -408,31 +455,52 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             };
             
             Str model = "";
-            
-            if(en[e][1] && e < 8)
-                continue;
 
             quat rot_r = edge_rotation[e];
             
-            if (en[e][0] && e < 4)
+            if (!en[e][0] && !en[e][1])
             {
-                model = "data/models/environments/general/basic_top_center.pmm";
-            }
-            else if(en[e][0])
-            {
-                model = "data/models/environments/general/basic_middle_side.pmm";
-            }
-            else if (!en[e][0] && !en[e][1])
-            {
+                // corners / edges
                 model = "data/models/environments/general/basic_top_side.pmm";
                 
                 if(e >= 8)
                     model = "data/models/environments/general/basic_middle_corner.pmm";
-                
             }
-            else if (!en[e][0] && en[e][1])
+            else if (en[e][0] && e < 8)
             {
+                if(e < 4)
+                {
+                    // top faces
+                    model = "data/models/environments/general/basic_top_center.pmm";
+                }
+                else
+                {
+                    // bottom faces.. todo. use basic_top_center?
+                    model = "data/models/environments/general/basic_middle_side.pmm";
+                }
+            }
+            else if(en[e][0] || en[e][1])
+            {
+                // side yup faces
                 model = "data/models/environments/general/basic_middle_side.pmm";
+                
+                // here we need lookups for diff rotations because the models are not uniform
+                if(e >= 8)
+                {
+                    if(en[e][1])
+                    {
+                        rot_r = side_edge_rotation_2[e%4];
+                    }
+                    else
+                    {
+                        rot_r = side_edge_rotation[e%4];
+                    }
+                }
+                else if(e >= 4)
+                {
+                    // bottom edge mid faces
+                    rot_r = bottom_edge_rotation[e%4];
+                }
             }
             
             if(!model.empty())
