@@ -143,8 +143,22 @@ void tilemap_ray_cast(const physics::ray_cast_result& result)
 
 void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
 {
+    Str geom_top_corner = "topcorner3shape";
+    Str geom_middle_corner = "middlecorner3shape";
+    Str geom_top_side = "topside3shape";
+    Str geom_middle_side = "middleside3shape";
+    Str geom_top_centre = "topcenter3shape";
+    
+    Str file_top_corner = "data/models/environments/general/basic_top_corner.pmm";
+    Str file_middle_corner = "data/models/environments/general/basic_middle_corner.pmm";
+    Str file_top_side = "data/models/environments/general/basic_top_side.pmm";
+    Str file_middle_side = "data/models/environments/general/basic_middle_side.pmm";
+    Str file_top_centre = "data/models/environments/general/basic_top_center.pmm";
+    
     static const f32 ninety = M_PI/2.0f;
     static const f32 one_eighty = M_PI;
+    
+    u32 start = scene->num_nodes;
     
     for (u32 n = 0; n < scene->num_nodes; ++n)
     {
@@ -278,7 +292,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // if we have no neighbours on 3 sides we are a corner
             if (!cn[c][0] && !cn[c][1] && !cn[c][2])
             {
-                u32 corner = load_pmm("data/models/environments/general/basic_top_corner.pmm", scene);
+                //u32 corner = load_pmm("data/models/environments/general/basic_top_corner.pmm", scene);
+                
+                u32 corner = get_new_node(scene);
+                scene->geometry_names[corner] = geom_top_corner;
+                scene->names[corner] = file_top_corner;
+                
                 scene->transforms[corner].translation = cpc;
                 scene->transforms[corner].rotation = corner_rotation[c];
                 scene->entities[corner] |= CMP_TRANSFORM;
@@ -289,7 +308,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // middle edge
             if (!cn[c][0] && !cn[c][2] && cn[c][1])
             {
-                u32 tile = load_pmm("data/models/environments/general/basic_middle_corner.pmm", scene);
+                //u32 tile = load_pmm("data/models/environments/general/basic_middle_corner.pmm", scene);
+                
+                u32 tile = get_new_node(scene);
+                scene->geometry_names[tile] = geom_middle_corner;
+                scene->names[tile] = file_middle_corner;
+                
                 scene->transforms[tile].translation = cpc;
                 scene->transforms[tile].rotation = corner_rotation[c];
                 scene->entities[tile] |= CMP_TRANSFORM;
@@ -302,7 +326,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             {
                 if (!cn[c][0])
                 {
-                    u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
+                    //u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
+                    
+                    u32 tile = get_new_node(scene);
+                    scene->geometry_names[tile] = geom_top_side;
+                    scene->names[tile] = file_top_side;
+                    
                     scene->transforms[tile].translation = cpc;
                     scene->transforms[tile].rotation = quat(0.0f, 0.0f, 0.0f);
                     
@@ -318,7 +347,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 }
                 else if (!cn[c][2])
                 {
-                    u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
+                    //u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
+                    
+                    u32 tile = get_new_node(scene);
+                    scene->geometry_names[tile] = geom_top_side;
+                    scene->names[tile] = file_top_side;
+                    
                     scene->transforms[tile].translation = cpc;
                     scene->transforms[tile].rotation = quat(0.0f, -ninety, 0.0f);
                     
@@ -338,11 +372,17 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             
             // rotations can be in 3 positions depending on neighbors
             u32 rot_i = 0;
-            Str model = "data/models/environments/general/basic_middle_side.pmm";
+            
+            //Str model = "data/models/environments/general/basic_middle_side.pmm";
+            Str model = geom_middle_side;
+            Str file = file_middle_side;
             
             if(!cn[c][1])
             {
-                model = "data/models/environments/general/basic_top_center.pmm";
+                //model = "data/models/environments/general/basic_top_center.pmm";
+                model = geom_top_centre;
+                file = file_top_centre;
+                
                 rot_i = 1;
             }
             else if(!cn[c][2])
@@ -350,7 +390,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 rot_i = 2;
             }
 
-            u32 tile = load_pmm(model.c_str(), scene);
+            //u32 tile = load_pmm(model.c_str(), scene);
+            
+            u32 tile = get_new_node(scene);
+            scene->geometry_names[tile] = model;
+            scene->geometry_names[tile] = file;
+            
             scene->transforms[tile].translation = cpc;
             scene->transforms[tile].rotation = corner_face_rotations[c][rot_i];
             scene->entities[tile] |= CMP_TRANSFORM;
@@ -455,34 +500,49 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             };
             
             Str model = "";
-
+            Str file = "";
+            
             quat rot_r = edge_rotation[e];
             
             if (!en[e][0] && !en[e][1])
             {
                 // corners / edges
-                model = "data/models/environments/general/basic_top_side.pmm";
+                //model = "data/models/environments/general/basic_top_side.pmm";
+                model = geom_top_side;
+                file = file_top_side;
+                
+                //if(e >= 8)
+                    //model = "data/models/environments/general/basic_middle_corner.pmm";
                 
                 if(e >= 8)
-                    model = "data/models/environments/general/basic_middle_corner.pmm";
+                {
+                    model = geom_middle_corner;
+                    file = file_middle_corner;
+                }
             }
             else if (en[e][0] && e < 8)
             {
                 if(e < 4)
                 {
                     // top faces
-                    model = "data/models/environments/general/basic_top_center.pmm";
+                    //model = "data/models/environments/general/basic_top_center.pmm";
+                    model = geom_top_centre;
+                    file = file_top_centre;
                 }
                 else
                 {
                     // bottom faces.. todo. use basic_top_center?
-                    model = "data/models/environments/general/basic_middle_side.pmm";
+                    //model = "data/models/environments/general/basic_middle_side.pmm";
+                    model = geom_middle_side;
+                    file = file_middle_side;
                 }
             }
             else if(en[e][0] || en[e][1])
             {
                 // side yup faces
-                model = "data/models/environments/general/basic_middle_side.pmm";
+                //model = "data/models/environments/general/basic_middle_side.pmm";
+                model = geom_middle_side;
+                file = file_middle_side;
                 
                 // here we need lookups for diff rotations because the models are not uniform
                 if(e >= 8)
@@ -507,7 +567,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             {
                 for(u32 i = 0; i < 2; ++i)
                 {
-                    u32 tile = load_pmm(model.c_str(), scene);
+                    //u32 tile = load_pmm(model.c_str(), scene);
+                    
+                    u32 tile = get_new_node(scene);
+                    scene->geometry_names[tile] = model;
+                    scene->names[tile] = file;
+                    
                     scene->transforms[tile].translation = esubp[i];
                     scene->transforms[tile].rotation = rot_r;
                     scene->entities[tile] |= CMP_TRANSFORM;
@@ -547,7 +612,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // add 4
             for(u32 i = 0; i < 4; ++i)
             {
-                u32 tile = load_pmm("data/models/environments/general/basic_top_center.pmm", scene);
+                //u32 tile = load_pmm("data/models/environments/general/basic_top_center.pmm", scene);
+                
+                u32 tile = get_new_node(scene);
+                scene->geometry_names[tile] = geom_top_centre;
+                scene->names[tile] = file_top_centre;
+                
                 scene->transforms[tile].translation = fpsub[i];
                 scene->transforms[tile].rotation = face_rotation[f];
                 scene->entities[tile] |= CMP_TRANSFORM;
@@ -556,6 +626,17 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             put::dbg::add_point(fp, 0.5f);
         }
     }
+    
+    // bake vertex buffer
+    u32 end = scene->num_nodes;
+
+    u32* node_list = nullptr;
+    for(u32 i = start; i < end; ++i)
+    {
+        sb_push(node_list, i);
+    }
+    
+    bake_nodes_to_vb(scene, node_list);
 }
 
 void setup_character(put::ecs::ecs_scene* scene)
@@ -608,7 +689,14 @@ void setup_character(put::ecs::ecs_scene* scene)
     //load_scene("data/scene/basic_level-3.pms", scene, true);
     //load_scene("data/scene/basic_level-4.pms", scene, true);
     //load_scene("data/scene/basic_level-ex.pms", scene, true);
-
+    
+    // todo move to level editor
+    load_pmm("data/models/environments/general/basic_top_corner.pmm", scene, PMM_GEOMETRY | PMM_MATERIAL);
+    load_pmm("data/models/environments/general/basic_middle_corner.pmm", scene, PMM_GEOMETRY | PMM_MATERIAL);
+    load_pmm("data/models/environments/general/basic_top_side.pmm", scene, PMM_GEOMETRY | PMM_MATERIAL);
+    load_pmm("data/models/environments/general/basic_middle_side.pmm", scene, PMM_GEOMETRY | PMM_MATERIAL);
+    load_pmm("data/models/environments/general/basic_top_center.pmm", scene, PMM_GEOMETRY | PMM_MATERIAL);
+    
     physics::physics_consume_command_buffer();
     pen::thread_sleep_ms(4);
 }
