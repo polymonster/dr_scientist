@@ -56,6 +56,7 @@ void* dr_ecs_extension(ecs_scene* scene)
     ext.context = exts;
     ext.num_components = exts->num_components;
     ext.ext_func = &dr_ecs_extension;
+    ext.update_func = &update_game_components;
     ext.browser_func = &dr_scene_browser_ui;
 
     register_ecs_extentsions(scene, ext);
@@ -157,6 +158,8 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
     
     static const f32 ninety = M_PI/2.0f;
     static const f32 one_eighty = M_PI;
+    
+    u32 parent = get_new_node(scene);
     
     u32 start = scene->num_nodes;
     
@@ -292,14 +295,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // if we have no neighbours on 3 sides we are a corner
             if (!cn[c][0] && !cn[c][1] && !cn[c][2])
             {
-                //u32 corner = load_pmm("data/models/environments/general/basic_top_corner.pmm", scene);
-                
                 u32 corner = get_new_node(scene);
                 scene->geometry_names[corner] = geom_top_corner;
                 scene->names[corner] = file_top_corner;
-                
                 scene->transforms[corner].translation = cpc;
                 scene->transforms[corner].rotation = corner_rotation[c];
+                scene->transforms[corner].scale = vec3f::one();
                 scene->entities[corner] |= CMP_TRANSFORM;
 
                 continue;
@@ -308,14 +309,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // middle edge
             if (!cn[c][0] && !cn[c][2] && cn[c][1])
             {
-                //u32 tile = load_pmm("data/models/environments/general/basic_middle_corner.pmm", scene);
-                
                 u32 tile = get_new_node(scene);
                 scene->geometry_names[tile] = geom_middle_corner;
                 scene->names[tile] = file_middle_corner;
-                
                 scene->transforms[tile].translation = cpc;
                 scene->transforms[tile].rotation = corner_rotation[c];
+                scene->transforms[tile].scale = vec3f::one();
                 scene->entities[tile] |= CMP_TRANSFORM;
 
                 continue;
@@ -326,14 +325,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             {
                 if (!cn[c][0])
                 {
-                    //u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
-                    
                     u32 tile = get_new_node(scene);
                     scene->geometry_names[tile] = geom_top_side;
                     scene->names[tile] = file_top_side;
-                    
                     scene->transforms[tile].translation = cpc;
                     scene->transforms[tile].rotation = quat(0.0f, 0.0f, 0.0f);
+                    scene->transforms[tile].scale = vec3f::one();
                     
                     if(cv.x < 0.0f)
                         scene->transforms[tile].rotation *= quat(0.0f, one_eighty, 0.0f);
@@ -347,14 +344,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 }
                 else if (!cn[c][2])
                 {
-                    //u32 tile = load_pmm("data/models/environments/general/basic_top_side.pmm", scene);
-                    
                     u32 tile = get_new_node(scene);
                     scene->geometry_names[tile] = geom_top_side;
                     scene->names[tile] = file_top_side;
-                    
                     scene->transforms[tile].translation = cpc;
                     scene->transforms[tile].rotation = quat(0.0f, -ninety, 0.0f);
+                    scene->transforms[tile].scale = vec3f::one();
                     
                     if(cv.z < 0.0f)
                         scene->transforms[tile].rotation *= quat(0.0f, one_eighty, 0.0f);
@@ -373,13 +368,11 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // rotations can be in 3 positions depending on neighbors
             u32 rot_i = 0;
             
-            //Str model = "data/models/environments/general/basic_middle_side.pmm";
             Str model = geom_middle_side;
             Str file = file_middle_side;
             
             if(!cn[c][1])
             {
-                //model = "data/models/environments/general/basic_top_center.pmm";
                 model = geom_top_centre;
                 file = file_top_centre;
                 
@@ -390,14 +383,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 rot_i = 2;
             }
 
-            //u32 tile = load_pmm(model.c_str(), scene);
-            
             u32 tile = get_new_node(scene);
             scene->geometry_names[tile] = model;
-            scene->geometry_names[tile] = file;
-            
+            scene->names[tile] = file;
             scene->transforms[tile].translation = cpc;
             scene->transforms[tile].rotation = corner_face_rotations[c][rot_i];
+            scene->transforms[tile].scale = vec3f::one();
             scene->entities[tile] |= CMP_TRANSFORM;
         }
 
@@ -507,12 +498,8 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             if (!en[e][0] && !en[e][1])
             {
                 // corners / edges
-                //model = "data/models/environments/general/basic_top_side.pmm";
                 model = geom_top_side;
                 file = file_top_side;
-                
-                //if(e >= 8)
-                    //model = "data/models/environments/general/basic_middle_corner.pmm";
                 
                 if(e >= 8)
                 {
@@ -525,14 +512,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 if(e < 4)
                 {
                     // top faces
-                    //model = "data/models/environments/general/basic_top_center.pmm";
                     model = geom_top_centre;
                     file = file_top_centre;
                 }
                 else
                 {
                     // bottom faces.. todo. use basic_top_center?
-                    //model = "data/models/environments/general/basic_middle_side.pmm";
                     model = geom_middle_side;
                     file = file_middle_side;
                 }
@@ -540,7 +525,6 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             else if(en[e][0] || en[e][1])
             {
                 // side yup faces
-                //model = "data/models/environments/general/basic_middle_side.pmm";
                 model = geom_middle_side;
                 file = file_middle_side;
                 
@@ -567,14 +551,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             {
                 for(u32 i = 0; i < 2; ++i)
                 {
-                    //u32 tile = load_pmm(model.c_str(), scene);
-                    
                     u32 tile = get_new_node(scene);
                     scene->geometry_names[tile] = model;
                     scene->names[tile] = file;
-                    
                     scene->transforms[tile].translation = esubp[i];
                     scene->transforms[tile].rotation = rot_r;
+                    scene->transforms[tile].scale = vec3f::one();
                     scene->entities[tile] |= CMP_TRANSFORM;
                 }
             }
@@ -612,14 +594,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // add 4
             for(u32 i = 0; i < 4; ++i)
             {
-                //u32 tile = load_pmm("data/models/environments/general/basic_top_center.pmm", scene);
-                
                 u32 tile = get_new_node(scene);
                 scene->geometry_names[tile] = geom_top_centre;
                 scene->names[tile] = file_top_centre;
-                
                 scene->transforms[tile].translation = fpsub[i];
                 scene->transforms[tile].rotation = face_rotation[f];
+                scene->transforms[tile].scale = vec3f::one();
                 scene->entities[tile] |= CMP_TRANSFORM;
             }
 
@@ -633,10 +613,14 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
     u32* node_list = nullptr;
     for(u32 i = start; i < end; ++i)
     {
+        //scene->parents[i] = parent;
         sb_push(node_list, i);
     }
     
-    bake_nodes_to_vb(scene, node_list);
+    // need to bake world mats and extents
+    update_scene(scene, 1.0/60.0f);
+    
+    bake_nodes_to_vb(scene, parent, node_list);
 }
 
 void setup_character(put::ecs::ecs_scene* scene)
@@ -1220,19 +1204,6 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         scene->entities[dr.root] |= CMP_TRANSFORM;
     }
 
-    pos_hist_x[hp] = pc.pos.x - pc.pps.x;
-    pos_hist_y[hp] = pc.pos.y - pc.pps.y;
-    pos_hist_z[hp] = pc.pos.z - pc.pps.z;
-
-    static f32 scale_min = -0.3f;
-    static f32 scale_max = 0.3f;
-
-    ImGui::PlotLines("X", &pos_hist_x[0], 60, hp, "", scale_min, scale_max);
-    ImGui::PlotLines("Y", &pos_hist_y[0], 60, hp, "", scale_min, scale_max);
-    ImGui::PlotLines("z", &pos_hist_z[0], 60, hp, "", scale_min, scale_max);
-
-    hp = (hp + 1) % 60;
-
     // camera ---------------------------------------------------------------------------------------------------------------
 
     if( game_cam )
@@ -1280,6 +1251,28 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         put::dbg::add_line(mid, mid + xz_dir, vec4f::white());
     }
     
+    static bool open = false;
+    ImGui::BeginMainMenuBar();
+    if(ImGui::MenuItem(ICON_FA_MALE))
+        open = !open;
+    ImGui::EndMainMenuBar();
+    
+    if(!open)
+        return;
+    
+    pos_hist_x[hp] = pc.pos.x - pc.pps.x;
+    pos_hist_y[hp] = pc.pos.y - pc.pps.y;
+    pos_hist_z[hp] = pc.pos.z - pc.pps.z;
+    
+    static f32 scale_min = -0.3f;
+    static f32 scale_max = 0.3f;
+    
+    ImGui::PlotLines("X", &pos_hist_x[0], 60, hp, "", scale_min, scale_max);
+    ImGui::PlotLines("Y", &pos_hist_y[0], 60, hp, "", scale_min, scale_max);
+    ImGui::PlotLines("z", &pos_hist_z[0], 60, hp, "", scale_min, scale_max);
+    
+    hp = (hp + 1) % 60;
+    
     ImGui::Checkbox("debug_lines", &debug_lines);
     ImGui::Checkbox("game_cam", &game_cam);
     
@@ -1310,6 +1303,20 @@ void update_game_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
     update_character_controller(ecsc, scene, dt);
     update_level_editor(ecsc, scene, dt);
+}
+
+void update_game_components(ecs_extension& extension, ecs_scene* scene, f32 dt)
+{
+    dr_ecs_exts* ext = (dr_ecs_exts*)extension.context;
+    
+    for(u32 n = 0; n < scene->num_nodes; ++n)
+    {
+        if(ext->cmp_flags[n] & CMP_CUSTOM_ANIM)
+        {
+            scene->transforms[n].rotation *= quat(0.0f, dt, 0.0f);
+            scene->entities[n] |= CMP_TRANSFORM;
+        }
+    }
 }
 
 PEN_TRV pen::user_entry( void* params )
