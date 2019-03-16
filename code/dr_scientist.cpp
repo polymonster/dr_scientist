@@ -144,22 +144,23 @@ void tilemap_ray_cast(const physics::ray_cast_result& result)
 
 void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
 {
-    Str geom_top_corner = "topcorner3shape";
-    Str geom_middle_corner = "middlecorner3shape";
-    Str geom_top_side = "topside3shape";
-    Str geom_middle_side = "middleside3shape";
-    Str geom_top_centre = "topcenter3shape";
-    
     Str file_top_corner = "data/models/environments/general/basic_top_corner.pmm";
     Str file_middle_corner = "data/models/environments/general/basic_middle_corner.pmm";
     Str file_top_side = "data/models/environments/general/basic_top_side.pmm";
     Str file_middle_side = "data/models/environments/general/basic_middle_side.pmm";
     Str file_top_centre = "data/models/environments/general/basic_top_center.pmm";
     
-    static const f32 ninety = M_PI/2.0f;
-    static const f32 one_eighty = M_PI;
+    static const f32 _90 = M_PI/2.0f;
+    static const f32 _180 = M_PI;
+    
+    f32 tile_size = 0.5f;
+    f32 sub_tile_size = 0.125f;
     
     u32 parent = get_new_node(scene);
+    scene->transforms[parent].translation = vec3f::zero();
+    scene->transforms[parent].rotation = quat(0.0f, 0.0f, 0.0f);
+    scene->transforms[parent].scale = vec3f::one();
+    scene->entities[parent] |= CMP_TRANSFORM;
     
     u32 start = scene->num_nodes;
     
@@ -261,25 +262,25 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
         };
         
         static quat corner_rotation[] = {
-            quat(0.0f, M_PI, 0.0f),
-            quat(0.0f, -M_PI / 2.0f, 0.0f),
+            quat(0.0f, _180, 0.0f),
+            quat(0.0f, -_90, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, M_PI / 2.0f, 0.0f),
-            quat(0.0f, 0.0f, one_eighty) * quat(0.0f, -ninety, 0.0f),
-            quat(0.0f, 0.0f, one_eighty) * quat(0.0f, one_eighty, 0.0f),
-            quat(0.0f, 0.0f, one_eighty) * quat(0.0f, ninety, 0.0f),
-            quat(0.0f, 0.0f, one_eighty)
+            quat(0.0f, _90, 0.0f),
+            quat(0.0f, 0.0f, _180) * quat(0.0f, -_90, 0.0f),
+            quat(0.0f, 0.0f, _180) * quat(0.0f, _180, 0.0f),
+            quat(0.0f, 0.0f, _180) * quat(0.0f, _90, 0.0f),
+            quat(0.0f, 0.0f, _180)
         };
         
         quat corner_face_rotations[8][3] = {
-            { { quat(0.0f, one_eighty, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, ninety, 0.0f) } },     // -x -z .
-            { { quat(0.0f, one_eighty, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, -ninety, 0.0f) } },    // -x +z .
-            { { quat(0.0f, 0.0f, 0.0f) },       { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, -ninety, 0.0f) } },    // +x +z .
-            { { quat(0.0f, 0.0f, 0.0f) },       { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, ninety, 0.0f) } },     // +x -z .
-            { { quat(0.0f, one_eighty, 0.0f) }, { quat(0.0f, 0.0f, one_eighty) }, { quat(0.0f, ninety, 0.0f) } },     // .
-            { { quat(0.0f, one_eighty, 0.0f) }, { quat(0.0f, 0.0f, one_eighty) }, { quat(0.0f, -ninety, 0.0f) } },    // .
-            { { quat(0.0f, 0.0f, 0.0f) },       { quat(0.0f, 0.0f, one_eighty) }, { quat(0.0f, -ninety, 0.0f) } },    // .
-            { { quat(0.0f, 0.0f, 0.0f) },       { quat(0.0f, 0.0f, one_eighty) }, { quat(0.0f, ninety, 0.0f) } }      // .
+            { { quat(0.0f, _180, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, _90, 0.0f) } },     // -x -z .
+            { { quat(0.0f, _180, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, -_90, 0.0f) } },    // -x +z .
+            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, -_90, 0.0f) } },    // +x +z .
+            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, _90, 0.0f) } },     // +x -z .
+            { { quat(0.0f, _180, 0.0f) }, { quat(0.0f, 0.0f, _180) }, { quat(0.0f, _90, 0.0f) } },     // .
+            { { quat(0.0f, _180, 0.0f) }, { quat(0.0f, 0.0f, _180) }, { quat(0.0f, -_90, 0.0f) } },    // .
+            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, _180) }, { quat(0.0f, -_90, 0.0f) } },    // .
+            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, _180) }, { quat(0.0f, _90, 0.0f) } }      // .
         };
         
         for (u32 c = 0; c < 8; ++c)
@@ -296,8 +297,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             if (!cn[c][0] && !cn[c][1] && !cn[c][2])
             {
                 u32 corner = get_new_node(scene);
-                scene->geometry_names[corner] = geom_top_corner;
-                scene->names[corner] = file_top_corner;
+                scene->geometry_names[corner] = file_top_corner;
                 scene->transforms[corner].translation = cpc;
                 scene->transforms[corner].rotation = corner_rotation[c];
                 scene->transforms[corner].scale = vec3f::one();
@@ -310,8 +310,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             if (!cn[c][0] && !cn[c][2] && cn[c][1])
             {
                 u32 tile = get_new_node(scene);
-                scene->geometry_names[tile] = geom_middle_corner;
-                scene->names[tile] = file_middle_corner;
+                scene->geometry_names[tile] = file_middle_corner;
                 scene->transforms[tile].translation = cpc;
                 scene->transforms[tile].rotation = corner_rotation[c];
                 scene->transforms[tile].scale = vec3f::one();
@@ -326,17 +325,16 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 if (!cn[c][0])
                 {
                     u32 tile = get_new_node(scene);
-                    scene->geometry_names[tile] = geom_top_side;
-                    scene->names[tile] = file_top_side;
+                    scene->geometry_names[tile] = file_top_side;
                     scene->transforms[tile].translation = cpc;
                     scene->transforms[tile].rotation = quat(0.0f, 0.0f, 0.0f);
                     scene->transforms[tile].scale = vec3f::one();
                     
                     if(cv.x < 0.0f)
-                        scene->transforms[tile].rotation *= quat(0.0f, one_eighty, 0.0f);
+                        scene->transforms[tile].rotation *= quat(0.0f, _180, 0.0f);
                     
                     if(cv.y < 0.0f)
-                        scene->transforms[tile].rotation *= quat(-ninety, 0.0f, 0.0f);
+                        scene->transforms[tile].rotation *= quat(-_90, 0.0f, 0.0f);
                     
                     scene->entities[tile] |= CMP_TRANSFORM;
 
@@ -345,17 +343,16 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 else if (!cn[c][2])
                 {
                     u32 tile = get_new_node(scene);
-                    scene->geometry_names[tile] = geom_top_side;
-                    scene->names[tile] = file_top_side;
+                    scene->geometry_names[tile] = file_top_side;
                     scene->transforms[tile].translation = cpc;
-                    scene->transforms[tile].rotation = quat(0.0f, -ninety, 0.0f);
+                    scene->transforms[tile].rotation = quat(0.0f, -_90, 0.0f);
                     scene->transforms[tile].scale = vec3f::one();
                     
                     if(cv.z < 0.0f)
-                        scene->transforms[tile].rotation *= quat(0.0f, one_eighty, 0.0f);
+                        scene->transforms[tile].rotation *= quat(0.0f, _180, 0.0f);
                     
                     if(cv.y < 0.0f)
-                        scene->transforms[tile].rotation *= quat( -ninety, 0.0f, 0.0f);
+                        scene->transforms[tile].rotation *= quat( -_90, 0.0f, 0.0f);
                     
                     scene->entities[tile] |= CMP_TRANSFORM;
 
@@ -368,14 +365,11 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // rotations can be in 3 positions depending on neighbors
             u32 rot_i = 0;
             
-            Str model = geom_middle_side;
-            Str file = file_middle_side;
+            Str model = file_middle_side;
             
             if(!cn[c][1])
             {
-                model = geom_top_centre;
-                file = file_top_centre;
-                
+                model = file_top_centre;
                 rot_i = 1;
             }
             else if(!cn[c][2])
@@ -385,7 +379,6 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
 
             u32 tile = get_new_node(scene);
             scene->geometry_names[tile] = model;
-            scene->names[tile] = file;
             scene->transforms[tile].translation = cpc;
             scene->transforms[tile].rotation = corner_face_rotations[c][rot_i];
             scene->transforms[tile].scale = vec3f::one();
@@ -440,40 +433,40 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
         };
         
         static quat edge_rotation[] = {
-            quat(0.0f, M_PI, 0.0f),
-            quat(0.0f, M_PI / 2.0f, 0.0f),
+            quat(0.0f, _180, 0.0f),
+            quat(0.0f, _90, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, -M_PI / 2.0f, 0.0f),
-            quat(-M_PI/2.0f, 0.0f, -M_PI),
-            quat(0.0f,  ninety, 0.0f) * quat(-ninety, 0.0f, 0.0f),
-            quat(-M_PI/2.0f, 0.0f, 0.0f),
-            quat(0.0f, -ninety, 0.0f) * quat(-ninety, 0.0f, 0.0f),
+            quat(0.0f, -_90, 0.0f),
+            quat(-_90, 0.0f, -_180),
+            quat(0.0f,  _90, 0.0f) * quat(-_90, 0.0f, 0.0f),
+            quat(-_90, 0.0f, 0.0f),
+            quat(0.0f, -_90, 0.0f) * quat(-_90, 0.0f, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, -ninety, 0.0f),
-            quat(0.0f, one_eighty, 0.0f),
-            quat(0.0f, ninety, 0.0f)
+            quat(0.0f, -_90, 0.0f),
+            quat(0.0f, _180, 0.0f),
+            quat(0.0f, _90, 0.0f)
         };
         
         // side edge rotations can be in 2 positions
         static quat side_edge_rotation[] = {
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, -ninety, 0.0f),
-            quat(0.0f, ninety, 0.0f),
+            quat(0.0f, -_90, 0.0f),
+            quat(0.0f, _90, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
         };
         
         static quat side_edge_rotation_2[] = {
-            quat(0.0f, -ninety, 0.0f),
-            quat(0.0f, -one_eighty, 0.0f),
-            quat(0.0f, one_eighty, 0.0f),
-            quat(0.0f, ninety, 0.0f),
+            quat(0.0f, -_90, 0.0f),
+            quat(0.0f, -_180, 0.0f),
+            quat(0.0f, _180, 0.0f),
+            quat(0.0f, _90, 0.0f),
         };
         
         static quat bottom_edge_rotation[] = {
-            quat(0.0f, one_eighty, 0.0f),
-            quat(0.0f, ninety, 0.0f),
+            quat(0.0f, _180, 0.0f),
+            quat(0.0f, _90, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, -ninety, 0.0f),
+            quat(0.0f, -_90, 0.0f),
         };
 
         for (u32 e = 0; e < 12; ++e)
@@ -498,13 +491,11 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             if (!en[e][0] && !en[e][1])
             {
                 // corners / edges
-                model = geom_top_side;
-                file = file_top_side;
+                model = file_top_side;
                 
                 if(e >= 8)
                 {
-                    model = geom_middle_corner;
-                    file = file_middle_corner;
+                    model = file_middle_corner;
                 }
             }
             else if (en[e][0] && e < 8)
@@ -512,21 +503,18 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 if(e < 4)
                 {
                     // top faces
-                    model = geom_top_centre;
-                    file = file_top_centre;
+                    model = file_top_centre;
                 }
                 else
                 {
                     // bottom faces.. todo. use basic_top_center?
-                    model = geom_middle_side;
-                    file = file_middle_side;
+                    model = file_middle_side;
                 }
             }
             else if(en[e][0] || en[e][1])
             {
                 // side yup faces
-                model = geom_middle_side;
-                file = file_middle_side;
+                model = file_middle_side;
                 
                 // here we need lookups for diff rotations because the models are not uniform
                 if(e >= 8)
@@ -553,7 +541,6 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 {
                     u32 tile = get_new_node(scene);
                     scene->geometry_names[tile] = model;
-                    scene->names[tile] = file;
                     scene->transforms[tile].translation = esubp[i];
                     scene->transforms[tile].rotation = rot_r;
                     scene->transforms[tile].scale = vec3f::one();
@@ -564,12 +551,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
 
         // face tiles
         static quat face_rotation[] = {
-            quat(-M_PI/2.0f, 0.0f, 0.0f),
+            quat(-_90, 0.0f, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, 0.0f, M_PI/2.0f),
-            quat(M_PI/2.0f, 0.0f, 0.0f),
-            quat(M_PI, 0.0f, 0.0f),
-            quat(0.0f, 0.0f, -M_PI/2.0f)
+            quat(0.0f, 0.0f, _90),
+            quat(_90, 0.0f, 0.0f),
+            quat(_180, 0.0f, 0.0f),
+            quat(0.0f, 0.0f, -_90)
         };
         
         for (u32 f = 0; f < 6; ++f)
@@ -595,8 +582,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             for(u32 i = 0; i < 4; ++i)
             {
                 u32 tile = get_new_node(scene);
-                scene->geometry_names[tile] = geom_top_centre;
-                scene->names[tile] = file_top_centre;
+                scene->geometry_names[tile] = file_top_centre;
                 scene->transforms[tile].translation = fpsub[i];
                 scene->transforms[tile].rotation = face_rotation[f];
                 scene->transforms[tile].scale = vec3f::one();
@@ -613,13 +599,17 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
     u32* node_list = nullptr;
     for(u32 i = start; i < end; ++i)
     {
-        //scene->parents[i] = parent;
+        scene->parents[i] = parent;
+        scene->bounding_volumes[i].min_extents = vec3f(-0.125f);
+        scene->bounding_volumes[i].max_extents = vec3f( 0.125f);
+        
         sb_push(node_list, i);
     }
-    
+
     // need to bake world mats and extents
-    update_scene(scene, 1.0/60.0f);
+    update_scene(scene, 0.0f);
     
+    // bake vertex buffer
     bake_nodes_to_vb(scene, parent, node_list);
 }
 
