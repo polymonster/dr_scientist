@@ -150,8 +150,8 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
     Str file_middle_side = "data/models/environments/general/basic_middle_side.pmm";
     Str file_top_centre = "data/models/environments/general/basic_top_center.pmm";
     
-    static const f32 _90 = M_PI/2.0f;
-    static const f32 _180 = M_PI;
+    static const f32 r90 = M_PI/2.0f;
+    static const f32 r180 = M_PI;
     
     f32 tile_size = 0.5f;
     f32 sub_tile_size = 0.125f;
@@ -262,25 +262,25 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
         };
         
         static quat corner_rotation[] = {
-            quat(0.0f, _180, 0.0f),
-            quat(0.0f, -_90, 0.0f),
+            quat(0.0f, r180, 0.0f),
+            quat(0.0f, -r90, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, _90, 0.0f),
-            quat(0.0f, 0.0f, _180) * quat(0.0f, -_90, 0.0f),
-            quat(0.0f, 0.0f, _180) * quat(0.0f, _180, 0.0f),
-            quat(0.0f, 0.0f, _180) * quat(0.0f, _90, 0.0f),
-            quat(0.0f, 0.0f, _180)
+            quat(0.0f, r90, 0.0f),
+            quat(0.0f, 0.0f, r180) * quat(0.0f, -r90, 0.0f),
+            quat(0.0f, 0.0f, r180) * quat(0.0f, r180, 0.0f),
+            quat(0.0f, 0.0f, r180) * quat(0.0f, r90, 0.0f),
+            quat(0.0f, 0.0f, r180)
         };
         
         quat corner_face_rotations[8][3] = {
-            { { quat(0.0f, _180, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, _90, 0.0f) } },     // -x -z .
-            { { quat(0.0f, _180, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, -_90, 0.0f) } },    // -x +z .
-            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, -_90, 0.0f) } },    // +x +z .
-            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, _90, 0.0f) } },     // +x -z .
-            { { quat(0.0f, _180, 0.0f) }, { quat(0.0f, 0.0f, _180) }, { quat(0.0f, _90, 0.0f) } },     // .
-            { { quat(0.0f, _180, 0.0f) }, { quat(0.0f, 0.0f, _180) }, { quat(0.0f, -_90, 0.0f) } },    // .
-            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, _180) }, { quat(0.0f, -_90, 0.0f) } },    // .
-            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, _180) }, { quat(0.0f, _90, 0.0f) } }      // .
+            { { quat(0.0f, r180, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, r90, 0.0f) } },     // -x -z .
+            { { quat(0.0f, r180, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, -r90, 0.0f) } },    // -x +z .
+            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, -r90, 0.0f) } },    // +x +z .
+            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, r90, 0.0f) } },     // +x -z .
+            { { quat(0.0f, r180, 0.0f) }, { quat(0.0f, 0.0f, r180) }, { quat(0.0f, r90, 0.0f) } },     // .
+            { { quat(0.0f, r180, 0.0f) }, { quat(0.0f, 0.0f, r180) }, { quat(0.0f, -r90, 0.0f) } },    // .
+            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, r180) }, { quat(0.0f, -r90, 0.0f) } },    // .
+            { { quat(0.0f, 0.0f, 0.0f) }, { quat(0.0f, 0.0f, r180) }, { quat(0.0f, r90, 0.0f) } }      // .
         };
         
         for (u32 c = 0; c < 8; ++c)
@@ -331,10 +331,10 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                     scene->transforms[tile].scale = vec3f::one();
                     
                     if(cv.x < 0.0f)
-                        scene->transforms[tile].rotation *= quat(0.0f, _180, 0.0f);
+                        scene->transforms[tile].rotation *= quat(0.0f, r180, 0.0f);
                     
                     if(cv.y < 0.0f)
-                        scene->transforms[tile].rotation *= quat(-_90, 0.0f, 0.0f);
+                        scene->transforms[tile].rotation *= quat(-r90, 0.0f, 0.0f);
                     
                     scene->entities[tile] |= CMP_TRANSFORM;
 
@@ -345,14 +345,14 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                     u32 tile = get_new_node(scene);
                     scene->geometry_names[tile] = file_top_side;
                     scene->transforms[tile].translation = cpc;
-                    scene->transforms[tile].rotation = quat(0.0f, -_90, 0.0f);
+                    scene->transforms[tile].rotation = quat(0.0f, -r90, 0.0f);
                     scene->transforms[tile].scale = vec3f::one();
                     
                     if(cv.z < 0.0f)
-                        scene->transforms[tile].rotation *= quat(0.0f, _180, 0.0f);
+                        scene->transforms[tile].rotation *= quat(0.0f, r180, 0.0f);
                     
                     if(cv.y < 0.0f)
-                        scene->transforms[tile].rotation *= quat( -_90, 0.0f, 0.0f);
+                        scene->transforms[tile].rotation *= quat( -r90, 0.0f, 0.0f);
                     
                     scene->entities[tile] |= CMP_TRANSFORM;
 
@@ -433,40 +433,40 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
         };
         
         static quat edge_rotation[] = {
-            quat(0.0f, _180, 0.0f),
-            quat(0.0f, _90, 0.0f),
+            quat(0.0f, r180, 0.0f),
+            quat(0.0f, r90, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, -_90, 0.0f),
-            quat(-_90, 0.0f, -_180),
-            quat(0.0f,  _90, 0.0f) * quat(-_90, 0.0f, 0.0f),
-            quat(-_90, 0.0f, 0.0f),
-            quat(0.0f, -_90, 0.0f) * quat(-_90, 0.0f, 0.0f),
+            quat(0.0f, -r90, 0.0f),
+            quat(-r90, 0.0f, -r180),
+            quat(0.0f,  r90, 0.0f) * quat(-r90, 0.0f, 0.0f),
+            quat(-r90, 0.0f, 0.0f),
+            quat(0.0f, -r90, 0.0f) * quat(-r90, 0.0f, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, -_90, 0.0f),
-            quat(0.0f, _180, 0.0f),
-            quat(0.0f, _90, 0.0f)
+            quat(0.0f, -r90, 0.0f),
+            quat(0.0f, r180, 0.0f),
+            quat(0.0f, r90, 0.0f)
         };
         
         // side edge rotations can be in 2 positions
         static quat side_edge_rotation[] = {
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, -_90, 0.0f),
-            quat(0.0f, _90, 0.0f),
+            quat(0.0f, -r90, 0.0f),
+            quat(0.0f, r90, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
         };
         
         static quat side_edge_rotation_2[] = {
-            quat(0.0f, -_90, 0.0f),
-            quat(0.0f, -_180, 0.0f),
-            quat(0.0f, _180, 0.0f),
-            quat(0.0f, _90, 0.0f),
+            quat(0.0f, -r90, 0.0f),
+            quat(0.0f, -r180, 0.0f),
+            quat(0.0f, r180, 0.0f),
+            quat(0.0f, r90, 0.0f),
         };
         
         static quat bottom_edge_rotation[] = {
-            quat(0.0f, _180, 0.0f),
-            quat(0.0f, _90, 0.0f),
+            quat(0.0f, r180, 0.0f),
+            quat(0.0f, r90, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, -_90, 0.0f),
+            quat(0.0f, -r90, 0.0f),
         };
 
         for (u32 e = 0; e < 12; ++e)
@@ -492,6 +492,8 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             {
                 // corners / edges
                 model = file_top_side;
+                
+                if(e >= 8) model = file_middle_corner;
                 
                 if(e >= 8)
                 {
@@ -551,12 +553,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
 
         // face tiles
         static quat face_rotation[] = {
-            quat(-_90, 0.0f, 0.0f),
+            quat(-r90, 0.0f, 0.0f),
             quat(0.0f, 0.0f, 0.0f),
-            quat(0.0f, 0.0f, _90),
-            quat(_90, 0.0f, 0.0f),
-            quat(_180, 0.0f, 0.0f),
-            quat(0.0f, 0.0f, -_90)
+            quat(0.0f, 0.0f, r90),
+            quat(r90, 0.0f, 0.0f),
+            quat(r180, 0.0f, 0.0f),
+            quat(0.0f, 0.0f, -r90)
         };
         
         for (u32 f = 0; f < 6; ++f)
@@ -658,7 +660,7 @@ void setup_character(put::ecs::ecs_scene* scene)
     dr.anim_run_r = 5;
     
     // add a few quick bits of collision
-    //load_scene("data/scene/basic_level.pms", scene, true);
+    load_scene("data/scene/basic_level.pms", scene, true);
     //load_scene("data/scene/basic_level-2.pms", scene, true);
     //load_scene("data/scene/basic_level-3.pms", scene, true);
     //load_scene("data/scene/basic_level-4.pms", scene, true);
@@ -686,9 +688,29 @@ bool can_edit()
     return true;
 }
 
+static bool press_debounce(u32 key, bool& db)
+{
+    if(pen::input_key(key))
+    {
+        if(!db)
+        {
+            db = true;
+            return true;
+        }
+    }
+    else
+    {
+        db = false;
+    }
+    
+    return false;
+}
+
 void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
-    put::camera* camera = ecsc.camera;
+    ecs::editor_enable(true);
+    
+    camera* camera = ecsc.camera;
     dr_ecs_exts* ext = (dr_ecs_exts*)ecsc.context;
 
     static bool open = false;
@@ -704,16 +726,11 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     if(!open)
         return;
     
+    ecs::editor_enable(false);
+    
     ImGui::Begin("Toolbox");
     
-    static bool bake = false;
     if (ImGui::Button("Bake"))
-    {
-        //bake = true;
-        bake_tile_blocks(scene, ext);
-    }
-
-    if (bake)
     {
         bake_tile_blocks(scene, ext);
     }
@@ -721,7 +738,18 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     ImGui::InputInt("Level", &slice[1]);
     p0.y = slice.y;
     
+    static bool _dbu = false;
+    if(press_debounce(PK_1, _dbu))
+        slice[1]++;
+    
+    static bool _dbd = false;
+    if(press_debounce(PK_2, _dbd))
+        slice[1]--;
+
     ImGui::End();
+    
+    if(!can_edit())
+        return;
     
     pen::mouse_state ms = pen::input_get_mouse_state();
     
@@ -740,27 +768,39 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     ip = floor(ip) + vec3f(0.5f);
     ip.y = slice.y-0.5f;
     
-    if(can_edit())
+    // tile
+    dbg::add_aabb(ip - vec3f(0.5f), ip + vec3f(0.5f), vec4f::white());
+    
+    // focus
+    static bool _dbf;
+    if(press_debounce(PK_F, _dbf))
+        ecsc.camera->focus = ip;
+    
+    // detect current occupancy
+    cast_result cast;
+    bool occupied = false;
+    
+    physics::ray_cast_params rcp;
+    rcp.start = ip + vec3f(0.0f, 1.0f, 0.0f);
+    rcp.end = ip;
+    rcp.callback = &tilemap_ray_cast;
+    rcp.user_data = &cast;
+    rcp.group = 1;
+    rcp.mask = 1;
+    
+    physics::cast_ray(rcp, true);
+    
+    occupied = cast.set;
+    
+    if(occupied)
+        return;
+    
+    if(ms.buttons[PEN_MOUSE_L])
     {
-        static bool debounce = false;
-        if(ms.buttons[PEN_MOUSE_L])
-        {
-            if(!debounce)
-            {
-                add_tile_block(scene, ext, ip);
-                
-                debounce = true;
-            }
-        }
-        else
-        {
-            debounce = false;
-        }
-        
-        put::dbg::add_aabb(ip - vec3f(0.5f), ip + vec3f(0.5f));
+        add_tile_block(scene, ext, ip);
     }
     
-    // detect neighbours
+    // detect neighbours for guides
     vec3f np[6] = {
         vec3f::unit_x(),
         vec3f::unit_y(),
@@ -772,9 +812,9 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     
     for(u32 n = 0; n < 6; ++n)
     {
-        vec3f nip = ip + np[n];
+        cast.set = false;
         
-        cast_result cast;
+        vec3f nip = ip + np[n] * 100000.0f;
         
         physics::ray_cast_params rcp;
         rcp.start = ip;
@@ -790,10 +830,17 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         if(cast.set)
         {
             dbg::add_point(cast.pos, 0.1f, vec4f::yellow());
+            
+            vec3f perp = cast.normal;
+            
+            for(u32 i = 0; i < 4; ++i)
+            {
+                dbg::add_line(cast.pos, cast.pos + cast.normal);
+            }
         }
         
-        dbg::add_aabb(nip - vec3f(0.5f), nip + vec3f(0.5f), vec4f::red());
-        dbg::add_line(ip, nip, vec4f::green());
+        //dbg::add_aabb(nip - vec3f(0.5f), nip + vec3f(0.5f), vec4f::red());
+        //dbg::add_line(ip, nip, vec4f::green());
     }
     
 }
@@ -986,6 +1033,15 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         // idle state
         controller.blend.anim_a = dr.anim_idle;
         controller.blend.anim_b = dr.anim_walk;
+        
+        //controller.anim_instances[dr.anim_walk].time = 0.0f;
+        //controller.anim_instances[dr.anim_run].time = 0.0f;
+        
+        f32 mid = controller.anim_instances[dr.anim_run].length / 2.0f;
+        controller.anim_instances[dr.anim_run].time = 0.2f;
+        controller.anim_instances[dr.anim_walk].time = controller.anim_instances[dr.anim_walk].length / 2.0f;
+        
+        //controller.anim_instances[dr.anim_run].flags |= anim_flags::LOOPED;
     }
     else
     {
@@ -999,6 +1055,9 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             controller.blend.anim_a = dr.anim_run;
         else if (controller.blend.ratio <= 0.0)
             controller.blend.anim_a = dr.anim_walk;
+        
+        controller.blend.anim_a = dr.anim_run;
+        controller.blend.anim_b = dr.anim_run;
     }
 
     // reset debounce jump
