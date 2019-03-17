@@ -1028,28 +1028,29 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     
     pc.acc = vec3f(0.0f, -gravity_strength, 0.0f);
 
+    static u32 _loco[] =
+    {
+        dr.anim_run,
+        dr.anim_walk
+    };
+    
     if(pc.loco_vel == 0.0f)
     {
         // idle state
         controller.blend.anim_a = dr.anim_idle;
         controller.blend.anim_b = dr.anim_walk;
         
-        //controller.anim_instances[dr.anim_walk].time = 0.0f;
-        //controller.anim_instances[dr.anim_run].time = 0.0f;
-        
-        f32 mid = controller.anim_instances[dr.anim_run].length / 2.0f;
-        
-        controller.anim_instances[dr.anim_walk].time = controller.anim_instances[dr.anim_walk].length / 2.0f;
-        
-        controller.anim_instances[dr.anim_run].time = 0.0f;
-        //controller.anim_instances[dr.anim_run].root_translation = pc.pos;
-        controller.anim_instances[dr.anim_run].root_delta = vec3f::zero();
-        controller.anim_instances[dr.anim_run].flags |= anim_flags::PAUSED;
-        controller.anim_instances[dr.anim_run].flags |= anim_flags::LOOPED;
+        for(u32 aa = 0; aa < 2; ++aa)
+        {
+            controller.anim_instances[_loco[aa]].time = 0.0f;
+            controller.anim_instances[_loco[aa]].root_delta = vec3f::zero();
+            controller.anim_instances[_loco[aa]].flags |= (anim_flags::PAUSED | anim_flags::LOOPED);
+        }
     }
     else
     {
         controller.anim_instances[dr.anim_run].flags &= ~anim_flags::PAUSED;
+        controller.anim_instances[dr.anim_walk].flags &= ~anim_flags::PAUSED;
         
         // locomotion state
         controller.blend.anim_a = dr.anim_walk;
@@ -1061,9 +1062,6 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             controller.blend.anim_a = dr.anim_run;
         else if (controller.blend.ratio <= 0.0)
             controller.blend.anim_a = dr.anim_walk;
-        
-        controller.blend.anim_a = dr.anim_run;
-        controller.blend.anim_b = dr.anim_run;
     }
 
     // reset debounce jump
