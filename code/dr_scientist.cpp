@@ -128,6 +128,9 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     instantiate_geometry(box, scene, b);
     instantiate_material(default_material, scene, b);
     instantiate_model_cbuffer(scene, b);
+    
+    pen::renderer_consume_cmd_buffer();
+    
     instantiate_rigid_body(scene, b);
 }
 
@@ -776,28 +779,90 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     if(press_debounce(PK_F, _dbf))
         ecsc.camera->focus = ip;
     
-    // detect current occupancy
-    cast_result cast;
-    bool occupied = false;
-    
-    physics::ray_cast_params rcp;
-    rcp.start = ip + vec3f(0.0f, 1.0f, 0.0f);
-    rcp.end = ip;
-    rcp.callback = &tilemap_ray_cast;
-    rcp.user_data = &cast;
-    rcp.group = 1;
-    rcp.mask = 1;
-    
-    physics::cast_ray(rcp, true);
-    
-    occupied = cast.set;
-    
-    if(occupied)
-        return;
+    // drag marquee
+    static vec3f down_ip = ip;
+    static bool _dbm = false;
+    static vec3f* selected = nullptr;
     
     if(ms.buttons[PEN_MOUSE_L])
     {
-        add_tile_block(scene, ext, ip);
+        if(!_dbm)
+            down_ip = ip;
+        
+        vec3f vdrag = ip - down_ip;
+        
+        u32 num_axis[3] = {
+            0, 0, 0
+        };
+        
+        f32 sign_axis[3] = {
+            1.0f, 1.0f, 1.0f
+        };
+        
+        for(u32 vv = 0; vv < 3; ++vv)
+        {
+            num_axis[vv] = abs(vdrag[vv]);
+            sign_axis[vv] = vdrag[vv] < 0.0f? -1.0f : 1.0f;
+        }
+        
+        vec3f dmm = down_ip - vec3f(0.5f);
+        vec3f dmx = down_ip + vec3f(0.5f);
+        
+        vec3f off = vec3f::zero();
+        
+        sb_clear(selected);
+        for(u32 x = 0; x <= num_axis[0]; ++x)
+        {
+            off.x = x * sign_axis[0];
+            
+            for(u32 y = 0; y <= num_axis[1]; ++y)
+            {
+                off.y = y * sign_axis[1];
+                
+                for(u32 z = 0; z <= num_axis[2]; ++z)
+                {
+                    off.z = z * sign_axis[2];
+                    
+                    sb_push(selected, dmm + off + vec3f(0.5f));
+                    
+                    put::dbg::add_aabb(dmm + off, dmx + off);
+                }
+            }
+        }
+
+        _dbm = true;
+    }
+    else
+    {
+        u32 num_selected = sb_count(selected);
+        for(u32 s = 0; s < num_selected; ++s)
+        {
+            // detect current occupancy
+            cast_result cast;
+            bool occupied = false;
+            
+            vec3f bp = selected[s];
+            
+            physics::ray_cast_params rcp;
+            rcp.start = bp + vec3f(0.0f, 1.0f, 0.0f);
+            rcp.end = bp;
+            rcp.callback = &tilemap_ray_cast;
+            rcp.user_data = &cast;
+            rcp.group = 1;
+            rcp.mask = 1;
+            
+            physics::cast_ray(rcp, true);
+            
+            occupied = cast.set;
+            
+            if(occupied)
+                return;
+            
+            add_tile_block(scene, ext, selected[s]);
+        }
+        sb_clear(selected);
+        
+        _dbm = false;
     }
     
     // detect neighbours for guides
@@ -812,6 +877,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     
     for(u32 n = 0; n < 6; ++n)
     {
+        cast_result cast;
         cast.set = false;
         
         vec3f nip = ip + np[n] * 100000.0f;
