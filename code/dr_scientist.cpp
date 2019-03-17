@@ -1038,13 +1038,19 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         //controller.anim_instances[dr.anim_run].time = 0.0f;
         
         f32 mid = controller.anim_instances[dr.anim_run].length / 2.0f;
-        controller.anim_instances[dr.anim_run].time = 0.2f;
+        
         controller.anim_instances[dr.anim_walk].time = controller.anim_instances[dr.anim_walk].length / 2.0f;
         
-        //controller.anim_instances[dr.anim_run].flags |= anim_flags::LOOPED;
+        controller.anim_instances[dr.anim_run].time = 0.0f;
+        //controller.anim_instances[dr.anim_run].root_translation = pc.pos;
+        controller.anim_instances[dr.anim_run].root_delta = vec3f::zero();
+        controller.anim_instances[dr.anim_run].flags |= anim_flags::PAUSED;
+        controller.anim_instances[dr.anim_run].flags |= anim_flags::LOOPED;
     }
     else
     {
+        controller.anim_instances[dr.anim_run].flags &= ~anim_flags::PAUSED;
+        
         // locomotion state
         controller.blend.anim_a = dr.anim_walk;
         controller.blend.anim_b = dr.anim_run;
