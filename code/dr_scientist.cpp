@@ -1062,6 +1062,9 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             controller.blend.anim_a = dr.anim_run;
         else if (controller.blend.ratio <= 0.0)
             controller.blend.anim_a = dr.anim_walk;
+        
+        //controller.blend.anim_a = dr.anim_walk;
+        //controller.blend.anim_b = dr.anim_walk;
     }
 
     // reset debounce jump
