@@ -140,6 +140,7 @@ void tilemap_ray_cast(const physics::ray_cast_result& result)
 
     cc->pos = result.point;
     cc->normal = result.normal;
+    cc->physics_handle = result.physics_handle;
 
     if (result.physics_handle != PEN_INVALID_HANDLE)
         cc->set = true;
@@ -709,8 +710,116 @@ static bool press_debounce(u32 key, bool& db)
     return false;
 }
 
+void detect_neighbours(vec3f p, f32 tile_size, u32 neighbours[6])
+{
+    static vec3f np[6] = {
+        vec3f::unit_x(),
+        vec3f::unit_y(),
+        vec3f::unit_z(),
+        -vec3f::unit_x(),
+        -vec3f::unit_y(),
+        -vec3f::unit_z()
+    };
+    
+    for(u32 n = 0; n < 6; ++n)
+    {
+        neighbours[n] = PEN_INVALID_HANDLE;
+        
+        cast_result cast;
+        cast.set = false;
+        
+        vec3f nip = p + np[n] * tile_size;
+        
+        physics::ray_cast_params rcp;
+        rcp.start = p;
+        rcp.end = nip;
+        rcp.callback = &tilemap_ray_cast;
+        rcp.user_data = &cast;
+        rcp.group = 1;
+        rcp.mask = 1;
+        
+        physics::cast_ray(rcp, true);
+        
+        if(cast.set)
+        {
+            neighbours[n] = cast.physics_handle;
+        }
+    }
+}
+
+u32 find_entity_from_physics(ecs_scene* scene, u32 physics_handle)
+{
+    for(u32 n = 0; n < scene->num_nodes; ++n)
+    {
+        if(scene->physics_handles[n] == physics_handle)
+            return n;
+    }
+    
+    return PEN_INVALID_HANDLE;
+}
+
+void build_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_list)
+{
+    // detect neighbours
+    u32 neighbours[6];
+    detect_neighbours(scene->transforms[entity].translation, 1.0f, neighbours);
+    
+    // inner blocks can be discarded
+    bool inner = true;
+    for(u32 nn = 0; nn < 6; ++nn)
+    {
+        if(neighbours[nn] == PEN_INVALID_HANDLE)
+        {
+            inner = false;
+            break;
+        }
+    }
+    
+    if(inner)
+    {
+        ext->cmp_flags[entity] = 0;
+        ecs::delete_entity(scene, entity);
+        return;
+    }
+    
+    // add island
+    ext->game_flags[entity] |= GF_TILE_IN_ISLAND;
+    sb_push(*island_list, entity);
+    
+    // entity index from physics
+    u32 neighbour_entity[6];
+    for(u32 nn = 0; nn < 6; ++nn)
+        neighbour_entity[nn] = find_entity_from_physics(scene, neighbours[nn]);
+    
+    for(u32 en = 0; en < 6; ++en)
+    {
+        u32 entity = neighbour_entity[en];
+        if(entity == PEN_INVALID_HANDLE)
+            continue;
+        
+        if(!(ext->cmp_flags[entity] & CMP_TILE_BLOCK))
+            continue;
+        
+        if((ext->game_flags[entity] & GF_TILE_IN_ISLAND))
+            continue;
+        
+        // recurse, adding its neighbours
+        build_islands(scene, ext, entity, island_list);
+    }
+}
+
 void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
+    // detect neighbours for guides
+    static vec3f np[6] = {
+        vec3f::unit_x(),
+        vec3f::unit_y(),
+        vec3f::unit_z(),
+        -vec3f::unit_x(),
+        -vec3f::unit_y(),
+        -vec3f::unit_z()
+    };
+    
     ecs::editor_enable(true);
     
     camera* camera = ecsc.camera;
@@ -737,17 +846,54 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     {
         bake_tile_blocks(scene, ext);
     }
-
-    ImGui::InputInt("Level", &slice[1]);
-    p0.y = slice.y;
+    
+    ImGui::SameLine();
+    
+    static u32** islands = nullptr;
+    if (ImGui::Button("Build Islands"))
+    {
+        //clear islands
+        sb_clear(islands);
+        
+        //clear flags
+        for(u32 n = 0; n < scene->num_nodes; ++n)
+            ext->game_flags[n] &= ~GF_TILE_IN_ISLAND;
+        
+        for(u32 n = 0; n < scene->num_nodes; ++n)
+        {
+            if(!(ext->cmp_flags[n] & CMP_TILE_BLOCK))
+                continue;
+            
+            if((ext->game_flags[n] & GF_TILE_IN_ISLAND))
+                continue;
+            
+            u32* island = nullptr;
+            build_islands(scene, ext, n, &island);
+            sb_push(islands, island);
+        }
+    }
+    
+    static s32 edit_axis = 1;
+    static const c8* edit_axis_name[] =
+    {
+        "zy",
+        "xz",
+        "xy"
+    };
+    
+    ImGui::Combo("Edit Axis", &edit_axis, &edit_axis_name[0], 3);
+    ImGui::InputInt("Level", &slice[edit_axis]);
+    
+    pN = np[edit_axis];
+    p0[edit_axis] = slice[edit_axis];
     
     static bool _dbu = false;
     if(press_debounce(PK_1, _dbu))
-        slice[1]++;
+        slice[edit_axis]++;
     
     static bool _dbd = false;
     if(press_debounce(PK_2, _dbd))
-        slice[1]--;
+        slice[edit_axis]--;
 
     ImGui::End();
     
@@ -769,7 +915,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     
     // snap to grid
     ip = floor(ip) + vec3f(0.5f);
-    ip.y = slice.y-0.5f;
+    ip[edit_axis] = slice[edit_axis]-0.5f;
     
     // tile
     dbg::add_aabb(ip - vec3f(0.5f), ip + vec3f(0.5f), vec4f::white());
@@ -865,15 +1011,25 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         _dbm = false;
     }
     
-    // detect neighbours for guides
-    vec3f np[6] = {
-        vec3f::unit_x(),
-        vec3f::unit_y(),
-        vec3f::unit_z(),
-        -vec3f::unit_x(),
-        -vec3f::unit_y(),
-        -vec3f::unit_z()
+    // draw islands
+    vec4f cols_test[] = {
+        vec4f::yellow(),
+        vec4f::green(),
+        vec4f::blue(),
+        vec4f::red()
     };
+    
+    u32 num_islands = sb_count(islands);
+    for(u32 i = 0; i < num_islands; ++i)
+    {
+        u32 num_tiles = sb_count(islands[i]);
+        for(u32 t = 0; t < num_tiles; ++t)
+        {
+            u32 entity = islands[i][t];
+            vec3f p = scene->transforms[entity].translation;
+            dbg::add_aabb(p - vec3f(0.5f), p + vec3f(0.5f), cols_test[i%4]);
+        }
+    }
     
     for(u32 n = 0; n < 6; ++n)
     {
@@ -897,18 +1053,12 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         {
             dbg::add_point(cast.pos, 0.1f, vec4f::yellow());
             
-            vec3f perp = cast.normal;
-            
             for(u32 i = 0; i < 4; ++i)
             {
                 dbg::add_line(cast.pos, cast.pos + cast.normal);
             }
         }
-        
-        //dbg::add_aabb(nip - vec3f(0.5f), nip + vec3f(0.5f), vec4f::red());
-        //dbg::add_line(ip, nip, vec4f::green());
     }
-    
 }
 
 void get_controller_input(camera* cam, controller_input& ci)

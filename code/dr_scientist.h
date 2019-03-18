@@ -31,7 +31,8 @@ enum e_cmp_flags
 
 enum e_game_flags
 {
-    GF_NONE
+    GF_NONE = 0,
+    GF_TILE_IN_ISLAND = 1<<0
 };
 
 struct tile_block
@@ -105,6 +106,7 @@ struct cast_result
     vec3f   pos = vec3f::zero();
     vec3f   normal = vec3f::zero();
     bool    set = false;
+    u32     physics_handle = 0;
 };
 
 void update_game_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt);
