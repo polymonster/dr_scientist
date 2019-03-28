@@ -12,11 +12,11 @@ exportNormals=0;exportTexCoords=0;
 exportVertexColors=0;exportVertexColorsAnimation=0;exportTangents=0;
 exportTexTangents=0;exportConstraints=0;exportPhysics=1;exportXRefs=1;instanceDuplicateCurves=0;
 dereferenceXRefs=1;cameraXFov=0;cameraYFov=1;
-animationTime=0.800000</comments>
+animationTime=2.400000</comments>
       <source_data>file:///D:/Dev/dr_scientist/assets/source/models/characters/blob/anims/blob_idle.mb</source_data>
     </contributor>
-    <created>2019-03-26T22:16:45Z</created>
-    <modified>2019-03-26T22:16:46Z</modified>
+    <created>2019-03-28T23:11:10Z</created>
+    <modified>2019-03-28T23:11:11Z</modified>
     <unit meter="1" name="meter"/>
     <up_axis>Y_UP</up_axis>
   </asset>
@@ -1603,7 +1603,7 @@ animationTime=0.800000</comments>
           </technique>
         </extra>
         <node id="root_jnt" name="root_jnt" type="JOINT">
-          <matrix sid="transform">0.9999616742134094 0 0.0087562445551157 0 0 1 0 0 -0.0087562445551157 0 0.9999616742134094 0 0 0 0 1</matrix>
+          <matrix sid="transform">0.9999094009399414 0 0.0134620051831007 0 0 1 0 0 -0.0134620051831007 0 0.9999094009399414 0 0 0 0 1</matrix>
           <extra>
             <technique profile="PSSG">
               <translate_keyed/>
@@ -1611,7 +1611,7 @@ animationTime=0.800000</comments>
             </technique>
           </extra>
           <node id="back01_jnt" name="back01_jnt" type="JOINT">
-            <matrix sid="transform">0.9984789490699768 0 -0.0551340021193027 0 0 1 0 0.1253277659416199 0.0551340021193027 0 0.9984789490699768 0 0 0 0 1</matrix>
+            <matrix sid="transform">0.9962095022201538 0 0.0869862735271453 0 0 1 0 0.1253277659416199 -0.0869862735271453 0 0.9962095022201538 0 0 0 0 1</matrix>
             <extra>
               <technique profile="PSSG">
                 <translate_keyed/>
@@ -1619,7 +1619,7 @@ animationTime=0.800000</comments>
               </technique>
             </extra>
             <node id="back02_jnt" name="back02_jnt" type="JOINT">
-              <matrix sid="transform">0.9738388061523438 0 -0.2272398769855499 0 0 1 0 0.1253277659416199 0.2272398769855499 0 0.9738388061523438 0 0 0 0 1</matrix>
+              <matrix sid="transform">0.9779192209243774 0 0.2089833468198776 0 0 1 0 0.1253277659416199 -0.2089833468198776 0 0.9779192209243774 0 0 0 0 1</matrix>
               <extra>
                 <technique profile="PSSG">
                   <translate_keyed/>
@@ -1627,7 +1627,7 @@ animationTime=0.800000</comments>
                 </technique>
               </extra>
               <node id="head_jnt" name="head_jnt" type="JOINT">
-                <matrix sid="transform">0.9841394424438477 0 -0.1773966401815414 0 0 1 0 0.1253277808427811 0.1773966401815414 0 0.9841394424438477 0 0 0 0 1</matrix>
+                <matrix sid="transform">0.9861096143722534 0 0.1660959124565125 0 0 1 0 0.1253277808427811 -0.1660959124565125 0 0.9861096143722534 0 0 0 0 1</matrix>
                 <extra>
                   <technique profile="PSSG">
                     <translate_keyed/>
@@ -1931,7 +1931,7 @@ animationTime=0.800000</comments>
               <node id="r_arm01_jnt" name="r_arm01_jnt" type="JOINT">
                 <matrix sid="transform">0.4514439105987549 0.892299473285675 0 -0.2404290586709976 0.8922973871231079 -0.4514428377151489 -0.002168612089008 -0.0038333677221089 -0.0019350515212863 0.000979006756097 -0.9999976754188538 -0.0217683110386133 0 0 0 1</matrix>
                 <node id="r_arm02_jnt" name="r_arm02_jnt" type="JOINT">
-                  <matrix sid="transform">0.2187369614839554 0.2183851152658463 0.9510321021080017 -0.0825429111719131 -0.009855369105935 0.9750787019729614 -0.2216401994228363 -0.1041164845228195 -0.9757341146469116 0.0391081310808658 0.2154380083084106 -0.0159829147160053 0 0 0 1</matrix>
+                  <matrix sid="transform">0.1841154843568802 0.2011987566947937 0.9620917439460754 -0.0810789912939071 -0.1504250317811966 0.9730622172355652 -0.1747061312198639 -0.1064355000853539 -0.9713258147239685 -0.1125565767288208 0.2094211578369141 0.0025909631513059 0 0 0 1</matrix>
                   <extra>
                     <technique profile="PSSG">
                       <translate_keyed/>
@@ -1939,7 +1939,7 @@ animationTime=0.800000</comments>
                     </technique>
                   </extra>
                   <node id="r_hand_jnt" name="r_hand_jnt" type="JOINT">
-                    <matrix sid="transform">0.8924044370651245 -0.3834639489650726 0.2378439158201218 0.003914538770914 0.4233902990818024 0.8938681483268738 -0.1474461108446121 -0.0927511602640152 -0.1560608446598053 0.2322823703289032 0.9600468277931213 0.0199145786464214 0 0 0 1</matrix>
+                    <matrix sid="transform">0.9913846850395203 0.0226686354726553 0.1290061622858047 0.003914538770914 0.0120607279241085 0.9649276733398438 -0.2622387409210205 -0.0927511602640152 -0.130426213145256 0.2615353763103485 0.9563410878181458 0.0199145786464214 0 0 0 1</matrix>
                     <extra>
                       <technique profile="PSSG">
                         <translate_keyed/>
