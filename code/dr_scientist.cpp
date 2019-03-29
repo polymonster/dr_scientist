@@ -45,6 +45,11 @@ void dr_scene_browser_ui(ecs_extension& extension, ecs_scene* scene)
     }
 }
 
+void dr_ecs_extension_shutdown(ecs_extension& extension)
+{
+    delete (dr_ecs_exts*)extension.context;
+}
+
 void* dr_ecs_extension(ecs_scene* scene)
 {
     dr_ecs_exts* exts = new dr_ecs_exts();
@@ -58,6 +63,7 @@ void* dr_ecs_extension(ecs_scene* scene)
     ext.ext_func = &dr_ecs_extension;
     ext.update_func = &update_game_components;
     ext.browser_func = &dr_scene_browser_ui;
+    ext.shutdown = &dr_ecs_extension_shutdown;
 
     register_ecs_extentsions(scene, ext);
 
@@ -664,7 +670,7 @@ void setup_character(put::ecs::ecs_scene* scene)
     dr.anim_run_r = 5;
     
     // add a few quick bits of collision
-    load_scene("data/scene/basic_level.pms", scene, true);
+    //load_scene("data/scene/basic_level.pms", scene, true);
     //load_scene("data/scene/basic_level-2.pms", scene, true);
     //load_scene("data/scene/basic_level-3.pms", scene, true);
     //load_scene("data/scene/basic_level-4.pms", scene, true);
@@ -869,6 +875,28 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             
             u32* island = nullptr;
             build_islands(scene, ext, n, &island);
+            
+            // make tile blocks children
+            u32 island_id = get_new_node(scene);
+            scene->names[island_id].setf("island_%i", island_id);
+            scene->transforms[island_id].translation = vec3f::zero();
+            scene->transforms[island_id].scale = vec3f::one();
+            scene->transforms[island_id].rotation = quat();
+            scene->entities[island_id] |= CMP_TRANSFORM;
+            
+            u32 num_blocks = sb_count(island);
+            if(num_blocks > 0)
+            {
+                for(u32 i = 0; i < num_blocks; ++i)
+                {
+                    u32 tb = island[i];
+                    set_node_parent(scene, island_id, tb);
+                    ext->tile_blocks[tb].island_id = island_id;
+                }
+            }
+            
+            scene->flags |= INVALIDATE_SCENE_TREE;
+            
             sb_push(islands, island);
         }
     }
@@ -1188,7 +1216,7 @@ void ctcb(const physics::contact_test_results& results)
                             PEN_ASSERT(!std::isnan(V[i]))
 
 void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
-{
+{    
     put::camera* camera = ecsc.camera;
 
     dt = min(dt, 1.0f / 10.0f);
@@ -1635,8 +1663,15 @@ PEN_TRV pen::user_entry( void* params )
     svr_editor.id_name = PEN_HASH(svr_editor.name.c_str());
     svr_editor.render_function = &render_scene_editor;
     
+    put::scene_view_renderer svr_shadow_maps;
+    svr_shadow_maps.name = "ces_render_shadow_maps";
+    svr_shadow_maps.id_name = PEN_HASH(svr_shadow_maps.name.c_str());
+    svr_shadow_maps.render_function = &render_shadow_views;
+    
     pmfx::register_scene_view_renderer(svr_main);
     pmfx::register_scene_view_renderer(svr_editor);
+    pmfx::register_scene_view_renderer(svr_shadow_maps);
+    
     pmfx::register_scene(main_scene, "main_scene");
     pmfx::register_camera(&main_camera, "model_viewer_camera");
 

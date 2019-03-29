@@ -38,6 +38,7 @@ enum e_game_flags
 struct tile_block
 {
     u32 neighbour_mask; //x,y,z,-x,-y,-z.
+    u32 island_id = 0;
 };
 
 struct dr_ecs_exts
