@@ -137,6 +137,7 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     instantiate_model_cbuffer(scene, b);
     
     pen::renderer_consume_cmd_buffer();
+    physics::physics_consume_command_buffer();
     
     instantiate_rigid_body(scene, b);
 }
