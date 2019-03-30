@@ -40,7 +40,8 @@ void dr_scene_browser_ui(ecs_extension& extension, ecs_scene* scene)
         
         if (ImGui::CollapsingHeader("Tile Blocks"))
         {
-            ImGui::InputInt("Mask", (s32*)&ext->tile_blocks[si].neighbour_mask);
+            ImGui::Value("Mask", ext->tile_blocks[si].neighbour_mask);
+            ImGui::Value("Island", ext->tile_blocks[si].island_id);
         }
     }
 }
@@ -670,7 +671,7 @@ void setup_character(put::ecs::ecs_scene* scene)
     dr.anim_run_r = 5;
     
     // add a few quick bits of collision
-    //load_scene("data/scene/basic_level.pms", scene, true);
+    load_scene("data/scene/basic_level.pms", scene, true);
     //load_scene("data/scene/basic_level-2.pms", scene, true);
     //load_scene("data/scene/basic_level-3.pms", scene, true);
     //load_scene("data/scene/basic_level-4.pms", scene, true);
@@ -814,6 +815,34 @@ void build_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_
     }
 }
 
+bool check_occupied(vec3f bp, u32& ph)
+{
+    cast_result cast;
+    bool occupied = false;
+    
+    physics::ray_cast_params rcp;
+    rcp.start = bp + vec3f(0.0f, 1.0f, 0.0f);
+    rcp.end = bp;
+    rcp.callback = &tilemap_ray_cast;
+    rcp.user_data = &cast;
+    rcp.group = 1;
+    rcp.mask = 1;
+    
+    physics::cast_ray(rcp, true);
+    
+    occupied = cast.set;
+    
+    ph = 0;
+    
+    if(occupied)
+    {
+        ph = cast.physics_handle;
+        return true;
+    }
+    
+    return false;
+}
+
 void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
     // detect neighbours for guides
@@ -878,6 +907,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             
             // make tile blocks children
             u32 island_id = get_new_node(scene);
+            u32 island_parent = island_id;
             scene->names[island_id].setf("island_%i", island_id);
             scene->transforms[island_id].translation = vec3f::zero();
             scene->transforms[island_id].scale = vec3f::one();
@@ -890,8 +920,10 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
                 for(u32 i = 0; i < num_blocks; ++i)
                 {
                     u32 tb = island[i];
-                    set_node_parent(scene, island_id, tb);
+                    set_node_parent_validate(scene, island_parent, tb);
                     ext->tile_blocks[tb].island_id = island_id;
+                    scene->names[tb].setf("island_%i_block_%i", island_id, i);
+                    island[i] = tb; // tb might have changed
                 }
             }
             
@@ -941,6 +973,9 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     // intersect with edit plane
     vec3f ip = maths::ray_plane_intersect(r0, rv, p0, pN);
     
+    vec3f altpN = np[(edit_axis+1)%3];
+    vec3f altip = maths::ray_plane_intersect(r0, rv, p0, altpN);
+    
     // snap to grid
     ip = floor(ip) + vec3f(0.5f);
     ip[edit_axis] = slice[edit_axis]-0.5f;
@@ -955,51 +990,106 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     
     // drag marquee
     static vec3f down_ip = ip;
+    static vec3f down_altip = altip;
     static bool _dbm = false;
     static vec3f* selected = nullptr;
+    static vec3f* island_selected = nullptr;
     
     if(ms.buttons[PEN_MOUSE_L])
     {
         if(!_dbm)
-            down_ip = ip;
-        
-        vec3f vdrag = ip - down_ip;
-        
-        u32 num_axis[3] = {
-            0, 0, 0
-        };
-        
-        f32 sign_axis[3] = {
-            1.0f, 1.0f, 1.0f
-        };
-        
-        for(u32 vv = 0; vv < 3; ++vv)
         {
-            num_axis[vv] = abs(vdrag[vv]);
-            sign_axis[vv] = vdrag[vv] < 0.0f? -1.0f : 1.0f;
+            down_ip = ip;
+            down_altip = altip;
         }
         
-        vec3f dmm = down_ip - vec3f(0.5f);
-        vec3f dmx = down_ip + vec3f(0.5f);
-        
-        vec3f off = vec3f::zero();
-        
-        sb_clear(selected);
-        for(u32 x = 0; x <= num_axis[0]; ++x)
+        u32 ph = 0;
+        if(check_occupied(down_ip, ph))
         {
-            off.x = x * sign_axis[0];
-            
-            for(u32 y = 0; y <= num_axis[1]; ++y)
+            if(!_dbm)
             {
-                off.y = y * sign_axis[1];
+                // detect island
+                sb_clear(island_selected);
                 
-                for(u32 z = 0; z <= num_axis[2]; ++z)
+                u32 e = find_entity_from_physics(scene, ph);
+                
+                u32* island = nullptr;
+                build_islands(scene, ext, e, &island);
+                
+                u32 num_tb = sb_count(island);
+                for(u32 i = 0; i < num_tb; ++i)
                 {
-                    off.z = z * sign_axis[2];
+                    vec3f sp = scene->transforms[island[i]].translation;
+                    sb_push(island_selected, sp);
+                }
+            }
+            else
+            {
+                // extrude island in the planes axis
+                u32 num_island_selected = sb_count(island_selected);
+
+                vec3f vdrag = altip - down_altip;
+                
+                u32 num = abs(dot(vdrag, pN));
+                f32 sign = dot(vdrag, pN) < 0.0f ? -1.0f : 1.0f;
+                
+                vec3f off = vec3f::zero();
+                
+                sb_clear(selected);
+                for(u32 i = 0; i <= num; ++i)
+                {
+                    for(u32 s = 0; s < num_island_selected; ++s)
+                    {
+                        vec3f op = island_selected[s] + off;
+                        put::dbg::add_aabb(op - vec3f(0.5f), op + vec3f(0.5f));
+                        sb_push(selected, op);
+                    }
                     
-                    sb_push(selected, dmm + off + vec3f(0.5f));
+                    off += pN * sign;
+                }
+            }
+        }
+        else
+        {
+            // drag axis
+            vec3f vdrag = ip - down_ip;
+            
+            u32 num_axis[3] = {
+                0, 0, 0
+            };
+            
+            f32 sign_axis[3] = {
+                1.0f, 1.0f, 1.0f
+            };
+            
+            for(u32 vv = 0; vv < 3; ++vv)
+            {
+                num_axis[vv] = abs(vdrag[vv]);
+                sign_axis[vv] = vdrag[vv] < 0.0f? -1.0f : 1.0f;
+            }
+            
+            vec3f dmm = down_ip - vec3f(0.5f);
+            vec3f dmx = down_ip + vec3f(0.5f);
+            
+            vec3f off = vec3f::zero();
+            
+            sb_clear(selected);
+            for(u32 x = 0; x <= num_axis[0]; ++x)
+            {
+                off.x = x * sign_axis[0];
+                
+                for(u32 y = 0; y <= num_axis[1]; ++y)
+                {
+                    off.y = y * sign_axis[1];
                     
-                    put::dbg::add_aabb(dmm + off, dmx + off);
+                    for(u32 z = 0; z <= num_axis[2]; ++z)
+                    {
+                        off.z = z * sign_axis[2];
+                        
+                        sb_push(selected, dmm + off + vec3f(0.5f));
+                        
+                        put::dbg::add_aabb(dmm + off, dmx + off);
+                    }
                 }
             }
         }
@@ -1030,7 +1120,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             occupied = cast.set;
             
             if(occupied)
-                return;
+                continue;
             
             add_tile_block(scene, ext, selected[s]);
         }
@@ -1306,9 +1396,6 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             controller.blend.anim_a = dr.anim_run;
         else if (controller.blend.ratio <= 0.0)
             controller.blend.anim_a = dr.anim_walk;
-        
-        //controller.blend.anim_a = dr.anim_walk;
-        //controller.blend.anim_b = dr.anim_walk;
     }
 
     // reset debounce jump
