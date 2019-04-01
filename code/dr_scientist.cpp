@@ -107,7 +107,7 @@ void mini_profiler()
 
 void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& pos)
 {
-    static u32 p = get_new_node(scene);
+    static u32 p = get_new_entity(scene);
     scene->transforms[p].translation = vec3f::zero();
     scene->transforms[p].rotation = quat();
     scene->transforms[p].scale = vec3f(1.0f);
@@ -117,7 +117,7 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     static material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
     static geometry_resource* box = get_geometry_resource(PEN_HASH("cube"));
     
-    u32 b = get_new_node(scene);
+    u32 b = get_new_entity(scene);
     scene->names[b] = "ground";
     scene->transforms[b].translation = pos;
     scene->transforms[b].rotation = quat();
@@ -168,15 +168,15 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
     f32 tile_size = 0.5f;
     f32 sub_tile_size = 0.125f;
     
-    u32 parent = get_new_node(scene);
+    u32 parent = get_new_entity(scene);
     scene->transforms[parent].translation = vec3f::zero();
     scene->transforms[parent].rotation = quat(0.0f, 0.0f, 0.0f);
     scene->transforms[parent].scale = vec3f::one();
     scene->entities[parent] |= CMP_TRANSFORM;
     
-    u32 start = scene->num_nodes;
+    u32 start = scene->num_entities;
     
-    for (u32 n = 0; n < scene->num_nodes; ++n)
+    for (u32 n = 0; n < scene->num_entities; ++n)
     {
         if (!(ext->cmp_flags[n] & CMP_TILE_BLOCK))
             continue;
@@ -308,7 +308,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // if we have no neighbours on 3 sides we are a corner
             if (!cn[c][0] && !cn[c][1] && !cn[c][2])
             {
-                u32 corner = get_new_node(scene);
+                u32 corner = get_new_entity(scene);
                 scene->geometry_names[corner] = file_top_corner;
                 scene->transforms[corner].translation = cpc;
                 scene->transforms[corner].rotation = corner_rotation[c];
@@ -321,7 +321,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // middle edge
             if (!cn[c][0] && !cn[c][2] && cn[c][1])
             {
-                u32 tile = get_new_node(scene);
+                u32 tile = get_new_entity(scene);
                 scene->geometry_names[tile] = file_middle_corner;
                 scene->transforms[tile].translation = cpc;
                 scene->transforms[tile].rotation = corner_rotation[c];
@@ -336,7 +336,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             {
                 if (!cn[c][0])
                 {
-                    u32 tile = get_new_node(scene);
+                    u32 tile = get_new_entity(scene);
                     scene->geometry_names[tile] = file_top_side;
                     scene->transforms[tile].translation = cpc;
                     scene->transforms[tile].rotation = quat(0.0f, 0.0f, 0.0f);
@@ -354,7 +354,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 }
                 else if (!cn[c][2])
                 {
-                    u32 tile = get_new_node(scene);
+                    u32 tile = get_new_entity(scene);
                     scene->geometry_names[tile] = file_top_side;
                     scene->transforms[tile].translation = cpc;
                     scene->transforms[tile].rotation = quat(0.0f, -r90, 0.0f);
@@ -389,7 +389,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 rot_i = 2;
             }
 
-            u32 tile = get_new_node(scene);
+            u32 tile = get_new_entity(scene);
             scene->geometry_names[tile] = model;
             scene->transforms[tile].translation = cpc;
             scene->transforms[tile].rotation = corner_face_rotations[c][rot_i];
@@ -553,7 +553,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             {
                 for(u32 i = 0; i < 2; ++i)
                 {
-                    u32 tile = get_new_node(scene);
+                    u32 tile = get_new_entity(scene);
                     scene->geometry_names[tile] = model;
                     scene->transforms[tile].translation = esubp[i];
                     scene->transforms[tile].rotation = rot_r;
@@ -595,7 +595,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             // add 4
             for(u32 i = 0; i < 4; ++i)
             {
-                u32 tile = get_new_node(scene);
+                u32 tile = get_new_entity(scene);
                 scene->geometry_names[tile] = file_top_centre;
                 scene->transforms[tile].translation = fpsub[i];
                 scene->transforms[tile].rotation = face_rotation[f];
@@ -608,7 +608,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
     }
     
     // bake vertex buffer
-    u32 end = scene->num_nodes;
+    u32 end = scene->num_entities;
 
     u32* node_list = nullptr;
     for(u32 i = start; i < end; ++i)
@@ -624,7 +624,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
     update_scene(scene, 0.0f);
     
     // bake vertex buffer
-    bake_nodes_to_vb(scene, parent, node_list);
+    bake_entities_to_vb(scene, parent, node_list);
 }
 
 void setup_character(put::ecs::ecs_scene* scene)
@@ -672,7 +672,7 @@ void setup_character(put::ecs::ecs_scene* scene)
     dr.anim_run_r = 5;
     
     // add a few quick bits of collision
-    load_scene("data/scene/basic_level.pms", scene, true);
+    //load_scene("data/scene/basic_level.pms", scene, true);
     //load_scene("data/scene/basic_level-2.pms", scene, true);
     //load_scene("data/scene/basic_level-3.pms", scene, true);
     //load_scene("data/scene/basic_level-4.pms", scene, true);
@@ -757,7 +757,7 @@ void detect_neighbours(vec3f p, f32 tile_size, u32 neighbours[6])
 
 u32 find_entity_from_physics(ecs_scene* scene, u32 physics_handle)
 {
-    for(u32 n = 0; n < scene->num_nodes; ++n)
+    for(u32 n = 0; n < scene->num_entities; ++n)
     {
         if(scene->physics_handles[n] == physics_handle)
             return n;
@@ -844,6 +844,38 @@ bool check_occupied(vec3f bp, u32& ph)
     return false;
 }
 
+bool detect_inner_block(vec3f block, vec3f* list)
+{
+    static vec3f np[6] = {
+        vec3f::unit_x(),
+        vec3f::unit_y(),
+        vec3f::unit_z(),
+        -vec3f::unit_x(),
+        -vec3f::unit_y(),
+        -vec3f::unit_z()
+    };
+    
+    u32 num_list = sb_count(list);
+    for(u32 i = 0; i < 6; ++i)
+    {
+        bool found = false;
+        for(u32 l = 0; l < num_list; ++l)
+        {
+            vec3f nn = list[l];
+            if(maths::point_inside_sphere(block + np[i], 1.0f, nn))
+            {
+                found = true;
+                break;
+            }
+        }
+        
+        if(!found)
+            return false;
+    }
+    
+    return true;
+}
+
 void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
     // detect neighbours for guides
@@ -892,10 +924,10 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         sb_clear(islands);
         
         //clear flags
-        for(u32 n = 0; n < scene->num_nodes; ++n)
+        for(u32 n = 0; n < scene->num_entities; ++n)
             ext->game_flags[n] &= ~GF_TILE_IN_ISLAND;
         
-        for(u32 n = 0; n < scene->num_nodes; ++n)
+        for(u32 n = 0; n < scene->num_entities; ++n)
         {
             if(!(ext->cmp_flags[n] & CMP_TILE_BLOCK))
                 continue;
@@ -907,7 +939,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             build_islands(scene, ext, n, &island);
             
             // make tile blocks children
-            u32 island_id = get_new_node(scene);
+            u32 island_id = get_new_entity(scene);
             u32 island_parent = island_id;
             scene->names[island_id].setf("island_%i", island_id);
             scene->transforms[island_id].translation = vec3f::zero();
@@ -921,7 +953,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
                 for(u32 i = 0; i < num_blocks; ++i)
                 {
                     u32 tb = island[i];
-                    set_node_parent_validate(scene, island_parent, tb);
+                    set_entity_parent_validate(scene, island_parent, tb);
                     ext->tile_blocks[tb].island_id = island_id;
                     scene->names[tb].setf("island_%i_block_%i", island_id, i);
                     island[i] = tb; // tb might have changed
@@ -931,6 +963,17 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             scene->flags |= INVALIDATE_SCENE_TREE;
             
             sb_push(islands, island);
+        }
+        
+        // del physics
+        u32 num_islands = sb_count(islands);
+        for(u32 i = 0; i < num_islands; ++i)
+        {
+            u32 num_tiles = sb_count(islands[i]);
+            for(u32 t = 0; t < num_tiles; ++t)
+            {
+                ecs::delete_entity(scene, islands[i][t]);
+            }
         }
     }
     
@@ -982,7 +1025,8 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     ip[edit_axis] = slice[edit_axis]-0.5f;
     
     // tile
-    dbg::add_aabb(ip - vec3f(0.5f), ip + vec3f(0.5f), vec4f::white());
+    if(!ms.buttons[PEN_MOUSE_L])
+        dbg::add_aabb(ip - vec3f(0.5f), ip + vec3f(0.5f), vec4f::white());
     
     // focus
     static bool _dbf;
@@ -1123,7 +1167,8 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             if(occupied)
                 continue;
             
-            add_tile_block(scene, ext, selected[s]);
+            if(!detect_inner_block(bp, selected))
+                add_tile_block(scene, ext, selected[s]);
         }
         sb_clear(selected);
         
@@ -1697,7 +1742,7 @@ void update_game_components(ecs_extension& extension, ecs_scene* scene, f32 dt)
 {
     dr_ecs_exts* ext = (dr_ecs_exts*)extension.context;
     
-    for(u32 n = 0; n < scene->num_nodes; ++n)
+    for(u32 n = 0; n < scene->num_entities; ++n)
     {
         if(ext->cmp_flags[n] & CMP_CUSTOM_ANIM)
         {
