@@ -18,6 +18,36 @@ namespace
     // loose..
     dr_char dr;
     f32 user_thread_time = 0.0f;
+    
+    // unit cube axis
+    static vec3f axis[6] = {
+        vec3f::unit_x(),
+        vec3f::unit_y(),
+        vec3f::unit_z(),
+        -vec3f::unit_x(),
+        -vec3f::unit_y(),
+        -vec3f::unit_z()
+    };
+    
+    // axis tangent
+    static vec3f axis_t[6] = {
+        vec3f::unit_y(),
+        vec3f::unit_x(),
+        vec3f::unit_x(),
+        vec3f::unit_y(),
+        vec3f::unit_x(),
+        vec3f::unit_x()
+    };
+    
+    // axis bi tangent
+    static vec3f axis_bt[6] = {
+        -vec3f::unit_z(),
+        vec3f::unit_z(),
+        vec3f::unit_y(),
+        vec3f::unit_z(),
+        -vec3f::unit_z(),
+        -vec3f::unit_y()
+    };
 }
 
 void dr_scene_browser_ui(ecs_extension& extension, ecs_scene* scene)
@@ -165,9 +195,6 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
     static const f32 r90 = M_PI/2.0f;
     static const f32 r180 = M_PI;
     
-    f32 tile_size = 0.5f;
-    f32 sub_tile_size = 0.125f;
-    
     u32 parent = get_new_entity(scene);
     scene->transforms[parent].translation = vec3f::zero();
     scene->transforms[parent].rotation = quat(0.0f, 0.0f, 0.0f);
@@ -185,36 +212,6 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
 
         // do casts to get neighbours
         
-        // cube axis
-        static vec3f np[6] = {
-             vec3f::unit_x(),
-             vec3f::unit_y(),
-             vec3f::unit_z(),
-            -vec3f::unit_x(),
-            -vec3f::unit_y(),
-            -vec3f::unit_z()
-        };
-        
-        // axis tangent
-        static vec3f nt[6] = {
-            vec3f::unit_y(),
-            vec3f::unit_x(),
-            vec3f::unit_x(),
-            vec3f::unit_y(),
-            vec3f::unit_x(),
-            vec3f::unit_x()
-        };
-        
-        // axis bi tangent
-        static vec3f nbt[6] = {
-            -vec3f::unit_z(),
-            vec3f::unit_z(),
-            vec3f::unit_y(),
-            vec3f::unit_z(),
-            -vec3f::unit_z(),
-            -vec3f::unit_y()
-        };
-        
         bool neighbour[6] = { 0 };
         u32 nc = 0;
 
@@ -222,7 +219,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
 
         for (u32 b = 0; b < 6; ++b)
         {
-            vec3f nip = pos + np[b];
+            vec3f nip = pos + axis[b];
 
             cast_result cast;
 
@@ -575,12 +572,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
         
         for (u32 f = 0; f < 6; ++f)
         {
-            vec3f fp = pos + np[f] * 0.5f;
-            vec3f fv = np[f];
+            vec3f fp = pos + axis[f] * 0.5f;
+            vec3f fv = axis[f];
             vec3f fpc = fp + fv * -0.125f;
             
-            vec3f u = nt[f];
-            vec3f v = nbt[f];
+            vec3f u = axis_t[f];
+            vec3f v = axis_bt[f];
             
             vec3f fpsub[] = {
                 fpc + (-u - v) * 0.125f,
@@ -720,15 +717,6 @@ static bool press_debounce(u32 key, bool& db)
 
 void detect_neighbours(vec3f p, f32 tile_size, u32 neighbours[6])
 {
-    static vec3f np[6] = {
-        vec3f::unit_x(),
-        vec3f::unit_y(),
-        vec3f::unit_z(),
-        -vec3f::unit_x(),
-        -vec3f::unit_y(),
-        -vec3f::unit_z()
-    };
-    
     for(u32 n = 0; n < 6; ++n)
     {
         neighbours[n] = PEN_INVALID_HANDLE;
@@ -736,7 +724,7 @@ void detect_neighbours(vec3f p, f32 tile_size, u32 neighbours[6])
         cast_result cast;
         cast.set = false;
         
-        vec3f nip = p + np[n] * tile_size;
+        vec3f nip = p + axis[n] * tile_size;
         
         physics::ray_cast_params rcp;
         rcp.start = p;
@@ -766,24 +754,21 @@ u32 find_entity_from_physics(ecs_scene* scene, u32 physics_handle)
     return PEN_INVALID_HANDLE;
 }
 
-void build_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_list)
+void find_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_list)
 {
     // detect neighbours
     u32 neighbours[6];
     detect_neighbours(scene->transforms[entity].translation, 1.0f, neighbours);
     
     // inner blocks can be discarded
-    bool inner = true;
+    u32 mask = 0;
     for(u32 nn = 0; nn < 6; ++nn)
     {
-        if(neighbours[nn] == PEN_INVALID_HANDLE)
-        {
-            inner = false;
-            break;
-        }
+        if(is_valid(neighbours[nn]))
+            mask |= 1<<nn;
     }
     
-    if(inner)
+    if(!mask)
     {
         ext->cmp_flags[entity] = 0;
         ecs::delete_entity(scene, entity);
@@ -791,6 +776,7 @@ void build_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_
     }
     
     // add island
+    ext->tile_blocks[entity].neighbour_mask = mask;
     ext->game_flags[entity] |= GF_TILE_IN_ISLAND;
     sb_push(*island_list, entity);
     
@@ -812,7 +798,7 @@ void build_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_
             continue;
         
         // recurse, adding its neighbours
-        build_islands(scene, ext, entity, island_list);
+        find_islands(scene, ext, entity, island_list);
     }
 }
 
@@ -846,15 +832,6 @@ bool check_occupied(vec3f bp, u32& ph)
 
 bool detect_inner_block(vec3f block, vec3f* list)
 {
-    static vec3f np[6] = {
-        vec3f::unit_x(),
-        vec3f::unit_y(),
-        vec3f::unit_z(),
-        -vec3f::unit_x(),
-        -vec3f::unit_y(),
-        -vec3f::unit_z()
-    };
-    
     u32 num_list = sb_count(list);
     for(u32 i = 0; i < 6; ++i)
     {
@@ -862,7 +839,7 @@ bool detect_inner_block(vec3f block, vec3f* list)
         for(u32 l = 0; l < num_list; ++l)
         {
             vec3f nn = list[l];
-            if(maths::point_inside_sphere(block + np[i], 1.0f, nn))
+            if(maths::point_inside_sphere(block + axis[i], 1.0f, nn))
             {
                 found = true;
                 break;
@@ -878,16 +855,6 @@ bool detect_inner_block(vec3f block, vec3f* list)
 
 void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
-    // detect neighbours for guides
-    static vec3f np[6] = {
-        vec3f::unit_x(),
-        vec3f::unit_y(),
-        vec3f::unit_z(),
-        -vec3f::unit_x(),
-        -vec3f::unit_y(),
-        -vec3f::unit_z()
-    };
-    
     ecs::editor_enable(true);
     
     camera* camera = ecsc.camera;
@@ -936,7 +903,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
                 continue;
             
             u32* island = nullptr;
-            build_islands(scene, ext, n, &island);
+            find_islands(scene, ext, n, &island);
             
             // make tile blocks children
             u32 island_id = get_new_entity(scene);
@@ -964,16 +931,40 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             
             sb_push(islands, island);
         }
-        
-        // del physics
-        u32 num_islands = sb_count(islands);
-        for(u32 i = 0; i < num_islands; ++i)
+    }
+    
+    // dbg tris
+    u32 num_islands = sb_count(islands);
+    for(u32 i = 0; i < num_islands; ++i)
+    {
+        u32 num_tiles = sb_count(islands[i]);
+        for(u32 t = 0; t < num_tiles; ++t)
         {
-            u32 num_tiles = sb_count(islands[i]);
-            for(u32 t = 0; t < num_tiles; ++t)
+            u32 tb = islands[i][t];
+            vec3f tp = scene->transforms[tb].translation;
+            
+            for(u32 n = 0; n < 6; ++n)
             {
-                ecs::delete_entity(scene, islands[i][t]);
+                if(ext->tile_blocks[tb].neighbour_mask & (1<<n))
+                    continue;
+                
+                // normal
+                vec3f mm = tp + axis[n] * 0.5f;
+                dbg::add_line(mm, mm + axis[n] * 0.5f);
+
+                // 4 verts
+                vec3f v[] =
+                {
+                    mm - axis_t[n] * 0.5f - axis_bt[n] * 0.5f, // --
+                    mm + axis_t[n] * 0.5f - axis_bt[n] * 0.5f, // +-
+                    mm + axis_t[n] * 0.5f + axis_bt[n] * 0.5f, // ++
+                    mm - axis_t[n] * 0.5f + axis_bt[n] * 0.5f  // -+
+                };
+                
+                dbg::add_triangle(v[0], v[1], v[2]);
             }
+            
+            //ecs::delete_entity(scene, islands[i][t]);
         }
     }
     
@@ -988,7 +979,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     ImGui::Combo("Edit Axis", &edit_axis, &edit_axis_name[0], 3);
     ImGui::InputInt("Level", &slice[edit_axis]);
     
-    pN = np[edit_axis];
+    pN = axis[edit_axis];
     p0[edit_axis] = slice[edit_axis];
     
     static bool _dbu = false;
@@ -1017,7 +1008,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     // intersect with edit plane
     vec3f ip = maths::ray_plane_intersect(r0, rv, p0, pN);
     
-    vec3f altpN = np[(edit_axis+1)%3];
+    vec3f altpN = axis[(edit_axis+1)%3];
     vec3f altip = maths::ray_plane_intersect(r0, rv, p0, altpN);
     
     // snap to grid
@@ -1059,7 +1050,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
                 u32 e = find_entity_from_physics(scene, ph);
                 
                 u32* island = nullptr;
-                build_islands(scene, ext, e, &island);
+                find_islands(scene, ext, e, &island);
                 
                 u32 num_tb = sb_count(island);
                 for(u32 i = 0; i < num_tb; ++i)
@@ -1183,7 +1174,6 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         vec4f::red()
     };
     
-    u32 num_islands = sb_count(islands);
     for(u32 i = 0; i < num_islands; ++i)
     {
         u32 num_tiles = sb_count(islands[i]);
@@ -1200,7 +1190,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         cast_result cast;
         cast.set = false;
         
-        vec3f nip = ip + np[n] * 100000.0f;
+        vec3f nip = ip + axis[n] * 100000.0f;
         
         physics::ray_cast_params rcp;
         rcp.start = ip;
