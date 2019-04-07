@@ -50,6 +50,26 @@ namespace
     };
 }
 
+void collision_mesh_from_vertex_list(f32* verts, u32 num, physics::collision_mesh_data& cmd)
+{
+    // indices are just 1 to 1 with verts
+    u32 num_verts = num;
+    u32 vb_size = num_verts*3*sizeof(f32);
+    u32 ib_size = num_verts*sizeof(u32);
+    
+    cmd.vertices = (f32*)pen::memory_alloc(vb_size);
+    memcpy(cmd.vertices, verts, vb_size);
+    
+    cmd.indices = (u32*)pen::memory_alloc(ib_size);
+    for(u32 i = 0; i < num_verts; ++i)
+    {
+        cmd.indices[i] = i;
+    }
+    
+    cmd.num_floats = num_verts * 3;
+    cmd.num_indices = num_verts;
+}
+
 void dr_scene_browser_ui(ecs_extension& extension, ecs_scene* scene)
 {
     dr_ecs_exts* ext = (dr_ecs_exts*)extension.context;
@@ -931,40 +951,63 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             
             sb_push(islands, island);
         }
-    }
-    
-    // dbg tris
-    u32 num_islands = sb_count(islands);
-    for(u32 i = 0; i < num_islands; ++i)
-    {
-        u32 num_tiles = sb_count(islands[i]);
-        for(u32 t = 0; t < num_tiles; ++t)
-        {
-            u32 tb = islands[i][t];
-            vec3f tp = scene->transforms[tb].translation;
-            
-            for(u32 n = 0; n < 6; ++n)
-            {
-                if(ext->tile_blocks[tb].neighbour_mask & (1<<n))
-                    continue;
-                
-                // normal
-                vec3f mm = tp + axis[n] * 0.5f;
-                dbg::add_line(mm, mm + axis[n] * 0.5f);
 
-                // 4 verts
-                vec3f v[] =
-                {
-                    mm - axis_t[n] * 0.5f - axis_bt[n] * 0.5f, // --
-                    mm + axis_t[n] * 0.5f - axis_bt[n] * 0.5f, // +-
-                    mm + axis_t[n] * 0.5f + axis_bt[n] * 0.5f, // ++
-                    mm - axis_t[n] * 0.5f + axis_bt[n] * 0.5f  // -+
-                };
+        u32 num_islands = sb_count(islands);
+        for(u32 i = 0; i < num_islands; ++i)
+        {
+            vec3f* verts = nullptr;
+            
+            u32 num_tiles = sb_count(islands[i]);
+            for(u32 t = 0; t < num_tiles; ++t)
+            {
+                u32 tb = islands[i][t];
+                vec3f tp = scene->transforms[tb].translation;
                 
-                dbg::add_triangle(v[0], v[1], v[2]);
+                for(u32 n = 0; n < 6; ++n)
+                {
+                    if(ext->tile_blocks[tb].neighbour_mask & (1<<n))
+                        continue;
+                    
+                    // normal
+                    vec3f mm = tp + axis[n] * 0.5f;
+                    
+                    // 4 verts
+                    vec3f v[] =
+                    {
+                        mm - axis_t[n] * 0.5f - axis_bt[n] * 0.5f, // --
+                        mm + axis_t[n] * 0.5f - axis_bt[n] * 0.5f, // +-
+                        mm + axis_t[n] * 0.5f + axis_bt[n] * 0.5f, // ++
+                        mm - axis_t[n] * 0.5f + axis_bt[n] * 0.5f  // -+
+                    };
+                    
+                    if(!(n == 2 || n == 5))
+                        std::swap(v[0], v[2]);
+
+                    sb_push(verts, v[0]);
+                    sb_push(verts, v[1]);
+                    sb_push(verts, v[2]);
+                    
+                    sb_push(verts, v[2]);
+                    sb_push(verts, v[3]);
+                    sb_push(verts, v[0]);
+                }
+
+                ecs::delete_entity(scene, tb);
             }
             
-            //ecs::delete_entity(scene, islands[i][t]);
+            // new collision node
+            u32 cmesh = get_new_entity(scene);
+            scene->transforms[cmesh].translation = vec3f(0.0f, 0.0f, 0.0f);
+            scene->transforms[cmesh].rotation = quat();
+            scene->transforms[cmesh].scale = vec3f(1.0f, 1.0f, 1.0f);
+            scene->entities[cmesh] |= CMP_TRANSFORM;
+            scene->parents[cmesh] = cmesh;
+            scene->physics_data[cmesh].rigid_body.shape = physics::MESH;
+            scene->physics_data[cmesh].rigid_body.mass = 0.0f;
+            
+            collision_mesh_from_vertex_list((f32*)&verts[0], sb_count(verts), scene->physics_data[cmesh].rigid_body.mesh_data);
+            
+            instantiate_rigid_body(scene, cmesh);
         }
     }
     
@@ -1174,6 +1217,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         vec4f::red()
     };
     
+    u32 num_islands = sb_count(islands);
     for(u32 i = 0; i < num_islands; ++i)
     {
         u32 num_tiles = sb_count(islands[i]);
