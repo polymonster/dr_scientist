@@ -204,7 +204,7 @@ void tilemap_ray_cast(const physics::ray_cast_result& result)
         cc->set = true;
 }
 
-void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
+void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entities, u32 num_entities, u32 parent)
 {
     Str file_top_corner = "data/models/environments/general/basic_top_corner.pmm";
     Str file_middle_corner = "data/models/environments/general/basic_middle_corner.pmm";
@@ -215,16 +215,12 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
     static const f32 r90 = M_PI/2.0f;
     static const f32 r180 = M_PI;
     
-    u32 parent = get_new_entity(scene);
-    scene->transforms[parent].translation = vec3f::zero();
-    scene->transforms[parent].rotation = quat(0.0f, 0.0f, 0.0f);
-    scene->transforms[parent].scale = vec3f::one();
-    scene->entities[parent] |= CMP_TRANSFORM;
+    u32* block_entities = nullptr;
     
-    u32 start = scene->num_entities;
-    
-    for (u32 n = 0; n < scene->num_entities; ++n)
+    for(u32 i = 0; i < num_entities; ++i)
     {
+        u32 n = entities[i];
+        
         if (!(ext->cmp_flags[n] & CMP_TILE_BLOCK))
             continue;
 
@@ -331,7 +327,8 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 scene->transforms[corner].rotation = corner_rotation[c];
                 scene->transforms[corner].scale = vec3f::one();
                 scene->entities[corner] |= CMP_TRANSFORM;
-
+                sb_push(block_entities, corner);
+                
                 continue;
             }
 
@@ -344,6 +341,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 scene->transforms[tile].rotation = corner_rotation[c];
                 scene->transforms[tile].scale = vec3f::one();
                 scene->entities[tile] |= CMP_TRANSFORM;
+                sb_push(block_entities, tile);
 
                 continue;
             }
@@ -366,6 +364,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                         scene->transforms[tile].rotation *= quat(-r90, 0.0f, 0.0f);
                     
                     scene->entities[tile] |= CMP_TRANSFORM;
+                    sb_push(block_entities, tile);
 
                     continue;
                 }
@@ -384,6 +383,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                         scene->transforms[tile].rotation *= quat( -r90, 0.0f, 0.0f);
                     
                     scene->entities[tile] |= CMP_TRANSFORM;
+                    sb_push(block_entities, tile);
 
                     continue;
                 }
@@ -412,6 +412,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
             scene->transforms[tile].rotation = corner_face_rotations[c][rot_i];
             scene->transforms[tile].scale = vec3f::one();
             scene->entities[tile] |= CMP_TRANSFORM;
+            sb_push(block_entities, tile);
         }
 
         // 12 edge tiles
@@ -576,6 +577,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                     scene->transforms[tile].rotation = rot_r;
                     scene->transforms[tile].scale = vec3f::one();
                     scene->entities[tile] |= CMP_TRANSFORM;
+                    sb_push(block_entities, tile);
                 }
             }
         }
@@ -618,6 +620,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
                 scene->transforms[tile].rotation = face_rotation[f];
                 scene->transforms[tile].scale = vec3f::one();
                 scene->entities[tile] |= CMP_TRANSFORM;
+                sb_push(block_entities, tile);
             }
 
             put::dbg::add_point(fp, 0.5f);
@@ -627,21 +630,24 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext)
     // bake vertex buffer
     u32 end = scene->num_entities;
 
-    u32* node_list = nullptr;
-    for(u32 i = start; i < end; ++i)
+    u32 num_tiles = sb_count(block_entities);
+    
+    for(u32 i = 0; i < num_tiles; ++i)
     {
-        scene->parents[i] = parent;
-        scene->bounding_volumes[i].min_extents = vec3f(-0.125f);
-        scene->bounding_volumes[i].max_extents = vec3f( 0.125f);
+        u32 tb = block_entities[i];
         
-        sb_push(node_list, i);
+        scene->parents[tb] = parent;
+        scene->bounding_volumes[tb].min_extents = vec3f(-0.125f);
+        scene->bounding_volumes[tb].max_extents = vec3f( 0.125f);
     }
 
     // need to bake world mats and extents
     update_scene(scene, 0.0f);
     
     // bake vertex buffer
-    bake_entities_to_vb(scene, parent, node_list);
+    bake_entities_to_vb(scene, parent, block_entities);
+    
+    sb_free(block_entities);
 }
 
 void setup_character(put::ecs::ecs_scene* scene)
@@ -897,11 +903,6 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     
     ImGui::Begin("Toolbox");
     
-    if (ImGui::Button("Bake"))
-    {
-        bake_tile_blocks(scene, ext);
-    }
-    
     ImGui::SameLine();
     
     static u32** islands = nullptr;
@@ -958,6 +959,14 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             vec3f* verts = nullptr;
             
             u32 num_tiles = sb_count(islands[i]);
+            
+            u32 island_parent = scene->parents[islands[i][0]];
+            
+            scene->physics_data[island_parent].rigid_body.shape = physics::MESH;
+            scene->physics_data[island_parent].rigid_body.mass = 0.0f;
+            
+            bake_tile_blocks(scene, ext, islands[i], num_tiles, island_parent);
+            
             for(u32 t = 0; t < num_tiles; ++t)
             {
                 u32 tb = islands[i][t];
@@ -995,19 +1004,13 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
                 ecs::delete_entity(scene, tb);
             }
             
-            // new collision node
-            u32 cmesh = get_new_entity(scene);
-            scene->transforms[cmesh].translation = vec3f(0.0f, 0.0f, 0.0f);
-            scene->transforms[cmesh].rotation = quat();
-            scene->transforms[cmesh].scale = vec3f(1.0f, 1.0f, 1.0f);
-            scene->entities[cmesh] |= CMP_TRANSFORM;
-            scene->parents[cmesh] = cmesh;
-            scene->physics_data[cmesh].rigid_body.shape = physics::MESH;
-            scene->physics_data[cmesh].rigid_body.mass = 0.0f;
+            collision_mesh_from_vertex_list((f32*)&verts[0],
+                                            sb_count(verts), scene->physics_data[island_parent].rigid_body.mesh_data);
             
-            collision_mesh_from_vertex_list((f32*)&verts[0], sb_count(verts), scene->physics_data[cmesh].rigid_body.mesh_data);
+            instantiate_rigid_body(scene, island_parent);
             
-            instantiate_rigid_body(scene, cmesh);
+            // reset num entities to reduce usage
+            ecs::trim_entities(scene);
         }
     }
     
