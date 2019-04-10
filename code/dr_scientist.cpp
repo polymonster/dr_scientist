@@ -204,6 +204,62 @@ void tilemap_ray_cast(const physics::ray_cast_result& result)
         cc->set = true;
 }
 
+void detect_neighbours(vec3f p, f32 tile_size, u32 neighbours[6])
+{
+    for(u32 n = 0; n < 6; ++n)
+    {
+        neighbours[n] = PEN_INVALID_HANDLE;
+        
+        cast_result cast;
+        cast.set = false;
+        
+        vec3f nip = p + axis[n] * tile_size;
+        
+        physics::ray_cast_params rcp;
+        rcp.start = p;
+        rcp.end = nip;
+        rcp.callback = &tilemap_ray_cast;
+        rcp.user_data = &cast;
+        rcp.group = 1;
+        rcp.mask = 1;
+        
+        physics::cast_ray(rcp, true);
+        
+        if(cast.set)
+        {
+            neighbours[n] = cast.physics_handle;
+        }
+    }
+}
+
+void detect_neighbours_ex(vec3f p, f32 tile_size, u32 neighbours[6], ecs_scene* scene, dr_ecs_exts* ext)
+{
+    detect_neighbours(p, tile_size, neighbours);
+    
+    // for non neighbours check inners
+    for(u32 n = 0; n < 6; ++n)
+    {
+        if(neighbours[n] != PEN_INVALID_HANDLE)
+            continue;
+        
+        for(u32 e = 0; e < scene->num_entities; ++e)
+        {
+            if(!(ext->cmp_flags[e] & CMP_TILE_BLOCK))
+                continue;
+            
+            if(!(ext->tile_blocks[e].flags & TF_INNER))
+                continue;
+            
+            vec3f pp = scene->transforms[e].translation;
+            if(maths::point_inside_sphere(p + axis[n], 1.0f, pp))
+            {
+                neighbours[n] = e;
+                break;
+            }
+        }
+    }
+}
+
 void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entities, u32 num_entities, u32 parent)
 {
     Str file_top_corner = "data/models/environments/general/basic_top_corner.pmm";
@@ -223,41 +279,31 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
         
         if (!(ext->cmp_flags[n] & CMP_TILE_BLOCK))
             continue;
+        
+        if(ext->tile_blocks[n].flags & TF_INNER)
+            continue;
 
         scene->state_flags[n] |= SF_HIDDEN;
-
-        // do casts to get neighbours
+        
+        u32 neigbour_i[6];
+        
+        vec3f pos = scene->transforms[n].translation;
+        
+        detect_neighbours_ex(pos, 1.0, neigbour_i, scene, ext);
         
         bool neighbour[6] = { 0 };
+        
         u32 nc = 0;
-
-        vec3f pos = scene->transforms[n].translation;
-
-        for (u32 b = 0; b < 6; ++b)
+        
+        for(u32 i = 0; i < 6; ++i)
         {
-            vec3f nip = pos + axis[b];
-
-            cast_result cast;
-
-            physics::ray_cast_params rcp;
-            rcp.start = pos;
-            rcp.end = nip;
-            rcp.callback = &tilemap_ray_cast;
-            rcp.user_data = &cast;
-            rcp.group = 1;
-            rcp.mask = 1;
-
-            physics::cast_ray(rcp, true);
-
-            // ..
-            if (cast.set)
+            if(neigbour_i[i] != PEN_INVALID_HANDLE)
             {
-                neighbour[b] = true;
                 nc++;
+                neighbour[i] = true;
             }
         }
-
-        // centre block simply gets removed
+        
         if (nc == 6)
             continue;
 
@@ -741,34 +787,6 @@ static bool press_debounce(u32 key, bool& db)
     return false;
 }
 
-void detect_neighbours(vec3f p, f32 tile_size, u32 neighbours[6])
-{
-    for(u32 n = 0; n < 6; ++n)
-    {
-        neighbours[n] = PEN_INVALID_HANDLE;
-        
-        cast_result cast;
-        cast.set = false;
-        
-        vec3f nip = p + axis[n] * tile_size;
-        
-        physics::ray_cast_params rcp;
-        rcp.start = p;
-        rcp.end = nip;
-        rcp.callback = &tilemap_ray_cast;
-        rcp.user_data = &cast;
-        rcp.group = 1;
-        rcp.mask = 1;
-        
-        physics::cast_ray(rcp, true);
-        
-        if(cast.set)
-        {
-            neighbours[n] = cast.physics_handle;
-        }
-    }
-}
-
 u32 find_entity_from_physics(ecs_scene* scene, u32 physics_handle)
 {
     for(u32 n = 0; n < scene->num_entities; ++n)
@@ -959,6 +977,8 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             vec3f* verts = nullptr;
             
             u32 num_tiles = sb_count(islands[i]);
+            if(num_tiles == 0)
+                continue;
             
             u32 island_parent = scene->parents[islands[i][0]];
             
@@ -1205,7 +1225,16 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
                 continue;
             
             if(!detect_inner_block(bp, selected))
+            {
                 add_tile_block(scene, ext, selected[s]);
+            }
+            else
+            {
+                u32 nn = get_new_entity(scene);
+                ext->cmp_flags[nn] |= CMP_TILE_BLOCK;
+                ext->tile_blocks[nn].flags |= TF_INNER;
+                scene->transforms[nn].translation = selected[s];
+            }
         }
         sb_clear(selected);
         

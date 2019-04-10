@@ -35,10 +35,17 @@ enum e_game_flags
     GF_TILE_IN_ISLAND = 1<<0
 };
 
+enum e_tile_flags
+{
+    TF_NONE = 0,
+    TF_INNER = 1
+};
+
 struct tile_block
 {
     u32 neighbour_mask; //x,y,z,-x,-y,-z.
     u32 island_id = 0;
+    u32 flags = 0;
 };
 
 struct dr_ecs_exts
