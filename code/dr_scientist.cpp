@@ -674,8 +674,6 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
     }
     
     // bake vertex buffer
-    u32 end = scene->num_entities;
-
     u32 num_tiles = sb_count(block_entities);
     
     for(u32 i = 0; i < num_tiles; ++i)
@@ -802,7 +800,7 @@ void find_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_l
 {
     // detect neighbours
     u32 neighbours[6];
-    detect_neighbours(scene->transforms[entity].translation, 1.0f, neighbours);
+    detect_neighbours_ex(scene->transforms[entity].translation, 1.0f, neighbours, scene, ext);
     
     // inner blocks can be discarded
     u32 mask = 0;
@@ -941,6 +939,9 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             if((ext->game_flags[n] & GF_TILE_IN_ISLAND))
                 continue;
             
+            if(ext->tile_blocks[n].flags & TF_INNER)
+                continue;
+            
             u32* island = nullptr;
             find_islands(scene, ext, n, &island);
             
@@ -1028,10 +1029,19 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
                                             sb_count(verts), scene->physics_data[island_parent].rigid_body.mesh_data);
             
             instantiate_rigid_body(scene, island_parent);
-            
-            // reset num entities to reduce usage
-            ecs::trim_entities(scene);
         }
+        
+        // delete all inners
+        u32 ne = scene->num_entities;
+        for(u32 e = 0; e < ne; ++e)
+        {
+            if(ext->cmp_flags[e] & CMP_TILE_BLOCK)
+                if(ext->tile_blocks[e].flags & TF_INNER)
+                    ecs::delete_entity(scene, e);
+        }
+        
+        // trim num entities to reduce usage
+        ecs::trim_entities(scene);
     }
     
     static s32 edit_axis = 1;
