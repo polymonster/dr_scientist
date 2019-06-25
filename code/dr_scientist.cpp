@@ -695,79 +695,6 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
     sb_free(block_entities);
 }
 
-
-void setup_area_lights(ecs::ecs_scene* scene, camera& cam)
-{
-    // ground
-    material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
-    geometry_resource* quad = get_geometry_resource(PEN_HASH("quad"));
-
-    u32 ground = get_new_entity(scene);
-    scene->names[ground] = "ground";
-    scene->transforms[ground].rotation = quat();
-    scene->transforms[ground].scale = vec3f(60.0f) * 0.2f;
-    scene->transforms[ground].translation = vec3f::zero();
-    scene->entities[ground] |= CMP_TRANSFORM;
-    scene->parents[ground] = ground;
-    scene->material_permutation[ground] |= FORWARD_LIT_UV_SCALE;
-
-    instantiate_geometry(quad, scene, ground);
-    instantiate_material(default_material, scene, ground);
-    instantiate_model_cbuffer(scene, ground);
-
-    // checkerboard roughness
-    scene->samplers[ground].sb[2].handle = put::load_texture("data/textures/roughness_checker.dds");
-    forward_lit_uv_scale* mat = (forward_lit_uv_scale*)&scene->material_data[ground];
-    mat->m_uv_scale = float2(0.6, 0.6);
-
-    // area lights
-    material_resource area_light_material;
-    area_light_material.id_shader = PEN_HASH("pmfx_utility");
-    area_light_material.id_technique = PEN_HASH("area_light_texture");
-    area_light_material.material_name = "area_light_texture";
-    area_light_material.shader_name = "pmfx_utility";
-
-    quat al_rots[] = {
-        quat(0.0f, 0.0f, M_PI / 2.0f) * quat(-M_PI / 4.0f, 0.0f, 0.0f),
-        quat(0.0f, 0.0f, M_PI / 2.0f),
-        quat(0.0f, 0.0f, M_PI / 2.0f) * quat(M_PI / 4.0f, 0.0f, 0.0f),
-    };
-
-    vec3f al_scales[] = {
-        vec3f(10.0f, 1.0f, 10.0f),
-        vec3f(10.0f, 1.0f, 10.0f),
-        vec3f(10.0f, 1.0f, 10.0f)
-    };
-
-    vec3f al_trans[] = {
-        vec3f(-25.0f, 20.0f, -20.0f),
-        vec3f(0.0f, 20.0f, -30.0f),
-        vec3f(25.0f, 20.0f, -20.0f)
-    };
-
-    area_light_resource alrs[] = {
-        { "trace", "box", "", "" },
-        { "trace", "torus", "", "" },
-        { "trace", "octahedron", "", "" },
-    };
-
-    for (u32 i = 0; i < 3; ++i)
-    {
-        u32 al = get_new_entity(scene);
-        scene->names[al].setf("area_light_%i", i);
-
-        scene->transforms[al].rotation = al_rots[i];
-        scene->transforms[al].scale = al_scales[i] * 0.2f;
-        scene->transforms[al].translation = al_trans[i] * 0.2f;
-        scene->entities[al] |= CMP_TRANSFORM;
-        scene->parents[al] = al;
-
-        instantiate_area_light_ex(scene, al, alrs[i]);
-    }
-
-    bake_material_handles();
-}
-
 void setup_character(put::ecs::ecs_scene* scene)
 {
     // load main model
@@ -1967,11 +1894,10 @@ PEN_TRV pen::user_entry( void* params )
     pmfx::init("data/configs/editor_renderer.jsn");
     
     setup_character(main_scene);
-    setup_area_lights(main_scene, main_camera);
     
     while( 1 )
     {
-        static u32 frame_timer = pen::timer_create("user_thread");
+        static timer* frame_timer = pen::timer_create();
         pen::timer_start(frame_timer);
 
 		put::dev_ui::new_frame();
