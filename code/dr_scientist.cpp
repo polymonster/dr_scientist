@@ -18,6 +18,7 @@ namespace
 {
     // loose..
     dr_char dr;
+    
     f32 user_thread_time = 0.0f;
     
     // unit cube axis
