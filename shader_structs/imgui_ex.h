@@ -1,4 +1,4 @@
-namespace deferred_render
+namespace imgui_ex
 {
     struct light_data
     {
@@ -55,5 +55,14 @@ namespace deferred_render
     {
         light_data single_light;
     };
-    #define POINT_LIGHT_MSAA 2
+    struct per_pass_vs
+    {
+        float4x4 projection_matrix;
+    };
+    struct image_ex
+    {
+        float4 colour_mask;
+        float4 params;
+        float4x4 inverse_wvp;
+    };
 }

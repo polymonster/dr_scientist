@@ -1,0 +1,61 @@
+{
+    //
+    // common
+    //
+    
+    base: {
+        tools: {
+            premake: "../pmtech/tools/premake/premake5",
+            pmfx: "../pmtech/third_party/pmfx-shader/build_pmfx.py",
+            texturec: "../pmtech/third_party/texturec/$platform/texturec",
+            models: "../pmtech/tools/build_scripts/build_models.py"
+        },
+    
+        env: {
+            pmtech_dir: "../pmtech/"
+        },
+    },
+    
+    //
+    // mac
+    //
+    
+    mac: {
+        jsn_inherit: ["base"],
+        
+        clean: [
+            "build/osx",
+            "bin/osx",
+            "temp"
+        ],
+        
+        libs: [
+            "cd ../third_party && ./build_libs.sh osx",
+        ],
+        
+        premake: [
+            "xcode4",
+            "--renderer=metal", 
+            "--platform_dir=osx"
+        ],
+        
+        pmfx: [
+            "-shader_platform metal",
+            "-shader_version macosx",
+            "-i ../pmtech/assets/shaders",
+            "-o bin/osx/data/pmfx/metal",
+            "-h shader_structs",
+            "-t temp/shaders",
+            "-source"
+        ],
+        
+        models: [
+            ["assets/exported/models", "bin/osx/data/models"]
+        ],
+        
+        textures: [
+            ["assets/exported/textures", "bin/osx/data/textures"],
+            ["../pmtech/assets/textures", "bin/osx/data/textures"]
+        ]
+    }
+}

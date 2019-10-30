@@ -1,4 +1,4 @@
-namespace deferred_render
+namespace trace
 {
     struct light_data
     {
@@ -55,5 +55,4 @@ namespace deferred_render
     {
         light_data single_light;
     };
-    #define POINT_LIGHT_MSAA 2
 }

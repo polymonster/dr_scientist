@@ -1,6 +1,0 @@
-{
-    "pmtech_dir": "../pmtech",
-    "textures_dir": "assets/exported/textures",
-    "models_dir": "assets/exported/models",
-	"copy_dirs": ["assets/scenes"]
-}
