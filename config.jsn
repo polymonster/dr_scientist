@@ -60,10 +60,10 @@
     },
     
     //
-    // linux ci
+    // linux
     //
     
-    linux-ci: {
+    linux: {
         jsn_inherit: ["base"],
         
         clean: [
