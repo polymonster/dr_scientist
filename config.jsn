@@ -57,5 +57,48 @@
             ["assets/exported/textures", "bin/osx/data/textures"],
             ["../pmtech/assets/textures", "bin/osx/data/textures"]
         ]
+    },
+    
+    //
+    // linux ci
+    //
+    
+    linux-ci: {
+        jsn_inherit: ["base"],
+        
+        clean: [
+            "build/linux",
+            "bin/linux",
+            "temp"
+        ],
+        
+        libs: [
+            "cd ../third_party && ./build_libs.sh linux",
+        ],
+        
+        premake: [
+            "gmake",
+            "--renderer=opengl", 
+            "--platform_dir=linux"
+        ],
+        
+        pmfx: [
+            "-shader_platform glsl",
+            "-shader_version 330",
+            "-i ../pmtech/assets/shaders",
+            "-o bin/linux/data/pmfx/metal",
+            "-h shader_structs",
+            "-t temp/shaders",
+            "-source"
+        ],
+        
+        models: [
+            ["assets/exported/models", "bin/linux/data/models"]
+        ],
+        
+        textures: [
+            ["assets/exported/textures", "bin/linux/data/textures"],
+            ["../pmtech/assets/textures", "bin/linux/data/textures"]
+        ]
     }
 }

@@ -24,7 +24,7 @@ jobs:
             cd ..
             git clone --recursive https://github.com/polymonster/pmtech.git
             cd repo
-            python3 ../pmtech/tools/build.py -all
+            python3 ../pmtech/tools/build_scripts/pmbuild.py linux
             cd build/linux
             make config=debug
             make confug=release
