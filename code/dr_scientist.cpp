@@ -699,7 +699,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
 void setup_character(put::ecs::ecs_scene* scene)
 {
     // load main model
-    dr.root = load_pmm("data/models/characters/doctor/Doctor.pmm", scene);
+    dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
     
     // load anims
     anim_handle idle = load_pma("data/models/characters/doctor/anims/doctor_idle01.pma");
@@ -1473,7 +1473,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     static f32 capsule_radius = 0.3f;
     
     static bool debug_lines = false;
-    static bool game_cam = false;
+    static bool game_cam = true;
 
     static u32 hp = 0;
     static f32 pos_hist_x[60];

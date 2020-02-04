@@ -10,10 +10,29 @@
             texturec: "../pmtech/third_party/texturec/$platform/texturec",
             models: "../pmtech/tools/build_scripts/build_models.py"
         },
-    
+        
         env: {
             pmtech_dir: "../pmtech/"
         },
+        
+        jsn_vars: {
+        	pmtech_dir: "../pmtech/",
+        	data_dir: ""
+        },
+        
+        copy: [
+            ["${pmtech_dir}/assets/fonts", "${data_dir}/fonts"],
+            ["${pmtech_dir}/assets/configs", "${data_dir}/configs"]
+        ],
+        
+        models: [
+            ["assets/exported/models", "${data_dir}/models"]
+        ],
+        
+        textures: [
+            ["assets/exported/textures", "${data_dir}/textures"],
+            ["../pmtech/assets/textures", "${data_dir}/textures"]
+        ]
     },
     
     //
@@ -21,6 +40,10 @@
     //
     
     mac(base): {        
+    	jsn_vars: {
+    		data_dir: "bin/osx/data"
+    	},
+    	
         clean: [
             "build/osx",
             "bin/osx",
@@ -45,20 +68,45 @@
             "-h shader_structs",
             "-t temp/shaders",
             "-source"
+        ]
+    },
+    
+    //
+    // iOS
+    //
+    
+    ios(base): {
+        jsn_vars: {
+    		data_dir: "bin/ios/data"
+    	},
+    	
+    	require_teamid: true,
+    	
+        clean: [
+            "build/ios",
+            "bin/ios",
+            "temp"
         ],
         
-        copy: [
-            ["../pmtech/assets/fonts", "bin/osx/data/fonts"],
-            ["../pmtech/assets/configs", "bin/osx/data/configs"]
+        libs: [
+            "cd ../third_party && ./build_libs.sh ios",
         ],
         
-        models: [
-            ["assets/exported/models", "bin/osx/data/models"]
+        premake: [
+            "xcode4",
+            "--renderer=metal", 
+            "--platform_dir=ios",
+            "--xcode_target=ios"
         ],
         
-        textures: [
-            ["assets/exported/textures", "bin/osx/data/textures"],
-            ["../pmtech/assets/textures", "bin/osx/data/textures"]
+        pmfx: [
+            "-shader_platform metal",
+            "-shader_version ios",
+            "-i ../pmtech/assets/shaders",
+            "-o bin/ios/data/pmfx/metal",
+            "-h shader_structs",
+            "-t temp/shaders",
+            "-source"
         ]
     },
     
@@ -66,8 +114,10 @@
     // linux
     //
     
-    linux: {
-        jsn_inherit: ["base"],
+    linux(jsn_inherit): {
+		jsn_vars: {
+    		data_dir: "bin/ios/data"
+    	},
         
         clean: [
             "build/linux",
@@ -93,15 +143,6 @@
             "-h shader_structs",
             "-t temp/shaders",
             "-source"
-        ],
-        
-        models: [
-            ["assets/exported/models", "bin/linux/data/models"]
-        ],
-        
-        textures: [
-            ["assets/exported/textures", "bin/linux/data/textures"],
-            ["../pmtech/assets/textures", "bin/linux/data/textures"]
         ]
     }
 }

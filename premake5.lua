@@ -3,7 +3,7 @@ dofile "../pmtech/tools/premake/globals.lua"
 dofile "../pmtech/tools/premake/app_template.lua"
 
 -- Solution
-solution "dr_scientist"
+solution ("dr_scientist_" .. platform_dir)
 	location ("build/" .. platform_dir ) 
 	configurations { "Debug", "Release" }
 	startproject "dr_scientist"
