@@ -176,7 +176,7 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     scene->transforms[b].scale = vec3f(0.5f);
     scene->entities[b] |= CMP_TRANSFORM;
     scene->parents[b] = p;
-    scene->physics_data[b].rigid_body.shape = physics::BOX;
+    scene->physics_data[b].rigid_body.shape = physics::e_shape::box;
     scene->physics_data[b].rigid_body.mass = 0.0f;
     scene->physics_data[b].rigid_body.group = 1;
     scene->physics_data[b].rigid_body.mask = 0xffffffff;
@@ -718,12 +718,12 @@ void setup_character(put::ecs::ecs_scene* scene)
     bind_animation_to_rig(scene, run_r, dr.root);
 
     // add capsule for collisions
-    scene->physics_data[dr.root].rigid_body.shape = physics::CAPSULE;
+    scene->physics_data[dr.root].rigid_body.shape = physics::e_shape::capsule;
     scene->physics_data[dr.root].rigid_body.mass = 1.0f;
     scene->physics_data[dr.root].rigid_body.group = 4;
     scene->physics_data[dr.root].rigid_body.mask = ~1;
     scene->physics_data[dr.root].rigid_body.dimensions = vec3f(0.3f, 0.3f, 0.3f);
-    scene->physics_data[dr.root].rigid_body.create_flags |= (physics::CF_DIMENSIONS | physics::CF_KINEMATIC);
+    scene->physics_data[dr.root].rigid_body.create_flags |= (physics::e_create_flags::dimensions | physics::e_create_flags::kinematic);
 
     // drs feet are at 0.. offset collision to centre at 0.5
     scene->physics_offset[dr.root].translation = vec3f(0.0f, 0.5f, 0.0f);
@@ -747,12 +747,33 @@ void setup_character(put::ecs::ecs_scene* scene)
     //load_scene("data/scene/basic_level-4.pms", scene, true);
     //load_scene("data/scene/basic_level-ex.pms", scene, true);
     
+    // add ground
+    material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
+    geometry_resource* box_resource = get_geometry_resource(PEN_HASH("cube"));
+        
+    u32 b = get_new_entity(scene);
+    scene->names[b] = "ground";
+    scene->transforms[b].translation = vec3f(0.0f, -1.0f, 0.0f);;
+    scene->transforms[b].rotation = quat();
+    scene->transforms[b].scale = vec3f(100.0f, 1.0f, 100.0f);
+    scene->entities[b] |= CMP_TRANSFORM;
+    scene->parents[b] = b;
+    scene->physics_data[b].rigid_body.shape = physics::e_shape::box;
+    scene->physics_data[b].rigid_body.mass = 0.0f;
+    scene->physics_data[b].rigid_body.group = 1;
+    scene->physics_data[b].rigid_body.mask = 0xffffffff;
+
+    instantiate_geometry(box_resource, scene, b);
+    instantiate_material(default_material, scene, b);
+    instantiate_model_cbuffer(scene, b);
+    instantiate_rigid_body(scene, b);
+    
     // todo move to level editor
-    load_pmm("data/models/environments/general/basic_top_corner.pmm", scene, PMM_GEOMETRY | PMM_MATERIAL);
-    load_pmm("data/models/environments/general/basic_middle_corner.pmm", scene, PMM_GEOMETRY | PMM_MATERIAL);
-    load_pmm("data/models/environments/general/basic_top_side.pmm", scene, PMM_GEOMETRY | PMM_MATERIAL);
-    load_pmm("data/models/environments/general/basic_middle_side.pmm", scene, PMM_GEOMETRY | PMM_MATERIAL);
-    load_pmm("data/models/environments/general/basic_top_center.pmm", scene, PMM_GEOMETRY | PMM_MATERIAL);
+    load_pmm("data/models/environments/general/basic_top_corner.pmm", scene, e_pmm_load_flags::geometry | e_pmm_load_flags::material);
+    load_pmm("data/models/environments/general/basic_middle_corner.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
+    load_pmm("data/models/environments/general/basic_top_side.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
+    load_pmm("data/models/environments/general/basic_middle_side.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
+    load_pmm("data/models/environments/general/basic_top_center.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
     
     physics::physics_consume_command_buffer();
     pen::thread_sleep_ms(4);
@@ -969,7 +990,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
                 }
             }
             
-            scene->flags |= INVALIDATE_SCENE_TREE;
+            scene->flags |= e_scene_flags::invalidate_scene_tree;
             
             sb_push(islands, island);
         }
@@ -985,7 +1006,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             
             u32 island_parent = scene->parents[islands[i][0]];
             
-            scene->physics_data[island_parent].rigid_body.shape = physics::MESH;
+            scene->physics_data[island_parent].rigid_body.shape = physics::e_shape::mesh;
             scene->physics_data[island_parent].rigid_body.mass = 0.0f;
             
             bake_tile_blocks(scene, ext, islands[i], num_tiles, island_parent);
@@ -1502,13 +1523,13 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         {
             controller.anim_instances[_loco[aa]].time = 0.0f;
             controller.anim_instances[_loco[aa]].root_delta = vec3f::zero();
-            controller.anim_instances[_loco[aa]].flags |= (anim_flags::PAUSED | anim_flags::LOOPED);
+            controller.anim_instances[_loco[aa]].flags |= (e_anim_flags::paused | e_anim_flags::looped);
         }
     }
     else
     {
-        controller.anim_instances[dr.anim_run].flags &= ~anim_flags::PAUSED;
-        controller.anim_instances[dr.anim_walk].flags &= ~anim_flags::PAUSED;
+        controller.anim_instances[dr.anim_run].flags &= ~e_anim_flags::paused;
+        controller.anim_instances[dr.anim_walk].flags &= ~e_anim_flags::paused ;
         
         // locomotion state
         controller.blend.anim_a = dr.anim_walk;
@@ -1584,7 +1605,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     f32 dtt = dt / (1.0f / 60.0f);
     f32 ar = pow(0.8f, dtt);
     
-    if (!(scene->flags & PAUSE_UPDATE))
+    if (!(scene->flags & e_scene_flags::pause_update))
     {
         pc.vel *= vec3f(ar, 1.0f, ar);
         pc.vel += pc.acc * dt;
@@ -1708,7 +1729,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     }
 
     // set onto entity
-    if (!(scene->flags & PAUSE_UPDATE))
+    if (!(scene->flags & e_scene_flags::pause_update))
     {
         scene->initial_transform[5].rotation = quat(0.0f, ci.dir_angle, 0.0f);
         scene->transforms[dr.root].translation = pc.pos;
@@ -1884,10 +1905,16 @@ PEN_TRV pen::user_entry( void* params )
     svr_area_light_textures.id_name = PEN_HASH(svr_area_light_textures.name.c_str());
     svr_area_light_textures.render_function = &ecs::render_area_light_textures;
     
+    put::scene_view_renderer svr_omni_shadow_maps;
+    svr_omni_shadow_maps.name = "ces_render_omni_shadow_maps";
+    svr_omni_shadow_maps.id_name = PEN_HASH(svr_omni_shadow_maps.name.c_str());
+    svr_omni_shadow_maps.render_function = &ecs::render_omni_shadow_views;
+    
     pmfx::register_scene_view_renderer(svr_main);
     pmfx::register_scene_view_renderer(svr_editor);
     pmfx::register_scene_view_renderer(svr_shadow_maps);
     pmfx::register_scene_view_renderer(svr_area_light_textures);
+    pmfx::register_scene_view_renderer(svr_omni_shadow_maps);
     
     pmfx::register_scene(main_scene, "main_scene");
     pmfx::register_camera(&main_camera, "model_viewer_camera");
@@ -1902,8 +1929,6 @@ PEN_TRV pen::user_entry( void* params )
         pen::timer_start(frame_timer);
 
 		put::dev_ui::new_frame();
-        
-        //pmfx::update();
         
         ecs::update();
         

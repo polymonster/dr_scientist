@@ -20,9 +20,7 @@
     // mac
     //
     
-    mac: {
-        jsn_inherit: ["base"],
-        
+    mac(base): {        
         clean: [
             "build/osx",
             "bin/osx",
@@ -47,6 +45,11 @@
             "-h shader_structs",
             "-t temp/shaders",
             "-source"
+        ],
+        
+        copy: [
+            ["../pmtech/assets/fonts", "bin/osx/data/fonts"],
+            ["../pmtech/assets/configs", "bin/osx/data/configs"]
         ],
         
         models: [
