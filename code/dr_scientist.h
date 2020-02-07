@@ -23,23 +23,42 @@
 using namespace put;
 using namespace ecs;
 
-enum e_cmp_flags
+namespace e_cmp_flags
 {
-    CMP_TILE_BLOCK = 1,
-    CMP_CUSTOM_ANIM = 1<<1
-};
+    enum cmp_flags_t
+    {
+        tile_block = 1,
+        custom_anim = 1<<1
+    };
+}
 
-enum e_game_flags
+namespace e_game_flags
 {
-    GF_NONE = 0,
-    GF_TILE_IN_ISLAND = 1<<0
-};
+    enum game_flags_t
+    {
+        none = 0,
+        tile_in_island = 1<<0
+    };
+}
 
-enum e_tile_flags
+namespace e_tile_flags
 {
-    TF_NONE = 0,
-    TF_INNER = 1
-};
+    enum tile_flags_t
+    {
+        none = 0,
+        inner = 1<<0
+    };
+}
+
+namespace e_contoller
+{
+    enum contoller_t
+    {
+        jump = 1 << 0,
+        run = 1 << 1,
+        debounce_jump = 1 << 2
+    };
+}
 
 struct tile_block
 {
@@ -66,13 +85,6 @@ struct dr_char
     u32 anim_jump;
     u32 anim_run_l;
     u32 anim_run_r;
-};
-
-enum e_contoller_actions
-{
-    JUMP = 1 << 0,
-    RUN = 1 << 1,
-    DEBOUNCE_JUMP = 1 << 2
 };
 
 struct controller_input

@@ -163,7 +163,7 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     scene->transforms[p].translation = vec3f::zero();
     scene->transforms[p].rotation = quat();
     scene->transforms[p].scale = vec3f(1.0f);
-    scene->entities[p] |= CMP_TRANSFORM;
+    scene->entities[p] |= e_cmp::transform;
     scene->names[p] = "basic_level";
 
     static material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
@@ -174,7 +174,7 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     scene->transforms[b].translation = pos;
     scene->transforms[b].rotation = quat();
     scene->transforms[b].scale = vec3f(0.5f);
-    scene->entities[b] |= CMP_TRANSFORM;
+    scene->entities[b] |= e_cmp::transform;
     scene->parents[b] = p;
     scene->physics_data[b].rigid_body.shape = physics::e_shape::box;
     scene->physics_data[b].rigid_body.mass = 0.0f;
@@ -182,7 +182,7 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     scene->physics_data[b].rigid_body.mask = 0xffffffff;
 
     // ext flags
-    ext->cmp_flags[b] |= CMP_TILE_BLOCK;
+    ext->cmp_flags[b] |= e_cmp_flags::tile_block;
 
     instantiate_geometry(box, scene, b);
     instantiate_material(default_material, scene, b);
@@ -246,10 +246,10 @@ void detect_neighbours_ex(vec3f p, f32 tile_size, u32 neighbours[6], ecs_scene* 
         
         for(u32 e = 0; e < scene->num_entities; ++e)
         {
-            if(!(ext->cmp_flags[e] & CMP_TILE_BLOCK))
+            if(!(ext->cmp_flags[e] & e_cmp_flags::tile_block))
                 continue;
             
-            if(!(ext->tile_blocks[e].flags & TF_INNER))
+            if(!(ext->tile_blocks[e].flags & e_tile_flags::inner))
                 continue;
             
             vec3f pp = scene->transforms[e].translation;
@@ -279,13 +279,13 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
     {
         u32 n = entities[i];
         
-        if (!(ext->cmp_flags[n] & CMP_TILE_BLOCK))
+        if (!(ext->cmp_flags[n] & e_cmp_flags::tile_block))
             continue;
         
-        if(ext->tile_blocks[n].flags & TF_INNER)
+        if(ext->tile_blocks[n].flags & e_tile_flags::inner)
             continue;
 
-        scene->state_flags[n] |= SF_HIDDEN;
+        scene->state_flags[n] |= e_state::hidden;
         
         u32 neigbour_i[6];
         
@@ -374,7 +374,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
                 scene->transforms[corner].translation = cpc;
                 scene->transforms[corner].rotation = corner_rotation[c];
                 scene->transforms[corner].scale = vec3f::one();
-                scene->entities[corner] |= CMP_TRANSFORM;
+                scene->entities[corner] |= e_cmp::transform;
                 sb_push(block_entities, corner);
                 
                 continue;
@@ -388,7 +388,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
                 scene->transforms[tile].translation = cpc;
                 scene->transforms[tile].rotation = corner_rotation[c];
                 scene->transforms[tile].scale = vec3f::one();
-                scene->entities[tile] |= CMP_TRANSFORM;
+                scene->entities[tile] |= e_cmp::transform;
                 sb_push(block_entities, tile);
 
                 continue;
@@ -411,7 +411,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
                     if(cv.y < 0.0f)
                         scene->transforms[tile].rotation *= quat(-r90, 0.0f, 0.0f);
                     
-                    scene->entities[tile] |= CMP_TRANSFORM;
+                    scene->entities[tile] |= e_cmp::transform;
                     sb_push(block_entities, tile);
 
                     continue;
@@ -430,7 +430,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
                     if(cv.y < 0.0f)
                         scene->transforms[tile].rotation *= quat( -r90, 0.0f, 0.0f);
                     
-                    scene->entities[tile] |= CMP_TRANSFORM;
+                    scene->entities[tile] |= e_cmp::transform;
                     sb_push(block_entities, tile);
 
                     continue;
@@ -459,7 +459,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
             scene->transforms[tile].translation = cpc;
             scene->transforms[tile].rotation = corner_face_rotations[c][rot_i];
             scene->transforms[tile].scale = vec3f::one();
-            scene->entities[tile] |= CMP_TRANSFORM;
+            scene->entities[tile] |= e_cmp::transform;
             sb_push(block_entities, tile);
         }
 
@@ -624,7 +624,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
                     scene->transforms[tile].translation = esubp[i];
                     scene->transforms[tile].rotation = rot_r;
                     scene->transforms[tile].scale = vec3f::one();
-                    scene->entities[tile] |= CMP_TRANSFORM;
+                    scene->entities[tile] |= e_cmp::transform;
                     sb_push(block_entities, tile);
                 }
             }
@@ -667,7 +667,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
                 scene->transforms[tile].translation = fpsub[i];
                 scene->transforms[tile].rotation = face_rotation[f];
                 scene->transforms[tile].scale = vec3f::one();
-                scene->entities[tile] |= CMP_TRANSFORM;
+                scene->entities[tile] |= e_cmp::transform;
                 sb_push(block_entities, tile);
             }
 
@@ -730,7 +730,7 @@ void setup_character(put::ecs::ecs_scene* scene)
 
     instantiate_rigid_body(scene, dr.root);
 
-    physics::set_v3(scene->physics_handles[dr.root], vec3f::zero(), physics::CMD_SET_ANGULAR_FACTOR);
+    physics::set_v3(scene->physics_handles[dr.root], vec3f::zero(), physics::e_cmd::set_angular_velocity);
 
     // todo make bind return index
     dr.anim_idle = 0;
@@ -756,7 +756,7 @@ void setup_character(put::ecs::ecs_scene* scene)
     scene->transforms[b].translation = vec3f(0.0f, -1.0f, 0.0f);;
     scene->transforms[b].rotation = quat();
     scene->transforms[b].scale = vec3f(100.0f, 1.0f, 100.0f);
-    scene->entities[b] |= CMP_TRANSFORM;
+    scene->entities[b] |= e_cmp::transform;
     scene->parents[b] = b;
     scene->physics_data[b].rigid_body.shape = physics::e_shape::box;
     scene->physics_data[b].rigid_body.mass = 0.0f;
@@ -842,7 +842,7 @@ void find_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_l
     
     // add island
     ext->tile_blocks[entity].neighbour_mask = mask;
-    ext->game_flags[entity] |= GF_TILE_IN_ISLAND;
+    ext->game_flags[entity] |= e_game_flags::tile_in_island;
     sb_push(*island_list, entity);
     
     // entity index from physics
@@ -856,10 +856,10 @@ void find_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_l
         if(entity == PEN_INVALID_HANDLE)
             continue;
         
-        if(!(ext->cmp_flags[entity] & CMP_TILE_BLOCK))
+        if(!(ext->cmp_flags[entity] & e_cmp_flags::tile_block))
             continue;
         
-        if((ext->game_flags[entity] & GF_TILE_IN_ISLAND))
+        if((ext->game_flags[entity] & e_game_flags::tile_in_island))
             continue;
         
         // recurse, adding its neighbours
@@ -952,17 +952,17 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         
         //clear flags
         for(u32 n = 0; n < scene->num_entities; ++n)
-            ext->game_flags[n] &= ~GF_TILE_IN_ISLAND;
+            ext->game_flags[n] &= ~e_game_flags::tile_in_island;
         
         for(u32 n = 0; n < scene->num_entities; ++n)
         {
-            if(!(ext->cmp_flags[n] & CMP_TILE_BLOCK))
+            if(!(ext->cmp_flags[n] & e_cmp_flags::tile_block))
                 continue;
             
-            if((ext->game_flags[n] & GF_TILE_IN_ISLAND))
+            if((ext->game_flags[n] & e_game_flags::tile_in_island))
                 continue;
             
-            if(ext->tile_blocks[n].flags & TF_INNER)
+            if(ext->tile_blocks[n].flags & e_tile_flags::inner)
                 continue;
             
             u32* island = nullptr;
@@ -975,7 +975,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             scene->transforms[island_id].translation = vec3f::zero();
             scene->transforms[island_id].scale = vec3f::one();
             scene->transforms[island_id].rotation = quat();
-            scene->entities[island_id] |= CMP_TRANSFORM;
+            scene->entities[island_id] |= e_cmp::transform;
             
             u32 num_blocks = sb_count(island);
             if(num_blocks > 0)
@@ -1058,8 +1058,8 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         u32 ne = scene->num_entities;
         for(u32 e = 0; e < ne; ++e)
         {
-            if(ext->cmp_flags[e] & CMP_TILE_BLOCK)
-                if(ext->tile_blocks[e].flags & TF_INNER)
+            if(ext->cmp_flags[e] & e_cmp_flags::tile_block)
+                if(ext->tile_blocks[e].flags & e_tile_flags::inner)
                     ecs::delete_entity(scene, e);
         }
         
@@ -1264,8 +1264,8 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             else
             {
                 u32 nn = get_new_entity(scene);
-                ext->cmp_flags[nn] |= CMP_TILE_BLOCK;
-                ext->tile_blocks[nn].flags |= TF_INNER;
+                ext->cmp_flags[nn] |= e_cmp_flags::tile_block;
+                ext->tile_blocks[nn].flags |= e_tile_flags::inner;
                 scene->transforms[nn].translation = selected[s];
             }
         }
@@ -1351,12 +1351,12 @@ void get_controller_input(camera* cam, controller_input& ci)
         
         if(gs.button[PGP_BUTTON_X])
         {
-            ci.actions |= RUN;
+            ci.actions |= e_contoller::run;
         }
         
         if(gs.button[PGP_BUTTON_A])
         {
-            ci.actions |= JUMP;
+            ci.actions |= e_contoller::jump;
         }
     }
     else
@@ -1381,12 +1381,12 @@ void get_controller_input(camera* cam, controller_input& ci)
         
         if (pen::input_key(PK_Q))
         {
-             ci.actions |= JUMP;
+             ci.actions |= e_contoller::jump;
         }
         
         if (pen::input_key(PK_SHIFT))
         {
-            ci.actions |= RUN;
+            ci.actions |= e_contoller::run;
         }
         
         if(mag2(left_stick) > 0)
@@ -1544,14 +1544,14 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     }
 
     // reset debounce jump
-    if (pc.air == 0 && !(ci.actions & JUMP))
-        pc.actions &= ~DEBOUNCE_JUMP;
+    if (pc.air == 0 && !(ci.actions & e_contoller::jump))
+        pc.actions &= ~e_contoller::debounce_jump;
 
     // must debounce
-    if (pc.actions & DEBOUNCE_JUMP)
-        ci.actions &= ~JUMP;
+    if (pc.actions & e_contoller::debounce_jump)
+        ci.actions &= ~e_contoller::jump;
     
-    if (ci.actions & JUMP && pc.air <= jump_time)
+    if (ci.actions & e_contoller::jump && pc.air <= jump_time)
     {
         pc.acc.y += jump_strength;
         
@@ -1562,10 +1562,10 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         
         pc.air = max(pc.air, dt);
     }
-    else if(ci.actions & JUMP)
+    else if(ci.actions & e_contoller::jump)
     {
         // must release to re-jump
-        pc.actions |= DEBOUNCE_JUMP;
+        pc.actions |= e_contoller::debounce_jump;
     }
 
     if (pc.air > 0.0f)
@@ -1733,7 +1733,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     {
         scene->initial_transform[5].rotation = quat(0.0f, ci.dir_angle, 0.0f);
         scene->transforms[dr.root].translation = pc.pos;
-        scene->entities[dr.root] |= CMP_TRANSFORM;
+        scene->entities[dr.root] |= e_cmp::transform;
     }
 
     // camera ---------------------------------------------------------------------------------------------------------------
@@ -1843,10 +1843,10 @@ void update_game_components(ecs_extension& extension, ecs_scene* scene, f32 dt)
     
     for(u32 n = 0; n < scene->num_entities; ++n)
     {
-        if(ext->cmp_flags[n] & CMP_CUSTOM_ANIM)
+        if(ext->cmp_flags[n] & e_cmp_flags::custom_anim)
         {
             scene->transforms[n].rotation *= quat(0.0f, dt, 0.0f);
-            scene->entities[n] |= CMP_TRANSFORM;
+            scene->entities[n] |= e_cmp::transform;
         }
     }
 }
