@@ -121,13 +121,5 @@ struct player_controller
     f32   cam_zoom_target;
 };
 
-struct cast_result
-{
-    vec3f   pos = vec3f::zero();
-    vec3f   normal = vec3f::zero();
-    bool    set = false;
-    u32     physics_handle = 0;
-};
-
 void update_game_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt);
 void update_game_components(ecs_extension& ext, ecs_scene* scene, f32 dt);

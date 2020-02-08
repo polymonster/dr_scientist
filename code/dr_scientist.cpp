@@ -1,6 +1,8 @@
 #include "dr_scientist.h"
 #include "../shader_structs/forward_render.h"
 
+using physics::cast_result;
+
 pen::window_creation_params pen_window
 {
     1280,					//width
@@ -194,38 +196,21 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     instantiate_rigid_body(scene, b);
 }
 
-void tilemap_ray_cast(const physics::ray_cast_result& result)
-{
-    cast_result* cc = (cast_result*)result.user_data;
-
-    cc->pos = result.point;
-    cc->normal = result.normal;
-    cc->physics_handle = result.physics_handle;
-
-    if (result.physics_handle != PEN_INVALID_HANDLE)
-        cc->set = true;
-}
-
 void detect_neighbours(vec3f p, f32 tile_size, u32 neighbours[6])
 {
     for(u32 n = 0; n < 6; ++n)
     {
         neighbours[n] = PEN_INVALID_HANDLE;
-        
-        cast_result cast;
-        cast.set = false;
-        
+                
         vec3f nip = p + axis[n] * tile_size;
         
         physics::ray_cast_params rcp;
         rcp.start = p;
         rcp.end = nip;
-        rcp.callback = &tilemap_ray_cast;
-        rcp.user_data = &cast;
         rcp.group = 1;
         rcp.mask = 1;
         
-        physics::cast_ray(rcp, true);
+        cast_result cast = physics::cast_ray_immediate(rcp);
         
         if(cast.set)
         {
@@ -869,24 +854,16 @@ void find_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_l
 
 bool check_occupied(vec3f bp, u32& ph)
 {
-    cast_result cast;
-    bool occupied = false;
-    
     physics::ray_cast_params rcp;
     rcp.start = bp + vec3f(0.0f, 1.0f, 0.0f);
     rcp.end = bp;
-    rcp.callback = &tilemap_ray_cast;
-    rcp.user_data = &cast;
     rcp.group = 1;
     rcp.mask = 1;
     
-    physics::cast_ray(rcp, true);
-    
-    occupied = cast.set;
-    
+    cast_result cast = physics::cast_ray_immediate(rcp);
+        
     ph = 0;
-    
-    if(occupied)
+    if(cast.set)
     {
         ph = cast.physics_handle;
         return true;
@@ -1237,24 +1214,17 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         for(u32 s = 0; s < num_selected; ++s)
         {
             // detect current occupancy
-            cast_result cast;
-            bool occupied = false;
-            
             vec3f bp = selected[s];
             
             physics::ray_cast_params rcp;
             rcp.start = bp + vec3f(0.0f, 1.0f, 0.0f);
             rcp.end = bp;
-            rcp.callback = &tilemap_ray_cast;
-            rcp.user_data = &cast;
             rcp.group = 1;
             rcp.mask = 1;
             
-            physics::cast_ray(rcp, true);
+            cast_result cast = physics::cast_ray_immediate(rcp);
             
-            occupied = cast.set;
-            
-            if(occupied)
+            if(cast.set)
                 continue;
             
             if(!detect_inner_block(bp, selected))
@@ -1296,29 +1266,24 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     
     for(u32 n = 0; n < 6; ++n)
     {
-        cast_result cast;
-        cast.set = false;
-        
         vec3f nip = ip + axis[n] * 100000.0f;
         
         physics::ray_cast_params rcp;
         rcp.start = ip;
         rcp.end = nip;
-        rcp.callback = &tilemap_ray_cast;
-        rcp.user_data = &cast;
         rcp.group = 1;
         rcp.mask = 1;
         
-        physics::cast_ray(rcp, true);
+        cast_result cast = physics::cast_ray_immediate(rcp);
         
         // ..
         if(cast.set)
         {
-            dbg::add_point(cast.pos, 0.1f, vec4f::yellow());
+            dbg::add_point(cast.point, 0.1f, vec4f::yellow());
             
             for(u32 i = 0; i < 4; ++i)
             {
-                dbg::add_line(cast.pos, cast.pos + cast.normal);
+                dbg::add_line(cast.point, cast.point + cast.normal);
             }
         }
     }
@@ -1405,28 +1370,6 @@ void get_controller_input(camera* cam, controller_input& ci)
     {
         ci.movement_vel = 0.0f;
     }
-}
-
-void sccb(const physics::sphere_cast_result& result)
-{
-    cast_result* cc = (cast_result*)result.user_data;
-    
-    cc->pos = result.point;
-    cc->normal = result.normal;
-
-    if(result.physics_handle != PEN_INVALID_HANDLE)
-        cc->set = true;
-}
-
-void rccb(const physics::ray_cast_result& result)
-{
-    cast_result* cc = (cast_result*)result.user_data;
-
-    cc->pos = result.point;
-    cc->normal = result.normal;
-
-    if (result.physics_handle != PEN_INVALID_HANDLE)
-        cc->set = true;
 }
 
 pen::multi_buffer<physics::contact*, 2> contacts;
@@ -1619,32 +1562,25 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     vec3f feet = pc.pps + vec3f(0.0f, 0.35f, 0.0f);     // position of lower sphere
 
     // casts
-    cast_result wall_cast;
-    cast_result surface_cast;
-        
     physics::sphere_cast_params scp;
     scp.from = mid - ci.movement_dir * 0.3f;
     scp.to = mid + ci.movement_dir * 1000.0f;
     scp.dimension = vec3f(0.3f);
-    scp.callback = &sccb;
-    scp.user_data = &wall_cast;
     scp.group = 1;
     scp.mask = 1;
 
-    physics::cast_sphere(scp, true);
+    physics::cast_result wall_cast = physics::cast_sphere_immediate(scp);
     
     physics::ray_cast_params rcp;
     rcp.start = feet;
     rcp.end = feet + vec3f(0.0f, -10000.0f, 0.0f);
-    rcp.callback = &rccb;
-    rcp.user_data = &surface_cast;
     rcp.group = 1;
     rcp.mask = 0xff;
 
-    physics::cast_ray(rcp, true);
+    physics::cast_result surface_cast = physics::cast_ray_immediate(rcp);
     
     // walls
-    vec3f cv = mid - wall_cast.pos;
+    vec3f cv = mid - wall_cast.point;
     if (mag(cv) < 0.3f && wall_cast.set)
     {
         f32 diff = 0.3f - mag(cv);
@@ -1652,7 +1588,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     }
     
     // floor collision from casts
-    f32 cvm2 = mag(mid - surface_cast.pos);
+    f32 cvm2 = mag(mid - surface_cast.point);
     f32 dp = dot(surface_cast.normal, vec3f::unit_y());
 
     // todo.. resolve magic numbers
@@ -1764,14 +1700,14 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     
     if(debug_lines)
     {
-        put::dbg::add_point(surface_cast.pos, 0.1f, vec4f::green());
-        put::dbg::add_line(surface_cast.pos, surface_cast.pos + pc.surface_normal, vec4f::cyan());
+        put::dbg::add_point(surface_cast.point, 0.1f, vec4f::green());
+        put::dbg::add_line(surface_cast.point, surface_cast.point + pc.surface_normal, vec4f::cyan());
 
-        vec3f smid = surface_cast.pos + vec3f(0.0f, 0.5f, 0.0f);
+        vec3f smid = surface_cast.point + vec3f(0.0f, 0.5f, 0.0f);
         put::dbg::add_line(smid, smid + pc.surface_perp, vec4f::red());
 
         put::dbg::add_circle(vec3f::unit_y(), mid, 0.3f, vec4f::green());
-        put::dbg::add_point(wall_cast.pos, 0.1f, vec4f::green());
+        put::dbg::add_point(wall_cast.point, 0.1f, vec4f::green());
 
         put::dbg::add_point(head, 0.3f, vec4f::magenta());
         put::dbg::add_point(feet, 0.3f, vec4f::magenta());
