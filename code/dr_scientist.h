@@ -56,7 +56,8 @@ namespace e_contoller
     {
         jump = 1 << 0,
         run = 1 << 1,
-        debounce_jump = 1 << 2
+        debounce_jump = 1 << 2,
+        attack = 1 << 3
     };
 }
 
@@ -85,6 +86,7 @@ struct dr_char
     u32 anim_jump;
     u32 anim_run_l;
     u32 anim_run_r;
+    u32 anim_attack;
 };
 
 struct controller_input

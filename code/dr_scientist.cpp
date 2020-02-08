@@ -693,14 +693,16 @@ void setup_character(put::ecs::ecs_scene* scene)
     anim_handle jump = load_pma("data/models/characters/doctor/anims/doctor_idle_jump.pma");
     anim_handle run_l = load_pma("data/models/characters/doctor/anims/doctor_run_l.pma");
     anim_handle run_r = load_pma("data/models/characters/doctor/anims/doctor_run_r.pma");
+    anim_handle attack = load_pma("data/models/characters/doctor/anims/doctor_attack01.pma");
     
     // bind to rig
-    bind_animation_to_rig(scene, idle, dr.root);
-    bind_animation_to_rig(scene, walk, dr.root);
-    bind_animation_to_rig(scene, run, dr.root);
-    bind_animation_to_rig(scene, jump, dr.root);
-    bind_animation_to_rig(scene, run_l, dr.root);
-    bind_animation_to_rig(scene, run_r, dr.root);
+    dr.anim_idle = bind_animation_to_rig(scene, idle, dr.root);
+    dr.anim_walk = bind_animation_to_rig(scene, walk, dr.root);
+    dr.anim_run = bind_animation_to_rig(scene, run, dr.root);
+    dr.anim_jump = bind_animation_to_rig(scene, jump, dr.root);
+    dr.anim_run_l = bind_animation_to_rig(scene, run_l, dr.root);
+    dr.anim_run_r  = bind_animation_to_rig(scene, run_r, dr.root);
+    dr.anim_attack = bind_animation_to_rig(scene, attack, dr.root);
 
     // add capsule for collisions
     scene->physics_data[dr.root].rigid_body.shape = physics::e_shape::capsule;
@@ -716,14 +718,6 @@ void setup_character(put::ecs::ecs_scene* scene)
     instantiate_rigid_body(scene, dr.root);
 
     physics::set_v3(scene->physics_handles[dr.root], vec3f::zero(), physics::e_cmd::set_angular_velocity);
-
-    // todo make bind return index
-    dr.anim_idle = 0;
-    dr.anim_walk = 1;
-    dr.anim_run = 2;
-    dr.anim_jump = 3;
-    dr.anim_run_l = 4;
-    dr.anim_run_r = 5;
     
     // add a few quick bits of collision
     //load_scene("data/scene/basic_level.pms", scene, true);
@@ -1349,6 +1343,11 @@ void get_controller_input(camera* cam, controller_input& ci)
              ci.actions |= e_contoller::jump;
         }
         
+        if (pen::input_key(PK_E))
+        {
+             ci.actions |= e_contoller::attack;
+        }
+        
         if (pen::input_key(PK_SHIFT))
         {
             ci.actions |= e_contoller::run;
@@ -1472,7 +1471,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     else
     {
         controller.anim_instances[dr.anim_run].flags &= ~e_anim_flags::paused;
-        controller.anim_instances[dr.anim_walk].flags &= ~e_anim_flags::paused ;
+        controller.anim_instances[dr.anim_walk].flags &= ~e_anim_flags::paused;
         
         // locomotion state
         controller.blend.anim_a = dr.anim_walk;
@@ -1511,6 +1510,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         pc.actions |= e_contoller::debounce_jump;
     }
 
+    // apply jump anim
     if (pc.air > 0.0f)
     {
         pc.acc += ci.movement_dir * ci.movement_vel * pc.air_vel;
@@ -1520,6 +1520,13 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             controller.blend.anim_a = dr.anim_jump;
             controller.blend.anim_b = dr.anim_jump;
         }
+    }
+    
+    // apply attack anim
+    if(ci.actions & e_contoller::attack)
+    {
+        controller.blend.anim_a = dr.anim_attack;
+        controller.blend.anim_b = dr.anim_attack;
     }
 
     // update pos from anim
