@@ -23,12 +23,14 @@
 using namespace put;
 using namespace ecs;
 
-namespace e_cmp_flags
+namespace e_game_cmp
 {
-    enum cmp_flags_t
+    enum game_cmp_t
     {
         tile_block = 1,
-        custom_anim = 1<<1
+        custom_anim = 1<<1,
+        blob = 1<<2,
+        collectable = 1<<3
     };
 }
 

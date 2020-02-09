@@ -1,6 +1,13 @@
 #include "dr_scientist.h"
 #include "../shader_structs/forward_render.h"
 
+// collecting mushroom
+
+// animation frame setting
+// animation tracking (attack)
+
+// min jump height
+
 using physics::cast_result;
 
 pen::window_creation_params pen_window
@@ -184,7 +191,7 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     scene->physics_data[b].rigid_body.mask = 0xffffffff;
 
     // ext flags
-    ext->cmp_flags[b] |= e_cmp_flags::tile_block;
+    ext->cmp_flags[b] |= e_game_cmp::tile_block;
 
     instantiate_geometry(box, scene, b);
     instantiate_material(default_material, scene, b);
@@ -231,7 +238,7 @@ void detect_neighbours_ex(vec3f p, f32 tile_size, u32 neighbours[6], ecs_scene* 
         
         for(u32 e = 0; e < scene->num_entities; ++e)
         {
-            if(!(ext->cmp_flags[e] & e_cmp_flags::tile_block))
+            if(!(ext->cmp_flags[e] & e_game_cmp::tile_block))
                 continue;
             
             if(!(ext->tile_blocks[e].flags & e_tile_flags::inner))
@@ -264,7 +271,7 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
     {
         u32 n = entities[i];
         
-        if (!(ext->cmp_flags[n] & e_cmp_flags::tile_block))
+        if (!(ext->cmp_flags[n] & e_game_cmp::tile_block))
             continue;
         
         if(ext->tile_blocks[n].flags & e_tile_flags::inner)
@@ -681,6 +688,96 @@ void bake_tile_blocks(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, u32* entitie
     sb_free(block_entities);
 }
 
+void setup_level_editor(put::ecs::ecs_scene* scene)
+{
+    load_pmm("data/models/environments/general/basic_top_corner.pmm", scene, e_pmm_load_flags::geometry | e_pmm_load_flags::material);
+    load_pmm("data/models/environments/general/basic_middle_corner.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
+    load_pmm("data/models/environments/general/basic_top_side.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
+    load_pmm("data/models/environments/general/basic_middle_side.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
+    load_pmm("data/models/environments/general/basic_top_center.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
+    
+    physics::physics_consume_command_buffer();
+    pen::thread_sleep_ms(4);
+}
+
+void setup_level(put::ecs::ecs_scene* scene)
+{
+    material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
+    geometry_resource* box_resource = get_geometry_resource(PEN_HASH("cube"));
+        
+    u32 b = get_new_entity(scene);
+    scene->names[b] = "ground";
+    scene->transforms[b].translation = vec3f(0.0f, -1.0f, 0.0f);;
+    scene->transforms[b].rotation = quat();
+    scene->transforms[b].scale = vec3f(100.0f, 1.0f, 100.0f);
+    scene->entities[b] |= e_cmp::transform;
+    scene->parents[b] = b;
+    scene->physics_data[b].rigid_body.shape = physics::e_shape::box;
+    scene->physics_data[b].rigid_body.mass = 0.0f;
+    scene->physics_data[b].rigid_body.group = 1;
+    scene->physics_data[b].rigid_body.mask = 0xffffffff;
+
+    instantiate_geometry(box_resource, scene, b);
+    instantiate_material(default_material, scene, b);
+    instantiate_model_cbuffer(scene, b);
+    instantiate_rigid_body(scene, b);
+}
+
+void instantiate_mushroom(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
+{
+    u32 root = load_pmm("data/models/props/mushroom01.pmm", scene);
+    
+    vec3f dim = scene->bounding_volumes[root].max_extents - scene->bounding_volumes[root].min_extents;
+    
+    // add capsule for collisions
+    scene->physics_data[root].rigid_body.shape = physics::e_shape::capsule;
+    scene->physics_data[root].rigid_body.mass = 0.0f;
+    
+    //scene->physics_data[root].rigid_body.group = 4;
+    //scene->physics_data[root].rigid_body.mask = ~1;
+    
+    scene->physics_data[root].rigid_body.group = 2;
+    scene->physics_data[root].rigid_body.mask = 0xffffffff;
+    
+    scene->physics_data[root].rigid_body.dimensions = dim * 0.5f;
+    scene->physics_data[root].rigid_body.create_flags |= (physics::e_create_flags::dimensions);
+
+    // drs feet are at 0.. offset collision to centre at 0.5
+    scene->physics_offset[root].translation = vec3f(0.0f, dim.y * 0.5f, 0.0f);
+    
+    scene->transforms[root].translation = pos;
+    
+    instantiate_rigid_body(scene, root);
+    
+    ext->cmp_flags[root] |= e_game_cmp::collectable;
+}
+
+void instantiate_blob(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
+{
+    u32 root = load_pmm("data/models/characters/blob/blob.pmm", scene);
+    
+    anim_handle idle = load_pma("data/models/characters/blob/anims/blob_idle.pma");
+    
+    bind_animation_to_rig(scene, idle, root);
+    
+    // add capsule for collisions
+    scene->physics_data[root].rigid_body.shape = physics::e_shape::cone;
+    scene->physics_data[root].rigid_body.mass = 1.0f;
+    scene->physics_data[root].rigid_body.group = 4;
+    scene->physics_data[root].rigid_body.mask = ~1;
+    scene->physics_data[root].rigid_body.dimensions = vec3f(0.6f, 0.5f, 0.6f);
+    scene->physics_data[root].rigid_body.create_flags |= (physics::e_create_flags::dimensions | physics::e_create_flags::kinematic);
+
+    // drs feet are at 0.. offset collision to centre at 0.5
+    scene->physics_offset[root].translation = vec3f(0.0f, 0.5f, 0.0f);
+    
+    scene->transforms[root].translation = pos;
+    
+    instantiate_rigid_body(scene, root);
+    
+    ext->cmp_flags[root] |= e_game_cmp::blob;
+}
+
 void setup_character(put::ecs::ecs_scene* scene)
 {
     // load main model
@@ -718,44 +815,6 @@ void setup_character(put::ecs::ecs_scene* scene)
     instantiate_rigid_body(scene, dr.root);
 
     physics::set_v3(scene->physics_handles[dr.root], vec3f::zero(), physics::e_cmd::set_angular_velocity);
-    
-    // add a few quick bits of collision
-    //load_scene("data/scene/basic_level.pms", scene, true);
-    //load_scene("data/scene/basic_level-2.pms", scene, true);
-    //load_scene("data/scene/basic_level-3.pms", scene, true);
-    //load_scene("data/scene/basic_level-4.pms", scene, true);
-    //load_scene("data/scene/basic_level-ex.pms", scene, true);
-    
-    // add ground
-    material_resource* default_material = get_material_resource(PEN_HASH("default_material"));
-    geometry_resource* box_resource = get_geometry_resource(PEN_HASH("cube"));
-        
-    u32 b = get_new_entity(scene);
-    scene->names[b] = "ground";
-    scene->transforms[b].translation = vec3f(0.0f, -1.0f, 0.0f);;
-    scene->transforms[b].rotation = quat();
-    scene->transforms[b].scale = vec3f(100.0f, 1.0f, 100.0f);
-    scene->entities[b] |= e_cmp::transform;
-    scene->parents[b] = b;
-    scene->physics_data[b].rigid_body.shape = physics::e_shape::box;
-    scene->physics_data[b].rigid_body.mass = 0.0f;
-    scene->physics_data[b].rigid_body.group = 1;
-    scene->physics_data[b].rigid_body.mask = 0xffffffff;
-
-    instantiate_geometry(box_resource, scene, b);
-    instantiate_material(default_material, scene, b);
-    instantiate_model_cbuffer(scene, b);
-    instantiate_rigid_body(scene, b);
-    
-    // todo move to level editor
-    load_pmm("data/models/environments/general/basic_top_corner.pmm", scene, e_pmm_load_flags::geometry | e_pmm_load_flags::material);
-    load_pmm("data/models/environments/general/basic_middle_corner.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
-    load_pmm("data/models/environments/general/basic_top_side.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
-    load_pmm("data/models/environments/general/basic_middle_side.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
-    load_pmm("data/models/environments/general/basic_top_center.pmm", scene, e_pmm_load_flags::geometry  | e_pmm_load_flags::material);
-    
-    physics::physics_consume_command_buffer();
-    pen::thread_sleep_ms(4);
 }
 
 bool can_edit()
@@ -835,7 +894,7 @@ void find_islands(ecs_scene* scene, dr_ecs_exts* ext, u32 entity, u32** island_l
         if(entity == PEN_INVALID_HANDLE)
             continue;
         
-        if(!(ext->cmp_flags[entity] & e_cmp_flags::tile_block))
+        if(!(ext->cmp_flags[entity] & e_game_cmp::tile_block))
             continue;
         
         if((ext->game_flags[entity] & e_game_flags::tile_in_island))
@@ -927,7 +986,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         
         for(u32 n = 0; n < scene->num_entities; ++n)
         {
-            if(!(ext->cmp_flags[n] & e_cmp_flags::tile_block))
+            if(!(ext->cmp_flags[n] & e_game_cmp::tile_block))
                 continue;
             
             if((ext->game_flags[n] & e_game_flags::tile_in_island))
@@ -1029,7 +1088,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         u32 ne = scene->num_entities;
         for(u32 e = 0; e < ne; ++e)
         {
-            if(ext->cmp_flags[e] & e_cmp_flags::tile_block)
+            if(ext->cmp_flags[e] & e_game_cmp::tile_block)
                 if(ext->tile_blocks[e].flags & e_tile_flags::inner)
                     ecs::delete_entity(scene, e);
         }
@@ -1228,7 +1287,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             else
             {
                 u32 nn = get_new_entity(scene);
-                ext->cmp_flags[nn] |= e_cmp_flags::tile_block;
+                ext->cmp_flags[nn] |= e_game_cmp::tile_block;
                 ext->tile_blocks[nn].flags |= e_tile_flags::inner;
                 scene->transforms[nn].translation = selected[s];
             }
@@ -1283,7 +1342,7 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     }
 }
 
-void get_controller_input(camera* cam, controller_input& ci)
+void get_controller_input(camera* cam, ecs_scene* scene, controller_input& ci)
 {
     // clear state
     ci.actions = 0;
@@ -1352,7 +1411,7 @@ void get_controller_input(camera* cam, controller_input& ci)
         {
             ci.actions |= e_contoller::run;
         }
-        
+                        
         if(mag2(left_stick) > 0)
             normalise(left_stick);
     }
@@ -1368,6 +1427,34 @@ void get_controller_input(camera* cam, controller_input& ci)
     else
     {
         ci.movement_vel = 0.0f;
+    }
+    
+    // mouse movement
+    if(pen::input_mouse(PEN_MOUSE_L))
+    {
+        pen::mouse_state ms = pen::input_get_mouse_state();
+        
+        vec2i vpi = vec2i(pen_window.width, pen_window.height);
+        mat4  view_proj = cam->proj * cam->view;
+        vec3f r0 = maths::unproject_sc(vec3f(ms.x, pen_window.height - ms.y, 0.0f), view_proj, vpi);
+        vec3f r1 = maths::unproject_sc(vec3f(ms.x, pen_window.height - ms.y, 1.0f), view_proj, vpi);
+        
+        physics::ray_cast_params rcp;
+        rcp.start = r0;
+        rcp.end = r1;
+        rcp.mask = 0xffffff;
+        rcp.group = 0xffffff;
+        
+        physics::cast_result surface_cast = physics::cast_ray_immediate(rcp);
+        
+        if(surface_cast.set)
+        {
+            vec3f wp = surface_cast.point * vec3f(1.0f, 0.0f, 1.0f);
+            vec3f dp = scene->transforms[dr.root].translation * vec3f(1.0f, 0.0f, 1.0f);
+            
+            ci.movement_dir = normalised(wp - dp);
+            ci.movement_vel = 1.0f;
+        }
     }
 }
 
@@ -1395,9 +1482,7 @@ void ctcb(const physics::contact_test_results& results)
 void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {    
     put::camera* camera = ecsc.camera;
-
-    dt = min(dt, 1.0f / 10.0f);
-
+    
     // tweakers and vars, move into struct
 
     static controller_input ci;
@@ -1424,7 +1509,9 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 
     // controller ----------------------------------------------------------------------------------------------------------
     
-    get_controller_input(camera, ci);
+    get_controller_input(camera, scene, ci);
+    
+    dt = min(dt, 1.0f / 10.0f);
 
     if (ci.movement_vel >= 0.2)
     {
@@ -1784,12 +1871,33 @@ void update_game_components(ecs_extension& extension, ecs_scene* scene, f32 dt)
 {
     dr_ecs_exts* ext = (dr_ecs_exts*)extension.context;
     
+    vec3f dr_pos = scene->world_matrices[dr.root].get_translation();
+    
     for(u32 n = 0; n < scene->num_entities; ++n)
     {
-        if(ext->cmp_flags[n] & e_cmp_flags::custom_anim)
+        if(ext->cmp_flags[n] & e_game_cmp::custom_anim)
         {
             scene->transforms[n].rotation *= quat(0.0f, dt, 0.0f);
             scene->entities[n] |= e_cmp::transform;
+        }
+        
+        // blob ai
+        if(ext->cmp_flags[n] & e_game_cmp::blob)
+        {
+            // goto player
+            
+            vec3f p = scene->transforms[n].translation;
+            
+            vec3f vv = normalised((dr_pos - p) * vec3f(1.0f, 0.0f, 1.0f));
+            
+            scene->transforms[n].translation += vv * 0.01f;
+            
+            f32 r = atan2(vv.x, vv.z);
+            
+            scene->transforms[n].rotation = quat(0.0f, r, 0.0f);
+            
+            // avoid stuff
+            // ..
         }
     }
 }
@@ -1863,8 +1971,60 @@ PEN_TRV pen::user_entry( void* params )
     pmfx::register_camera(&main_camera, "model_viewer_camera");
 
     pmfx::init("data/configs/editor_renderer.jsn");
+    put::init_hot_loader();
     
     setup_character(main_scene);
+    setup_level_editor(main_scene);
+    setup_level(main_scene);
+    
+    for(u32 i = 0; i < 5; ++i)
+    {
+        vec3f pos = vec3f(rand()%40 - 20, 0.0f, rand()%40 - 20);
+        instantiate_blob(main_scene, exts, pos);
+    }
+    
+    for(u32 i = 0; i < 20; ++i)
+    {
+        vec3f pos = vec3f(rand()%40 - 20, 0.0f, rand()%40 - 20);
+        instantiate_mushroom(main_scene, exts, pos);
+    }
+    
+    // lights
+    vec3f lp[] = {
+        vec3f(10.0f, 5.0f, 3.0f),
+        vec3f(-2.0f, 5.0f, 12.0f),
+        vec3f(-13.0f, 5.0f, -8.0f),
+        vec3f(5.0f, 5.0f, -5.0f),
+    };
+    
+    vec4f lc[] = {
+        vec4f::orange(),
+        vec4f::magenta(),
+        vec4f::green(),
+        vec4f::cyan()
+    };
+    
+    main_scene->lights[0].colour = vec3f(0.1f, 0.1f, 0.1f);
+    
+    for(u32 i = 0; i < 4; ++i)
+    {
+        u32 light = get_new_entity(main_scene);
+        instantiate_light(main_scene, light);
+        main_scene->names[light] = "point_light";
+        main_scene->id_name[light] = PEN_HASH("point_light");
+        main_scene->lights[light].colour = lc[i].xyz;
+        main_scene->lights[light].radius = 10.0f;
+        main_scene->lights[light].type = e_light_type::point;
+        main_scene->lights[light].shadow_map = true;
+        main_scene->transforms[light].translation = lp[i];
+        main_scene->transforms[light].rotation = quat();
+        main_scene->transforms[light].scale = vec3f::one();
+        main_scene->entities[light] |= e_cmp::light;
+        main_scene->entities[light] |= e_cmp::transform;
+    }
+    
+    main_scene->view_flags |= e_scene_view_flags::hide_debug;
+    put::dev_ui::enable(false);
     
     while( 1 )
     {
