@@ -3,11 +3,29 @@
     // common
     //
     
+    jsn_vars<linux>:
+    {
+    	premake: "../pmtech/tools/premake/premake5_linux",
+    	texturec: "../pmtech/third_party/texturec/linux/texturec"
+    },
+    
+	jsn_vars<mac>:
+    {
+    	premake: "../pmtech/tools/premake/premake5",
+    	texturec: "../pmtech/third_party/texturec/osx/texturec"
+    },
+    
+    jsn_vars<windows>:
+    {
+    	premake: "../pmtech/tools/premake/premake5",
+    	texturec: "../pmtech/third_party/texturec/win32/texturec"
+    },
+    
     base: {
         tools: {
-            premake: "../pmtech/tools/premake/premake5",
+            premake: "${premake}",            
+            texturec: "${texturec}",
             pmfx: "../pmtech/third_party/pmfx-shader/build_pmfx.py",
-            texturec: "../pmtech/third_party/texturec/$platform/texturec",
             models: "../pmtech/tools/build_scripts/build_models.py"
         },
         
