@@ -23,6 +23,19 @@
 using namespace put;
 using namespace ecs;
 
+namespace e_collision_group
+{
+    enum collision_group_t
+    {
+        level = 1<<0,
+        collectable = 1<<1,
+        dr = 1<<2,
+        enemy = 1<<3,
+        
+        all = 0xffffffff
+    };
+}
+
 namespace e_game_cmp
 {
     enum game_cmp_t

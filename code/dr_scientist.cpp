@@ -187,7 +187,7 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     scene->parents[b] = p;
     scene->physics_data[b].rigid_body.shape = physics::e_shape::box;
     scene->physics_data[b].rigid_body.mass = 0.0f;
-    scene->physics_data[b].rigid_body.group = 1;
+    scene->physics_data[b].rigid_body.group = e_collision_group::level;
     scene->physics_data[b].rigid_body.mask = 0xffffffff;
 
     // ext flags
@@ -214,8 +214,8 @@ void detect_neighbours(vec3f p, f32 tile_size, u32 neighbours[6])
         physics::ray_cast_params rcp;
         rcp.start = p;
         rcp.end = nip;
-        rcp.group = 1;
-        rcp.mask = 1;
+        rcp.group = e_collision_group::level;
+        rcp.mask = e_collision_group::level;
         
         cast_result cast = physics::cast_ray_immediate(rcp);
         
@@ -714,7 +714,7 @@ void setup_level(put::ecs::ecs_scene* scene)
     scene->parents[b] = b;
     scene->physics_data[b].rigid_body.shape = physics::e_shape::box;
     scene->physics_data[b].rigid_body.mass = 0.0f;
-    scene->physics_data[b].rigid_body.group = 1;
+    scene->physics_data[b].rigid_body.group = e_collision_group::level;
     scene->physics_data[b].rigid_body.mask = 0xffffffff;
 
     instantiate_geometry(box_resource, scene, b);
@@ -733,11 +733,8 @@ void instantiate_mushroom(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f po
     scene->physics_data[root].rigid_body.shape = physics::e_shape::capsule;
     scene->physics_data[root].rigid_body.mass = 0.0f;
     
-    //scene->physics_data[root].rigid_body.group = 4;
-    //scene->physics_data[root].rigid_body.mask = ~1;
-    
-    scene->physics_data[root].rigid_body.group = 2;
-    scene->physics_data[root].rigid_body.mask = 0xffffffff;
+    scene->physics_data[root].rigid_body.group = e_collision_group::collectable;
+    scene->physics_data[root].rigid_body.mask = ~e_collision_group::dr;
     
     scene->physics_data[root].rigid_body.dimensions = dim * 0.5f;
     scene->physics_data[root].rigid_body.create_flags |= (physics::e_create_flags::dimensions);
@@ -752,6 +749,13 @@ void instantiate_mushroom(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f po
     ext->cmp_flags[root] |= e_game_cmp::collectable;
 }
 
+void instantiate_bush(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
+{
+    u32 root = load_pmm("data/models/environments/general/bush.pmm", scene);
+    scene->transforms[root].translation = pos;
+    scene->entities[root] |= e_cmp::transform;
+}
+
 void instantiate_blob(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
 {
     u32 root = load_pmm("data/models/characters/blob/blob.pmm", scene);
@@ -763,7 +767,7 @@ void instantiate_blob(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
     // add capsule for collisions
     scene->physics_data[root].rigid_body.shape = physics::e_shape::cone;
     scene->physics_data[root].rigid_body.mass = 1.0f;
-    scene->physics_data[root].rigid_body.group = 4;
+    scene->physics_data[root].rigid_body.group = e_collision_group::enemy;
     scene->physics_data[root].rigid_body.mask = ~1;
     scene->physics_data[root].rigid_body.dimensions = vec3f(0.6f, 0.5f, 0.6f);
     scene->physics_data[root].rigid_body.create_flags |= (physics::e_create_flags::dimensions | physics::e_create_flags::kinematic);
@@ -804,8 +808,8 @@ void setup_character(put::ecs::ecs_scene* scene)
     // add capsule for collisions
     scene->physics_data[dr.root].rigid_body.shape = physics::e_shape::capsule;
     scene->physics_data[dr.root].rigid_body.mass = 1.0f;
-    scene->physics_data[dr.root].rigid_body.group = 4;
-    scene->physics_data[dr.root].rigid_body.mask = ~1;
+    scene->physics_data[dr.root].rigid_body.group = e_collision_group::dr;
+    scene->physics_data[dr.root].rigid_body.mask = ~e_collision_group::level;
     scene->physics_data[dr.root].rigid_body.dimensions = vec3f(0.3f, 0.3f, 0.3f);
     scene->physics_data[dr.root].rigid_body.create_flags |= (physics::e_create_flags::dimensions | physics::e_create_flags::kinematic);
 
@@ -910,8 +914,8 @@ bool check_occupied(vec3f bp, u32& ph)
     physics::ray_cast_params rcp;
     rcp.start = bp + vec3f(0.0f, 1.0f, 0.0f);
     rcp.end = bp;
-    rcp.group = 1;
-    rcp.mask = 1;
+    rcp.group = e_collision_group::level;
+    rcp.mask = e_collision_group::level;
     
     cast_result cast = physics::cast_ray_immediate(rcp);
         
@@ -1085,8 +1089,8 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         }
         
         // delete all inners
-        u32 ne = scene->num_entities;
-        for(u32 e = 0; e < ne; ++e)
+        size_t ne = scene->num_entities;
+        for(size_t e = 0; e < ne; ++e)
         {
             if(ext->cmp_flags[e] & e_game_cmp::tile_block)
                 if(ext->tile_blocks[e].flags & e_tile_flags::inner)
@@ -1272,8 +1276,8 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             physics::ray_cast_params rcp;
             rcp.start = bp + vec3f(0.0f, 1.0f, 0.0f);
             rcp.end = bp;
-            rcp.group = 1;
-            rcp.mask = 1;
+            rcp.group = e_collision_group::level;
+            rcp.mask = e_collision_group::level;
             
             cast_result cast = physics::cast_ray_immediate(rcp);
             
@@ -1324,8 +1328,8 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         physics::ray_cast_params rcp;
         rcp.start = ip;
         rcp.end = nip;
-        rcp.group = 1;
-        rcp.mask = 1;
+        rcp.group = e_collision_group::level;
+        rcp.mask = e_collision_group::level;
         
         cast_result cast = physics::cast_ray_immediate(rcp);
         
@@ -1660,16 +1664,16 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     scp.from = mid - ci.movement_dir * 0.3f;
     scp.to = mid + ci.movement_dir * 1000.0f;
     scp.dimension = vec3f(0.3f);
-    scp.group = 1;
-    scp.mask = 1;
+    scp.group = e_collision_group::level;
+    scp.mask = e_collision_group::level;
 
     physics::cast_result wall_cast = physics::cast_sphere_immediate(scp);
     
     physics::ray_cast_params rcp;
     rcp.start = feet;
     rcp.end = feet + vec3f(0.0f, -10000.0f, 0.0f);
-    rcp.group = 1;
-    rcp.mask = 0xff;
+    rcp.group = e_collision_group::level;
+    rcp.mask = 0xff & ~2;
 
     physics::cast_result surface_cast = physics::cast_ray_immediate(rcp);
     
@@ -1719,6 +1723,20 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     {
         const vec3f& p = cb[i].pos;
         const vec3f& n = cb[i].normal;
+        
+        // collect items
+        if(cb[i].group == e_collision_group::collectable)
+        {
+            for(size_t n = 0; n < scene->num_entities; ++n)
+            {
+                if(scene->physics_handles[n] == cb[i].physics_handle)
+                {
+                    physics::remove_from_world(cb[i].physics_handle);
+                    scene->state_flags[n] |= e_state::hidden;
+                }
+            }
+            continue;
+        }
 
         vec3f pxz = vec3f(p.x, 0.0f, p.z);
         vec3f qxz = vec3f(pc.pos.x, 0.0f, pc.pos.z);
@@ -1989,6 +2007,12 @@ PEN_TRV pen::user_entry( void* params )
         instantiate_mushroom(main_scene, exts, pos);
     }
     
+    for(u32 i = 0; i < 20; ++i)
+    {
+        vec3f pos = vec3f(rand()%60 - 30, 0.0f, rand()%60 - 30);
+        instantiate_bush(main_scene, exts, pos);
+    }
+    
     // lights
     vec3f lp[] = {
         vec3f(10.0f, 5.0f, 3.0f),
@@ -2000,13 +2024,13 @@ PEN_TRV pen::user_entry( void* params )
     vec4f lc[] = {
         vec4f::orange(),
         vec4f::magenta(),
-        vec4f::green(),
+        vec4f(0.0f, 1.0f, 0.3f, 1.0f),
         vec4f::cyan()
     };
     
     main_scene->lights[0].colour = vec3f(0.1f, 0.1f, 0.1f);
     
-    for(u32 i = 0; i < 4; ++i)
+    for(u32 i = 0; i < 3; ++i)
     {
         u32 light = get_new_entity(main_scene);
         instantiate_light(main_scene, light);
