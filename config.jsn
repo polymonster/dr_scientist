@@ -69,7 +69,7 @@
         ],
         
         libs: [
-            "cd ../third_party && ./build_libs.sh osx",
+            "cd ../pmtech/third_party && ./build_libs.sh osx",
         ],
         
         premake: [
@@ -107,7 +107,7 @@
         ],
         
         libs: [
-            "cd ../third_party && ./build_libs.sh ios",
+            "cd ../pmtech/third_party && ./build_libs.sh ios",
         ],
         
         premake: [
