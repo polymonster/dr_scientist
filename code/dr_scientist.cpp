@@ -1,11 +1,8 @@
 #include "dr_scientist.h"
 #include "../shader_structs/forward_render.h"
 
-// collecting mushroom
-
 // animation frame setting
 // animation tracking (attack)
-
 // min jump height
 
 using physics::cast_result;
@@ -14,7 +11,7 @@ pen::window_creation_params pen_window
 {
     1280,					//width
     720,					//height
-    4,						//MSAA samples
+    1,						//MSAA samples
     "dr_scientist"		    //window title / process name
 };
 
