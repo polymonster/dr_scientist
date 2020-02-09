@@ -114,7 +114,7 @@
     // linux
     //
     
-    linux(jsn_inherit): {
+    linux(base): {
 		jsn_vars: {
     		data_dir: "bin/ios/data"
     	},
