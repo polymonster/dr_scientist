@@ -7,17 +7,24 @@
 
 using physics::cast_result;
 
-pen::window_creation_params pen_window
+void* pen::user_entry(void* params);
+namespace pen
 {
-    1280,					//width
-    720,					//height
-    1,						//MSAA samples
-    "dr_scientist"		    //window title / process name
-};
-
+    pen_creation_params pen_entry(int argc, char** argv)
+    {
+        pen::pen_creation_params p;
+        p.window_width = 1280;
+        p.window_height =  720;
+        p.window_title = "dr_scientist";
+        p.window_sample_count = 4;
+        p.user_thread_function = user_entry;
+        p.flags = pen::e_pen_create_flags::renderer;
+        return p;
+    }
+}
 namespace physics
 {
-    extern PEN_TRV physics_thread_main( void* params );
+    extern void* physics_thread_main( void* params );
 }
 
 namespace
@@ -782,7 +789,20 @@ void instantiate_blob(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
 void setup_character(put::ecs::ecs_scene* scene)
 {
     // load main model
-    dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
+    const bool loadop = true;
+    
+    if(loadop)
+    {
+        dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
+        
+        //optimise_pmm("data/models/characters/doctor/doctor.pmm", "data/models/characters/doctor/doctor_optimised.pmm");
+    }
+    else
+    {
+        //dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
+        //optimise_pmm("data/models/characters/doctor/doctor.pmm", "data/models/characters/doctor/doctor_optimised.pmm");
+        //dr.root = load_pmm("data/models/characters/doctor/doctor_optimised.pmm", scene);
+    }
     
     // load anims
     anim_handle idle = load_pma("data/models/characters/doctor/anims/doctor_idle01.pma");
@@ -1128,7 +1148,8 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     pen::mouse_state ms = pen::input_get_mouse_state();
     
     // get a camera ray
-    vec2i vpi = vec2i(pen_window.width, pen_window.height);
+    vec2i vpi;
+    pen::window_get_size(vpi.x, vpi.y);
     ms.y = vpi.y - ms.y;
     mat4  view_proj = camera->proj * camera->view;
     vec3f r0 = maths::unproject_sc(vec3f(ms.x, ms.y, 0.0f), view_proj, vpi);
@@ -1435,10 +1456,12 @@ void get_controller_input(camera* cam, ecs_scene* scene, controller_input& ci)
     {
         pen::mouse_state ms = pen::input_get_mouse_state();
         
-        vec2i vpi = vec2i(pen_window.width, pen_window.height);
+        vec2i vpi;
+        pen::window_get_size(vpi.x, vpi.y);
+        
         mat4  view_proj = cam->proj * cam->view;
-        vec3f r0 = maths::unproject_sc(vec3f(ms.x, pen_window.height - ms.y, 0.0f), view_proj, vpi);
-        vec3f r1 = maths::unproject_sc(vec3f(ms.x, pen_window.height - ms.y, 1.0f), view_proj, vpi);
+        vec3f r0 = maths::unproject_sc(vec3f(ms.x, vpi.y - ms.y, 0.0f), view_proj, vpi);
+        vec3f r1 = maths::unproject_sc(vec3f(ms.x, vpi.y - ms.y, 1.0f), view_proj, vpi);
         
         physics::ray_cast_params rcp;
         rcp.start = r0;
@@ -1917,14 +1940,14 @@ void update_game_components(ecs_extension& extension, ecs_scene* scene, f32 dt)
     }
 }
 
-PEN_TRV pen::user_entry( void* params )
+void* pen::user_entry( void* params )
 {
     //unpack the params passed to the thread and signal to the engine it ok to proceed
     pen::job_thread_params* job_params = (pen::job_thread_params*)params;
     pen::job* p_thread_info = job_params->job_info;
     pen::semaphore_post(p_thread_info->p_sem_continue, 1);
     
-    pen::jobs_create_job( physics::physics_thread_main, 1024*10, nullptr, pen::THREAD_START_DETACHED );
+    pen::jobs_create_job( physics::physics_thread_main, 1024*10, nullptr, e_thread_start_flags::detached );
     
 	dev_ui::init();
 	dbg::init();
@@ -1992,19 +2015,19 @@ PEN_TRV pen::user_entry( void* params )
     setup_level_editor(main_scene);
     setup_level(main_scene);
     
-    for(u32 i = 0; i < 5; ++i)
+    for(u32 i = 0; i < 15; ++i)
     {
         vec3f pos = vec3f(rand()%40 - 20, 0.0f, rand()%40 - 20);
         instantiate_blob(main_scene, exts, pos);
     }
     
-    for(u32 i = 0; i < 20; ++i)
+    for(u32 i = 0; i < 40; ++i)
     {
         vec3f pos = vec3f(rand()%40 - 20, 0.0f, rand()%40 - 20);
         instantiate_mushroom(main_scene, exts, pos);
     }
     
-    for(u32 i = 0; i < 20; ++i)
+    for(u32 i = 0; i < 40; ++i)
     {
         vec3f pos = vec3f(rand()%60 - 30, 0.0f, rand()%60 - 30);
         instantiate_bush(main_scene, exts, pos);
@@ -2057,6 +2080,8 @@ PEN_TRV pen::user_entry( void* params )
         ecs::update();
         
         pmfx::render();
+        
+        mini_profiler();
         
         pmfx::show_dev_ui();
 		put::vgt::show_dev_ui();
