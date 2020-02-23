@@ -6,25 +6,29 @@
     jsn_vars<linux>:
     {
     	premake: "../pmtech/tools/premake/premake5_linux",
-    	texturec: "../pmtech/third_party/texturec/linux/texturec"
+    	texturec: "../pmtech/third_party/texturec/linux/texturec",
+    	mesh_opt: "../pmtech/tools/bin/linux/mesh_opt"
     },
     
 	jsn_vars<mac>:
     {
     	premake: "../pmtech/tools/premake/premake5",
-    	texturec: "../pmtech/third_party/texturec/osx/texturec"
+    	texturec: "../pmtech/third_party/texturec/osx/texturec",
+    	mesh_opt: "../pmtech/tools/bin/osx/mesh_opt"
     },
     
     jsn_vars<windows>:
     {
     	premake: "../pmtech/tools/premake/premake5",
-    	texturec: "../pmtech/third_party/texturec/win32/texturec"
+    	texturec: "../pmtech/third_party/texturec/win32/texturec",
+    	mesh_opt: "../pmtech/tools/bin/win32/mesh_opt"
     },
     
     base: {
         tools: {
             premake: "${premake}",            
             texturec: "${texturec}",
+            mesh_opt: "${mesh_opt}",
             pmfx: "../pmtech/third_party/pmfx-shader/build_pmfx.py",
             models: "../pmtech/tools/build_scripts/build_models.py"
         },
@@ -70,6 +74,7 @@
         
         libs: [
             "cd ../pmtech/third_party && ./build_libs.sh osx",
+            "cd ../pmtech/tools && pmbuild mac"
         ],
         
         premake: [
@@ -108,6 +113,7 @@
         
         libs: [
             "cd ../pmtech/third_party && ./build_libs.sh ios",
+            "cd ../pmtech/tools && pmbuild mac"
         ],
         
         premake: [
