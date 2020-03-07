@@ -29,8 +29,9 @@
             premake: "${premake}",            
             texturec: "${texturec}",
             mesh_opt: "${mesh_opt}",
-            pmfx: "../pmtech/third_party/pmfx-shader/build_pmfx.py",
-            models: "../pmtech/tools/build_scripts/build_models.py"
+            pmfx: "${pmtech_dir}/third_party/pmfx-shader/build_pmfx.py",
+            models: "${pmtech_dir}/tools/build_scripts/build_models.py",
+            jsn: "${pmtech_dir}/tools/build_scripts/jsn/jsn.py"
         },
         
         env: {
@@ -43,8 +44,7 @@
         },
         
         copy: [
-            ["${pmtech_dir}/assets/fonts", "${data_dir}/fonts"],
-            ["${pmtech_dir}/assets/configs", "${data_dir}/configs"]
+            ["${pmtech_dir}/assets/fonts", "${data_dir}/fonts"]
         ],
         
         models: [
@@ -54,6 +54,11 @@
         textures: [
             ["assets/exported/textures", "${data_dir}/textures"],
             ["../pmtech/assets/textures", "${data_dir}/textures"]
+        ],
+        
+		jsn: [
+        	["assets/configs", "${data_dir}/configs"],
+			["${pmtech_dir}/assets/configs", "${data_dir}/configs"]
         ]
     },
     
@@ -85,7 +90,7 @@
         
         pmfx: [
             "-shader_platform metal",
-            "-shader_version macosx",
+            "-metal_sdk macosx",
             "-i ../pmtech/assets/shaders",
             "-o bin/osx/data/pmfx/metal",
             "-h shader_structs",
@@ -125,7 +130,7 @@
         
         pmfx: [
             "-shader_platform metal",
-            "-shader_version ios",
+			"-metal_sdk iphoneos",
             "-i ../pmtech/assets/shaders",
             "-o bin/ios/data/pmfx/metal",
             "-h shader_structs",

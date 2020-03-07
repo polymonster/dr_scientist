@@ -760,6 +760,15 @@ void instantiate_bush(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
     scene->entities[root] |= e_cmp::transform;
 }
 
+void instantiate_house(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
+{
+    u32 root = load_pmm("data/models/environments/buildings/doctorhouse.pmm", scene);
+    root += 4;
+    scene->transforms[root].translation = pos;
+    scene->transforms[root].rotation = quat(0.0f, M_PI, 0.0f);
+    scene->entities[root] |= e_cmp::transform;
+}
+
 void instantiate_blob(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
 {
     u32 root = load_pmm("data/models/characters/blob/blob.pmm", scene);
@@ -789,28 +798,13 @@ void instantiate_blob(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
 void setup_character(put::ecs::ecs_scene* scene)
 {
     // load main model
-    const bool loadop = true;
-    
-    if(loadop)
-    {
-        dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
+    dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
         
-        //optimise_pmm("data/models/characters/doctor/doctor.pmm", "data/models/characters/doctor/doctor_optimised.pmm");
-    }
-    else
-    {
-        //dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
-        //optimise_pmm("data/models/characters/doctor/doctor.pmm", "data/models/characters/doctor/doctor_optimised.pmm");
-        //dr.root = load_pmm("data/models/characters/doctor/doctor_optimised.pmm", scene);
-    }
-    
     // load anims
     anim_handle idle = load_pma("data/models/characters/doctor/anims/doctor_idle01.pma");
     anim_handle walk = load_pma("data/models/characters/doctor/anims/doctor_walk.pma");
     anim_handle run = load_pma("data/models/characters/doctor/anims/doctor_run.pma");
     anim_handle jump = load_pma("data/models/characters/doctor/anims/doctor_idle_jump.pma");
-    anim_handle run_l = load_pma("data/models/characters/doctor/anims/doctor_run_l.pma");
-    anim_handle run_r = load_pma("data/models/characters/doctor/anims/doctor_run_r.pma");
     anim_handle attack = load_pma("data/models/characters/doctor/anims/doctor_attack01.pma");
     
     // bind to rig
@@ -818,8 +812,6 @@ void setup_character(put::ecs::ecs_scene* scene)
     dr.anim_walk = bind_animation_to_rig(scene, walk, dr.root);
     dr.anim_run = bind_animation_to_rig(scene, run, dr.root);
     dr.anim_jump = bind_animation_to_rig(scene, jump, dr.root);
-    dr.anim_run_l = bind_animation_to_rig(scene, run_l, dr.root);
-    dr.anim_run_r  = bind_animation_to_rig(scene, run_r, dr.root);
     dr.anim_attack = bind_animation_to_rig(scene, attack, dr.root);
 
     // add capsule for collisions
@@ -2033,6 +2025,8 @@ void* pen::user_entry( void* params )
         instantiate_bush(main_scene, exts, pos);
     }
     
+    instantiate_house(main_scene, exts, vec3f(10.0f, 0.0f, -10.0f));
+    
     // lights
     vec3f lp[] = {
         vec3f(10.0f, 5.0f, 3.0f),
@@ -2070,18 +2064,22 @@ void* pen::user_entry( void* params )
     main_scene->view_flags |= e_scene_view_flags::hide_debug;
     put::dev_ui::enable(false);
     
+    f32 dt = 0.0f;
+    timer* frame_timer = pen::timer_create();
+    pen::timer_start(frame_timer);
+    
     while( 1 )
     {
-        static timer* frame_timer = pen::timer_create();
+        dt = pen::timer_elapsed_ms(frame_timer)/1000.0f;
         pen::timer_start(frame_timer);
 
 		put::dev_ui::new_frame();
         
-        ecs::update();
+        ecs::update(dt);
         
         pmfx::render();
         
-        mini_profiler();
+        // mini_profiler();
         
         pmfx::show_dev_ui();
 		put::vgt::show_dev_ui();
