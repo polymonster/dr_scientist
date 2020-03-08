@@ -11,10 +11,8 @@ solution ("dr_scientist_" .. platform_dir)
 	linkoptions { link_cmd }
 	
 -- Engine Project	
-dofile "../pmtech/source/pen/project.lua"
-
--- Toolkit Project	
-dofile "../pmtech/source/put/project.lua"
+dofile "../pmtech/core/pen/project.lua"
+dofile "../pmtech/core/put/project.lua"
 
 -- Example projects	
 -- ( project name, current script dir, )
