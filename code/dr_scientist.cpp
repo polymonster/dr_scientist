@@ -763,7 +763,6 @@ void instantiate_bush(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
 void instantiate_house(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
 {
     u32 root = load_pmm("data/models/environments/buildings/doctorhouse.pmm", scene);
-    root += 4;
     scene->transforms[root].translation = pos;
     scene->transforms[root].rotation = quat(0.0f, M_PI, 0.0f);
     scene->entities[root] |= e_cmp::transform;
@@ -1791,7 +1790,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     // set onto entity
     if (!(scene->flags & e_scene_flags::pause_update))
     {
-        scene->initial_transform[5].rotation = quat(0.0f, ci.dir_angle, 0.0f);
+        scene->initial_transform[dr.root+4].rotation = quat(0.0f, ci.dir_angle, 0.0f);
         scene->transforms[dr.root].translation = pc.pos;
         scene->entities[dr.root] |= e_cmp::transform;
     }
@@ -2002,11 +2001,11 @@ void* pen::user_entry( void* params )
 
     pmfx::init("data/configs/editor_renderer.jsn");
     put::init_hot_loader();
-    
+        
     setup_character(main_scene);
     setup_level_editor(main_scene);
     setup_level(main_scene);
-    
+
     for(u32 i = 0; i < 15; ++i)
     {
         vec3f pos = vec3f(rand()%40 - 20, 0.0f, rand()%40 - 20);
@@ -2060,7 +2059,7 @@ void* pen::user_entry( void* params )
         main_scene->entities[light] |= e_cmp::light;
         main_scene->entities[light] |= e_cmp::transform;
     }
-    
+
     main_scene->view_flags |= e_scene_view_flags::hide_debug;
     put::dev_ui::enable(false);
     
