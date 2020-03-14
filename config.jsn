@@ -56,10 +56,15 @@
             ["../pmtech/assets/textures", "${data_dir}/textures"]
         ],
         
-		jsn: [
-        	["assets/configs", "${data_dir}/configs"],
-			["${pmtech_dir}/assets/configs", "${data_dir}/configs"]
-        ]
+		jsn: {
+			files:[
+				["assets/configs", "${data_dir}/configs"],
+				["${pmtech_dir}/assets/configs", "${data_dir}/configs"]
+			],
+			import_dirs:[
+				"${pmtech_dir}/assets/configs", "assets/configs"
+			]
+        }
     },
     
     //
