@@ -163,6 +163,8 @@ import "../pmtech/tools/pmbuild_ext/pmbuild_init.jsn"
                 "cd ${pmtech_dir}\\third_party && ..\\pmbuild bullet-win32"
                 "cd ${pmtech_dir}\\third_party && ..\\pmbuild make bullet-win32 all /p:Platform=x64 /p:Configuration=Debug"
                 "cd ${pmtech_dir}\\third_party && ..\\pmbuild make bullet-win32 all /p:Platform=x64 /p:Configuration=Release"
+				"cd ${pmtech_dir}\\tools && ..\\pmbuild win32"
+				"cd ${pmtech_dir}\\tools && ..\\pmbuild make win32 mesh_opt /p:Platform=x64 /p:Configuration=Release"
             ]
         }
     }
