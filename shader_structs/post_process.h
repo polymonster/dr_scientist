@@ -55,14 +55,29 @@ namespace post_process
     {
         light_data single_light;
     };
+    struct cbuffer_gi_volume
+    {
+        float4 gi_scene_size;
+        float4 gi_volume_size;
+    };
     struct src_info
     {
-        float2 inv_texel_size[8];
+        float4 inv_texel_size[8];
     };
     struct filter_kernel
     {
         float4 filter_info;
         float4 filter_offset_weight[16];
+    };
+    struct pp_info
+    {
+        float4 frame_jitter;
+    };
+    struct taa_cbuffer
+    {
+        float4x4 frame_inv_view_projection;
+        float4x4 prev_view_projection;
+        float4 jitter;
     };
     struct high_pass
     {

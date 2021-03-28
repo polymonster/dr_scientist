@@ -1,182 +1,159 @@
+import "../pmtech/tools/pmbuild_ext/pmbuild_init.jsn"
 {
-    //
-    // common
-    //
-    
-    jsn_vars<linux>:
-    {
-    	premake: "../pmtech/tools/premake/premake5_linux",
-    	texturec: "../pmtech/third_party/texturec/linux/texturec",
-    	mesh_opt: "../pmtech/tools/bin/linux/mesh_opt"
-    },
-    
-	jsn_vars<mac>:
-    {
-    	premake: "../pmtech/tools/premake/premake5",
-    	texturec: "../pmtech/third_party/texturec/osx/texturec",
-    	mesh_opt: "../pmtech/tools/bin/osx/mesh_opt"
-    },
-    
-    jsn_vars<windows>:
-    {
-    	premake: "../pmtech/tools/premake/premake5",
-    	texturec: "../pmtech/third_party/texturec/win32/texturec",
-    	mesh_opt: "../pmtech/tools/bin/win32/mesh_opt"
-    },
-    
-    base: {
-        tools: {
-            premake: "${premake}",            
-            texturec: "${texturec}",
-            mesh_opt: "${mesh_opt}",
-            pmfx: "${pmtech_dir}/third_party/pmfx-shader/build_pmfx.py",
-            models: "${pmtech_dir}/tools/build_scripts/build_models.py",
-            jsn: "${pmtech_dir}/tools/build_scripts/jsn/jsn.py"
-        },
-        
-        env: {
-            pmtech_dir: "../pmtech/"
-        },
-        
-        jsn_vars: {
-        	pmtech_dir: "../pmtech/",
-        	data_dir: ""
-        },
-        
-        copy: [
-            ["${pmtech_dir}/assets/fonts", "${data_dir}/fonts"]
-        ],
-        
-        models: [
-            ["assets/exported/models", "${data_dir}/models"]
-        ],
-        
-        textures: [
-            ["assets/exported/textures", "${data_dir}/textures"],
-            ["../pmtech/assets/textures", "${data_dir}/textures"]
-        ],
-        
-		jsn: {
-			files:[
-				["assets/configs", "${data_dir}/configs"],
-				["${pmtech_dir}/assets/configs", "${data_dir}/configs"]
-			],
-			import_dirs:[
-				"${pmtech_dir}/assets/configs", "assets/configs"
-			]
-        }
-    },
-    
-    //
-    // mac
-    //
-    
-    mac(base): {        
-    	jsn_vars: {
-    		data_dir: "bin/osx/data"
-    	},
-    	
-        clean: [
-            "build/osx",
-            "bin/osx",
-            "temp"
-        ],
-        
-        libs: [
-            "cd ../pmtech/third_party && ./build_libs.sh osx",
-            "cd ../pmtech/tools && pmbuild mac"
-        ],
-        
-        premake: [
-            "xcode4",
-            "--renderer=metal", 
-            "--platform_dir=osx"
-        ],
-        
-        pmfx: [
-            "-shader_platform metal",
-            "-metal_sdk macosx",
-            "-i ../pmtech/assets/shaders",
-            "-o bin/osx/data/pmfx/metal",
-            "-h shader_structs",
-            "-t temp/shaders",
-            "-source"
-        ]
-    },
-    
-    //
-    // iOS
-    //
-    
-    ios(base): {
-        jsn_vars: {
-    		data_dir: "bin/ios/data"
-    	},
-    	
-    	require_teamid: true,
-    	
-        clean: [
-            "build/ios",
-            "bin/ios",
-            "temp"
-        ],
-        
-        libs: [
-            "cd ../pmtech/third_party && ./build_libs.sh ios",
-            "cd ../pmtech/tools && pmbuild mac"
-        ],
-        
-        premake: [
-            "xcode4",
-            "--renderer=metal", 
-            "--platform_dir=ios",
-            "--xcode_target=ios"
-        ],
-        
-        pmfx: [
-            "-shader_platform metal",
-			"-metal_sdk iphoneos",
-            "-i ../pmtech/assets/shaders",
-            "-o bin/ios/data/pmfx/metal",
-            "-h shader_structs",
-            "-t temp/shaders",
-            "-source"
-        ]
-    },
-    
-    //
-    // linux
-    //
-    
-    linux(base): {
+    jsn_vars: {
+        pmbuild_dir: "../pmtech/third_party/pmbuild"
+        pmtech_dir: "../pmtech"
+    }
+	
+	base:
+	{
 		jsn_vars: {
-    		data_dir: "bin/ios/data"
-    	},
+            data_dir: ""
+            build_dir: ""
+            bin_dir: ""
+        }
         
-        clean: [
-            "build/linux",
-            "bin/linux",
-            "temp"
-        ],
+        clean: {
+            directories: [
+                "${data_dir}"
+                "${build_dir}"
+                "${bin_dir}"
+                "temp"
+            ]
+        }
         
-        libs: [
-            "cd ../pmtech/third_party && ./build_libs.sh linux",
-        ],
+        render_configs: {
+            type: jsn
+            args: [
+                "-i %{input_file} -o %{output_file}"
+                "-I ../assets/configs assets/configs",
+            ]
+            files: [
+                ["${pmtech_dir}/assets/configs", "${data_dir}/configs"]
+            ]
+            dependencies: true
+        }
+		
+		texturec: {
+            args: [
+                "-f %{input_file}"
+                "%{export_args}"
+                "-o %{output_file}"
+            ]
+            files: [
+                ["${pmtech_dir}/assets/textures", "${data_dir}/textures"]
+                ["assets/exported/textures", "${data_dir}/textures"]
+            ]
+            excludes: [
+                "export.jsn"
+                "*.txt"
+                "*.DS_Store"
+                "*.dds"
+                "*.pmv"
+            ]
+            change_ext: ".dds"
+            dependencies: true
+        }
         
-        premake: [
-            "gmake",
-            "--renderer=opengl", 
-            "--platform_dir=linux"
-        ],
+        models: {
+            files: [
+                ["assets/exported/models", "${data_dir}/models"]
+            ]
+        }
+		
+		base_copy: {
+            type: copy
+            files: [
+                ["${pmtech_dir}/assets/fonts", "${data_dir}/fonts"]
+                ["${pmtech_dir}/assets/textures/**/*.dds", "${data_dir}/textures"]
+            ]
+        }
+		
+		pmbuild_config: {
+            pmbuild_cmd: "${pmbuild_dir}/pmbuild"
+            destination: "${data_dir}"
+        }
         
-        pmfx: [
-            "-shader_platform glsl",
-            "-shader_version 330",
-            "-i ../pmtech/assets/shaders",
-            "-o bin/linux/data/pmfx/metal",
-            "-h shader_structs",
-            "-t temp/shaders",
-            "-source"
-        ]
+	}
+	
+	//
+    // win32
+    //
+	
+    win32(base):
+    {
+        jsn_vars: {
+            data_dir: "bin/win32/data"
+            build_dir: "build/win32"
+            bin_dir: "bin/win32"
+        }
+                
+        shared_libs: {
+            type: copy
+            files: [
+                ["${pmtech_dir}/third_party/shared_libs/win32", "bin/win32"]
+            ]
+        }
+        
+        premake: {
+            args: [
+                "%{vs_latest}"
+                "--renderer=dx11"
+                "--platform_dir=win32"
+				"--pmtech_dir=${pmtech_dir}/"
+                "--sdk_version=%{windows_sdk_version}"
+            ]
+        },
+        
+        pmfx: {
+            args: [
+                "-shader_platform hlsl"
+                "-shader_version 5_0"
+                "-i ${pmtech_dir}/assets/shaders"
+                "-o bin/win32/data/pmfx/hlsl"
+                "-h shader_structs"
+                "-t temp/shaders"
+                "-source"
+            ]
+        }
+        
+        make: {
+            toolchain: "msbuild"
+            files: [
+                "build/win32/*.vcxproj"
+            ]
+        }
+        
+        launch: {
+            cmd: "%{target_path}"
+            files: [
+                "bin/win32/*.exe"
+            ]
+        }
+		
+		vscode: {
+            files: [
+                "build/win32/*.vcxproj"
+            ]
+            folders: [
+                "."
+                ".."
+            ]
+            configurations:[
+                {
+                    name: "debug"
+                    make: "../pmbuild make win32 %{target_name} /p:Configuration=Debug /p:Platform=x64"
+                    launch: "bin/win32/%{target_name}_d.exe"
+                }
+                {
+                    name: "release"
+                    make: "../pmbuild make win32 %{target_name} /p:Configuration=Release /p:Platform=x64"
+                    launch: "bin/win32/%{target_name}.exe"
+                }
+            ]
+            cwd: "bin/win32"
+            debugger: "vscode"
+            change_ext: ""
+        }
     }
 }

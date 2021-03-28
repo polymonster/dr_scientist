@@ -1,13 +1,15 @@
 #include "dr_scientist.h"
 #include "../shader_structs/forward_render.h"
 
-// animation frame setting
-// animation tracking (attack)
-// min jump height
-
 using physics::cast_result;
 
-void* pen::user_entry(void* params);
+namespace
+{
+    void* user_setup(void* params);
+    loop_t user_update();
+    void   user_shutdown();
+} // namespace
+
 namespace pen
 {
     pen_creation_params pen_entry(int argc, char** argv)
@@ -17,7 +19,7 @@ namespace pen
         p.window_height =  720;
         p.window_title = "dr_scientist";
         p.window_sample_count = 4;
-        p.user_thread_function = user_entry;
+        p.user_thread_function = user_setup;
         p.flags = pen::e_pen_create_flags::renderer;
         return p;
     }
@@ -1931,181 +1933,220 @@ void update_game_components(ecs_extension& extension, ecs_scene* scene, f32 dt)
     }
 }
 
-void* pen::user_entry( void* params )
+namespace
 {
-    //unpack the params passed to the thread and signal to the engine it ok to proceed
-    pen::job_thread_params* job_params = (pen::job_thread_params*)params;
-    pen::job* p_thread_info = job_params->job_info;
-    pen::semaphore_post(p_thread_info->p_sem_continue, 1);
-    
-    pen::jobs_create_job( physics::physics_thread_main, 1024*10, nullptr, e_thread_start_flags::detached );
-    
-	dev_ui::init();
-	dbg::init();
-    
-	//create main camera and controller
-	put::camera main_camera;
-	put::camera_create_perspective( &main_camera, 60.0f, k_use_window_aspect, 0.1f, 1000.0f );
+    pen::job* s_thread_info = nullptr;
 
-    //create the main scene and controller
-    ecs_scene* main_scene = create_scene("main_scene");
-    editor_init( main_scene, &main_camera );
+    put::camera                 main_camera;
+    ecs::ecs_controller         game_controller;
+    dr_ecs_exts*                exts;
+    ecs_scene*                  main_scene;
+    pen::timer*                 frame_timer;
 
-    // create and register game specific extensions
-    dr_ecs_exts* exts = (dr_ecs_exts*)dr_ecs_extension(main_scene);
-    
-    // controllers
-    ecs::ecs_controller game_controller;
-    game_controller.camera = &main_camera;
-    game_controller.update_func = &update_game_controller;
-    game_controller.name = "dr_scientist_game_controller";
-    game_controller.context = exts;
-    game_controller.id_name = PEN_HASH(game_controller.name.c_str());
+    put::scene_view_renderer    svr_main;
+    put::scene_view_renderer    svr_editor;
+    put::scene_view_renderer    svr_shadow_maps;
+    put::scene_view_renderer    svr_area_light_textures;
+    put::scene_view_renderer    svr_omni_shadow_maps;
 
-    ecs::register_ecs_controller(main_scene, game_controller);
-    
-    //create view renderers
-    put::scene_view_renderer svr_main;
-    svr_main.name = "ces_render_scene";
-    svr_main.id_name = PEN_HASH(svr_main.name.c_str());
-    svr_main.render_function = &render_scene_view;
-    
-    put::scene_view_renderer svr_editor;
-    svr_editor.name = "ces_render_editor";
-    svr_editor.id_name = PEN_HASH(svr_editor.name.c_str());
-    svr_editor.render_function = &render_scene_editor;
-    
-    put::scene_view_renderer svr_shadow_maps;
-    svr_shadow_maps.name = "ces_render_shadow_maps";
-    svr_shadow_maps.id_name = PEN_HASH(svr_shadow_maps.name.c_str());
-    svr_shadow_maps.render_function = &render_shadow_views;
-
-    put::scene_view_renderer svr_area_light_textures;
-    svr_area_light_textures.name = "ces_render_area_light_textures";
-    svr_area_light_textures.id_name = PEN_HASH(svr_area_light_textures.name.c_str());
-    svr_area_light_textures.render_function = &ecs::render_area_light_textures;
-    
-    put::scene_view_renderer svr_omni_shadow_maps;
-    svr_omni_shadow_maps.name = "ces_render_omni_shadow_maps";
-    svr_omni_shadow_maps.id_name = PEN_HASH(svr_omni_shadow_maps.name.c_str());
-    svr_omni_shadow_maps.render_function = &ecs::render_omni_shadow_views;
-    
-    pmfx::register_scene_view_renderer(svr_main);
-    pmfx::register_scene_view_renderer(svr_editor);
-    pmfx::register_scene_view_renderer(svr_shadow_maps);
-    pmfx::register_scene_view_renderer(svr_area_light_textures);
-    pmfx::register_scene_view_renderer(svr_omni_shadow_maps);
-    
-    pmfx::register_scene(main_scene, "main_scene");
-    pmfx::register_camera(&main_camera, "model_viewer_camera");
-
-    pmfx::init("data/configs/editor_renderer.jsn");
-    put::init_hot_loader();
-        
-    setup_character(main_scene);
-    setup_level_editor(main_scene);
-    setup_level(main_scene);
-
-    for(u32 i = 0; i < 15; ++i)
+    void setup_scene()
     {
-        vec3f pos = vec3f(rand()%40 - 20, 0.0f, rand()%40 - 20);
-        instantiate_blob(main_scene, exts, pos);
-    }
-    
-    for(u32 i = 0; i < 40; ++i)
-    {
-        vec3f pos = vec3f(rand()%40 - 20, 0.0f, rand()%40 - 20);
-        instantiate_mushroom(main_scene, exts, pos);
-    }
-    
-    for(u32 i = 0; i < 40; ++i)
-    {
-        vec3f pos = vec3f(rand()%60 - 30, 0.0f, rand()%60 - 30);
-        instantiate_bush(main_scene, exts, pos);
-    }
-    
-    instantiate_house(main_scene, exts, vec3f(10.0f, 0.0f, -10.0f));
-    
-    // lights
-    vec3f lp[] = {
-        vec3f(10.0f, 5.0f, 3.0f),
-        vec3f(-2.0f, 5.0f, 12.0f),
-        vec3f(-13.0f, 5.0f, -8.0f),
-        vec3f(5.0f, 5.0f, -5.0f),
-    };
-    
-    vec4f lc[] = {
-        vec4f::orange(),
-        vec4f::magenta(),
-        vec4f(0.0f, 1.0f, 0.3f, 1.0f),
-        vec4f::cyan()
-    };
-    
-    main_scene->lights[0].colour = vec3f(0.1f, 0.1f, 0.1f);
-    
-    for(u32 i = 0; i < 3; ++i)
-    {
-        u32 light = get_new_entity(main_scene);
-        instantiate_light(main_scene, light);
-        main_scene->names[light] = "point_light";
-        main_scene->id_name[light] = PEN_HASH("point_light");
-        main_scene->lights[light].colour = lc[i].xyz;
-        main_scene->lights[light].radius = 10.0f;
-        main_scene->lights[light].type = e_light_type::point;
-        main_scene->lights[light].shadow_map = true;
-        main_scene->transforms[light].translation = lp[i];
-        main_scene->transforms[light].rotation = quat();
-        main_scene->transforms[light].scale = vec3f::one();
-        main_scene->entities[light] |= e_cmp::light;
-        main_scene->entities[light] |= e_cmp::transform;
+        setup_character(main_scene);
+        setup_level_editor(main_scene);
+        setup_level(main_scene);
+
+        /*
+        for (u32 i = 0; i < 15; ++i)
+        {
+            vec3f pos = vec3f(rand() % 40 - 20, 0.0f, rand() % 40 - 20);
+            instantiate_blob(main_scene, exts, pos);
+        }
+
+        for (u32 i = 0; i < 40; ++i)
+        {
+            vec3f pos = vec3f(rand() % 40 - 20, 0.0f, rand() % 40 - 20);
+            instantiate_mushroom(main_scene, exts, pos);
+        }
+
+        for (u32 i = 0; i < 40; ++i)
+        {
+            vec3f pos = vec3f(rand() % 60 - 30, 0.0f, rand() % 60 - 30);
+            instantiate_bush(main_scene, exts, pos);
+        }
+
+        instantiate_house(main_scene, exts, vec3f(10.0f, 0.0f, -10.0f));
+        */
+
+        // lights
+        vec3f lp[] = {
+            vec3f(10.0f, 5.0f, 3.0f),
+            vec3f(-2.0f, 5.0f, 12.0f),
+            vec3f(-13.0f, 5.0f, -8.0f),
+            vec3f(5.0f, 5.0f, -5.0f),
+        };
+
+        vec4f lc[] = {
+            vec4f::orange(),
+            vec4f::magenta(),
+            vec4f(0.0f, 1.0f, 0.3f, 1.0f),
+            vec4f::cyan()
+        };
+
+        main_scene->lights[0].colour = vec3f(0.1f, 0.1f, 0.1f);
+
+        for (u32 i = 0; i < 3; ++i)
+        {
+            u32 light = get_new_entity(main_scene);
+            instantiate_light(main_scene, light);
+            main_scene->names[light] = "point_light";
+            main_scene->id_name[light] = PEN_HASH("point_light");
+            main_scene->lights[light].colour = lc[i].xyz;
+            main_scene->lights[light].radius = 10.0f;
+            main_scene->lights[light].type = e_light_type::point;
+            main_scene->lights[light].flags |= e_light_flags::omni_shadow_map;
+            main_scene->transforms[light].translation = lp[i];
+            main_scene->transforms[light].rotation = quat();
+            main_scene->transforms[light].scale = vec3f::one();
+            main_scene->entities[light] |= e_cmp::light;
+            main_scene->entities[light] |= e_cmp::transform;
+        }
     }
 
-    main_scene->view_flags |= e_scene_view_flags::hide_debug;
-    put::dev_ui::enable(false);
-    
-    f32 dt = 0.0f;
-    timer* frame_timer = pen::timer_create();
-    pen::timer_start(frame_timer);
-    
-    while( 1 )
+    void* user_setup(void* params)
     {
-        dt = pen::timer_elapsed_ms(frame_timer)/1000.0f;
+        //unpack the params passed to the thread and signal to the engine it ok to proceed
+        pen::job_thread_params* job_params = (pen::job_thread_params*)params;
+        s_thread_info = job_params->job_info;
+        pen::semaphore_post(s_thread_info->p_sem_continue, 1);
+
+        // intialise pmtech systems
+        pen::jobs_create_job(physics::physics_thread_main, 1024 * 10, nullptr, pen::e_thread_start_flags::detached);
+        dev_ui::init();
+        dbg::init();
+
+        // timer
+        frame_timer = pen::timer_create();
+
+        //create main camera and controller
+        put::camera_create_perspective(&main_camera, 60.0f, k_use_window_aspect, 0.1f, 1000.0f);
+
+        //create the main scene and controller
+        main_scene = create_scene("main_scene");
+        editor_init(main_scene, &main_camera);
+
+        // create and register game specific extensions
+        exts = (dr_ecs_exts*)dr_ecs_extension(main_scene);
+
+        // controllers
+        game_controller.camera = &main_camera;
+        game_controller.update_func = &update_game_controller;
+        game_controller.name = "dr_scientist_game_controller";
+        game_controller.context = exts;
+        game_controller.id_name = PEN_HASH(game_controller.name.c_str());
+
+        ecs::register_ecs_controller(main_scene, game_controller);
+
+        //create view renderers
+        svr_main.name = "ecs_render_scene";
+        svr_main.id_name = PEN_HASH(svr_main.name.c_str());
+        svr_main.render_function = &render_scene_view;
+
+        svr_editor.name = "ecs_render_editor";
+        svr_editor.id_name = PEN_HASH(svr_editor.name.c_str());
+        svr_editor.render_function = &render_scene_editor;
+
+        svr_shadow_maps.name = "ecs_render_shadow_maps";
+        svr_shadow_maps.id_name = PEN_HASH(svr_shadow_maps.name.c_str());
+        svr_shadow_maps.render_function = &render_shadow_views;
+
+        svr_area_light_textures.name = "ecs_render_area_light_textures";
+        svr_area_light_textures.id_name = PEN_HASH(svr_area_light_textures.name.c_str());
+        svr_area_light_textures.render_function = &ecs::render_area_light_textures;
+
+        svr_omni_shadow_maps.name = "ecs_render_omni_shadow_maps";
+        svr_omni_shadow_maps.id_name = PEN_HASH(svr_omni_shadow_maps.name.c_str());
+        svr_omni_shadow_maps.render_function = &ecs::render_omni_shadow_views;
+
+        pmfx::register_scene_view_renderer(svr_main);
+        pmfx::register_scene_view_renderer(svr_editor);
+        pmfx::register_scene_view_renderer(svr_shadow_maps);
+        pmfx::register_scene_view_renderer(svr_area_light_textures);
+        pmfx::register_scene_view_renderer(svr_omni_shadow_maps);
+
+        pmfx::register_scene(main_scene, "main_scene");
+        pmfx::register_camera(&main_camera, "model_viewer_camera");
+
+        pmfx::init("data/configs/editor_renderer.jsn");
+        put::init_hot_loader();
+
+        setup_scene();
+
         pen::timer_start(frame_timer);
 
-		put::dev_ui::new_frame();
-        
-        ecs::update(dt);
-        
-        pmfx::render();
-        
-        // mini_profiler();
-        
-        pmfx::show_dev_ui();
-		put::vgt::show_dev_ui();
-        put::dev_ui::console();
-        put::dev_ui::render();
-        
+        pen_main_loop(user_update);
+        return PEN_THREAD_OK;
+    }
+
+    void user_shutdown()
+    {
+        pen::renderer_new_frame();
+
         pen::renderer_present();
         pen::renderer_consume_cmd_buffer();
-        
-		pmfx::poll_for_changes();
-		put::poll_hot_loader();
 
-        //msg from the engine we want to terminate
-        if( pen::semaphore_try_wait( p_thread_info->p_sem_exit ) )
-            break;
+        // signal to the engine the thread has finished
+        pen::semaphore_post(s_thread_info->p_sem_terminated, 1);
+    }
+
+    loop_t user_update()
+    {
+        pen::renderer_new_frame();
+
+        f32 dt = pen::timer_elapsed_ms(frame_timer) / 1000.0f;
+        pen::timer_start(frame_timer);
+
+        put::dev_ui::new_frame();
+
+        ecs::update(dt);
+
+        pmfx::render();
+
+        // mini_profiler();
+
+        pmfx::show_dev_ui();
+        put::vgt::show_dev_ui();
+        put::dev_ui::console();
+        put::dev_ui::render();
 
         user_thread_time = pen::timer_elapsed_ms(frame_timer);
-    }
-    
-    //clean up mem here
-	put::dbg::shutdown();
-	put::dev_ui::shutdown();
 
-    pen::renderer_consume_cmd_buffer();
+        // present
+        pen::renderer_present();
+        pen::renderer_consume_cmd_buffer();
+
+        pmfx::poll_for_changes();
+        put::poll_hot_loader();
+
+        if (pen::semaphore_try_wait(s_thread_info->p_sem_exit))
+        {
+            user_shutdown();
+            pen_main_loop_exit();
+        }
+
+        pen_main_loop_continue();
+    }
+} // namespace
+
+
+void* pen::user_entry( void* params )
+{
     
-    //signal to the engine the thread has finished
-    pen::semaphore_post( p_thread_info->p_sem_terminated, 1);
+    main_scene->view_flags |= e_scene_view_flags::hide_debug;
+    put::dev_ui::enable(false);
+
+
+    
+
     
     return PEN_THREAD_OK;
 }

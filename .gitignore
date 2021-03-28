@@ -55,6 +55,9 @@ temp/
 .mayaSwatches
 .pyc
 build_config_user.json
+config.user.jsn
 WIP/
+*.vscode
 
 assets/poseLib/
+

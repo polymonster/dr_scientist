@@ -1,4 +1,3 @@
-#include "pen.h"
 #include "renderer.h"
 #include "timer.h"
 #include "file_system.h"
