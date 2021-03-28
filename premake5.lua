@@ -13,6 +13,10 @@ solution ("dr_scientist_" .. platform_dir)
 -- Engine Project	
 dofile "../pmtech/core/pen/project.lua"
 dofile "../pmtech/core/put/project.lua"
+configuration{}
+	includedirs{
+		"."
+	}
 
 -- Example projects	
 -- ( project name, current script dir, )

@@ -731,6 +731,7 @@ void setup_level(put::ecs::ecs_scene* scene)
 
 void instantiate_mushroom(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
 {
+    //u32 root = load_pmm("data/models/characters/guy/guy.pmm", scene);
     u32 root = load_pmm("data/models/props/mushroom01.pmm", scene);
     
     vec3f dim = scene->bounding_volumes[root].max_extents - scene->bounding_volumes[root].min_extents;
@@ -799,7 +800,8 @@ void instantiate_blob(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
 void setup_character(put::ecs::ecs_scene* scene)
 {
     // load main model
-    dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
+    //dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
+    //dr.root = load_pmm("data/models/characters/guy/guy.pmm", scene);
         
     // load anims
     anim_handle idle = load_pma("data/models/characters/doctor/anims/doctor_idle01.pma");
@@ -1954,6 +1956,12 @@ namespace
         setup_character(main_scene);
         setup_level_editor(main_scene);
         setup_level(main_scene);
+
+        for (u32 i = 0; i < 2; ++i)
+        {
+            vec3f pos = vec3f(rand() % 40 - 20, 0.0f, rand() % 40 - 20);
+            instantiate_mushroom(main_scene, exts, pos);
+        }
 
         /*
         for (u32 i = 0; i < 15; ++i)
