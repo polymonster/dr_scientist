@@ -253,7 +253,7 @@ void add_tile_block(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, const vec3f& p
     instantiate_material(default_material, scene, b);
     instantiate_model_cbuffer(scene, b);
     
-    pen::renderer_consume_cmd_buffer();
+    //pen::renderer_consume_cmd_buffer();
     physics::physics_consume_command_buffer();
     
     instantiate_rigid_body(scene, b);
@@ -1015,9 +1015,7 @@ bool detect_inner_block(vec3f block, vec3f* list)
 }
 
 void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
-{
-    ecs::editor_enable(true);
-    
+{    
     camera* camera = ecsc.camera;
     dr_ecs_exts* ext = (dr_ecs_exts*)ecsc.context;
 
@@ -1027,14 +1025,17 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     static vec3f p0 = vec3f::zero();
     
     ImGui::BeginMainMenuBar();
-    if(ImGui::MenuItem(ICON_FA_BRIEFCASE))
+    if (ImGui::MenuItem(ICON_FA_BRIEFCASE))
         open = !open;
     ImGui::EndMainMenuBar();
-    
-    if(!open)
+
+    if (!open)
+    {
+        ecs::editor_enable(false);
         return;
-    
-    ecs::editor_enable(false);
+    }
+
+    ecs::editor_enable(true);
     
     ImGui::Begin("Toolbox");
     
@@ -1877,15 +1878,18 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 
     if( game_cam )
     {
-        f32 zl = smooth_step(pc.loco_vel, 0.0f, 5.0f, 0.0f, 1.0f);
+        f32 zl = smooth_step(pc.loco_vel, 0.0f, 5.0f, 0.0f, 1.0f) + 3.0f;
 
-        vec3f focus_pos = pc.pos + vec3f(0.0f, 0.0f, 3.0f + (4.0f * zl));
 
+        vec3f focus_pos = pc.pos; // +vec3f(0.0f, 0.0f, 3.0f + (4.0f * zl));
+
+        /*
         if (pen::input_is_key_down(PK_SHIFT))
         {
             zl += 2.0f;
             focus_pos = pc.pos - vec3f(0.0f, 0.0f, 5.0f);
         }
+        */
 
         pc.cam_y_target = lerp(pc.cam_y_target, pc.pos.y, camera_lerp_y * dt);
         pc.cam_pos_target = vec3f(focus_pos.x, pc.cam_y_target, focus_pos.z);
