@@ -64,14 +64,15 @@ namespace e_tile_flags
     };
 }
 
-namespace e_contoller
+namespace e_controller
 {
-    enum contoller_t
+    enum controller_t
     {
         jump = 1 << 0,
         run = 1 << 1,
         debounce_jump = 1 << 2,
-        attack = 1 << 3
+        attack = 1 << 3,
+        shoot = 1 << 4
     };
 }
 
@@ -106,6 +107,7 @@ struct dr_char
 struct controller_input
 {
     vec3f movement_dir = vec3f(0.0f, 0.0f, 1.0f);
+    vec3f aim_dir = vec3f(0.0f, 0.0f, 0.0f);
     f32   dir_angle = 0.0f;
     f32   movement_vel = 0.0f;
     vec2f cam_rot = vec2f::zero();

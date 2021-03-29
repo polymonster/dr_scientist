@@ -65,6 +65,56 @@ namespace
         -vec3f::unit_z(),
         -vec3f::unit_y()
     };
+
+    struct soa
+    {
+        u32   flags[1024] = { 0 };
+        vec3f pos[1024] = { 0 };
+        vec3f vel[1024] = { 0 };
+        vec3f target[1024] = { 0 };
+        // freelist
+    };
+    soa s_soa;
+
+    u32 soa_new(const vec3f& pos, const vec3f& dir)
+    {
+        for (u32 i = 0; i < 1024; ++i)
+            if (s_soa.flags[i] == 0)
+            {
+                s_soa.pos[i] = pos;
+                s_soa.vel[i] = dir;
+                s_soa.flags[i] = 1;
+                return i;
+            }
+        return 0;
+    }
+
+    void debug_render_soa()
+    {
+        for (u32 i = 0; i < 1024; ++i)
+        {
+            if (s_soa.flags[i] == 0)
+                continue;
+
+            dbg::add_line(s_soa.pos[i], s_soa.pos[i] + s_soa.vel[i]);
+        }
+    }
+
+    void update_soa()
+    {
+        for (u32 i = 0; i < 1024; ++i)
+        {
+            if (s_soa.flags[i] == 0)
+                continue;
+
+            s_soa.pos[i] += s_soa.vel[i];
+
+            if (mag2(s_soa.pos[i]) > 10000.0f)
+                s_soa.flags[i] = 0;
+        }
+
+        debug_render_soa();
+    }
 }
 
 void collision_mesh_from_vertex_list(f32* verts, u32 num, physics::collision_mesh_data& cmd)
@@ -800,7 +850,7 @@ void instantiate_blob(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
 void setup_character(put::ecs::ecs_scene* scene)
 {
     // load main model
-    //dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
+    dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
     //dr.root = load_pmm("data/models/characters/guy/guy.pmm", scene);
         
     // load anims
@@ -1386,12 +1436,12 @@ void get_controller_input(camera* cam, ecs_scene* scene, controller_input& ci)
         
         if(gs.button[PGP_BUTTON_X])
         {
-            ci.actions |= e_contoller::run;
+            ci.actions |= e_controller::run;
         }
         
         if(gs.button[PGP_BUTTON_A])
         {
-            ci.actions |= e_contoller::jump;
+            ci.actions |= e_controller::jump;
         }
     }
     else
@@ -1416,17 +1466,17 @@ void get_controller_input(camera* cam, ecs_scene* scene, controller_input& ci)
         
         if (pen::input_key(PK_Q))
         {
-             ci.actions |= e_contoller::jump;
+             ci.actions |= e_controller::jump;
         }
         
         if (pen::input_key(PK_E))
         {
-             ci.actions |= e_contoller::attack;
+             ci.actions |= e_controller::attack;
         }
         
         if (pen::input_key(PK_SHIFT))
         {
-            ci.actions |= e_contoller::run;
+            //ci.actions |= e_contoller::run;
         }
                         
         if(mag2(left_stick) > 0)
@@ -1447,6 +1497,7 @@ void get_controller_input(camera* cam, ecs_scene* scene, controller_input& ci)
     }
     
     // mouse movement
+    static bool released = true;
     if(pen::input_mouse(PEN_MOUSE_L))
     {
         pen::mouse_state ms = pen::input_get_mouse_state();
@@ -1465,15 +1516,29 @@ void get_controller_input(camera* cam, ecs_scene* scene, controller_input& ci)
         rcp.group = 0xffffff;
         
         physics::cast_result surface_cast = physics::cast_ray_immediate(rcp);
-        
+
         if(surface_cast.set)
         {
             vec3f wp = surface_cast.point * vec3f(1.0f, 0.0f, 1.0f);
             vec3f dp = scene->transforms[dr.root].translation * vec3f(1.0f, 0.0f, 1.0f);
             
-            ci.movement_dir = normalised(wp - dp);
-            ci.movement_vel = 1.0f;
+            ci.aim_dir = normalised(wp - dp);
+
+            if (!pen::input_key(PK_SHIFT))
+            {
+                ci.movement_dir = ci.aim_dir;
+                ci.movement_vel = 1.0f;
+            }
+            else if (released)
+            {
+                ci.actions |= e_controller::shoot;
+                released = false;
+            }
         }
+    }
+    else
+    {
+        released = true;
     }
 }
 
@@ -1548,6 +1613,15 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     {
         ci.dir_angle = atan2(ci.movement_dir.x, ci.movement_dir.z);
     }
+    else
+    {
+        ci.dir_angle = atan2(ci.aim_dir.x, ci.aim_dir.z);
+
+        if (ci.actions & e_controller::shoot)
+        {
+            u32 particle = soa_new(pc.pos + vec3f(0.0f, 0.3f, 0.5f), ci.aim_dir);
+        }
+    }
 
     // update state --------------------------------------------------------------------------------------------------------
     
@@ -1592,14 +1666,14 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     }
 
     // reset debounce jump
-    if (pc.air == 0 && !(ci.actions & e_contoller::jump))
-        pc.actions &= ~e_contoller::debounce_jump;
+    if (pc.air == 0 && !(ci.actions & e_controller::jump))
+        pc.actions &= ~e_controller::debounce_jump;
 
     // must debounce
-    if (pc.actions & e_contoller::debounce_jump)
-        ci.actions &= ~e_contoller::jump;
+    if (pc.actions & e_controller::debounce_jump)
+        ci.actions &= ~e_controller::jump;
     
-    if (ci.actions & e_contoller::jump && pc.air <= jump_time)
+    if (ci.actions & e_controller::jump && pc.air <= jump_time)
     {
         pc.acc.y += jump_strength;
         
@@ -1610,10 +1684,10 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         
         pc.air = max(pc.air, dt);
     }
-    else if(ci.actions & e_contoller::jump)
+    else if(ci.actions & e_controller::jump)
     {
         // must release to re-jump
-        pc.actions |= e_contoller::debounce_jump;
+        pc.actions |= e_controller::debounce_jump;
     }
 
     // apply jump anim
@@ -1629,7 +1703,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     }
     
     // apply attack anim
-    if(ci.actions & e_contoller::attack)
+    if(ci.actions & e_controller::attack)
     {
         controller.blend.anim_a = dr.anim_attack;
         controller.blend.anim_b = dr.anim_attack;
@@ -1805,15 +1879,23 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     {
         f32 zl = smooth_step(pc.loco_vel, 0.0f, 5.0f, 0.0f, 1.0f);
 
+        vec3f focus_pos = pc.pos + vec3f(0.0f, 0.0f, 3.0f + (4.0f * zl));
+
+        if (pen::input_is_key_down(PK_SHIFT))
+        {
+            zl += 2.0f;
+            focus_pos = pc.pos - vec3f(0.0f, 0.0f, 5.0f);
+        }
+
         pc.cam_y_target = lerp(pc.cam_y_target, pc.pos.y, camera_lerp_y * dt);
-        pc.cam_pos_target = vec3f(pc.pos.x, pc.cam_y_target, pc.pos.z);
+        pc.cam_pos_target = vec3f(focus_pos.x, pc.cam_y_target, focus_pos.z);
         pc.cam_zoom_target = lerp(min_zoom, max_zoom, zl);
 
         camera->focus = lerp(camera->focus, pc.cam_pos_target, camera_lerp * dt);
         camera->zoom = lerp(camera->zoom, pc.cam_zoom_target, camera_lerp * dt);
 
-        if(mag(ci.cam_rot) > 0.2f)
-            camera->rot += (ci.cam_rot * fabs(ci.cam_rot)) * dt;
+        camera->rot.x = -M_PI / 4.0f;
+        camera->rot.y = 0.0f;
 
         static f32 ulimit = -(M_PI / 2.0f) - M_PI * 0.02f;
         static f32 llimit = -M_PI * 0.02f;
@@ -1897,6 +1979,8 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 void update_game_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 {
     update_character_controller(ecsc, scene, dt);
+    update_soa();
+
     update_level_editor(ecsc, scene, dt);
 }
 
@@ -1933,6 +2017,31 @@ void update_game_components(ecs_extension& extension, ecs_scene* scene, f32 dt)
             // ..
         }
     }
+
+    // check collisions with projectiles
+    for (u32 i = 0; i < 1024; ++i)
+    {
+        if (s_soa.flags[i] != 0)
+        {
+            physics::ray_cast_params rcp;
+            rcp.start = s_soa.pos[i];
+            rcp.end = s_soa.pos[i] + s_soa.vel[i];
+            rcp.group = e_collision_group::enemy;
+
+            physics::cast_result surface_cast = physics::cast_ray_immediate(rcp);
+            if (surface_cast.set)
+            {
+                for (u32 n = 0; n < scene->num_entities; ++n)
+                {
+                    if (scene->physics_handles[n] == surface_cast.physics_handle)
+                    {
+                        scene->transforms[n].translation += vec3f(0.0f, -100.0f, 0.0f);
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 namespace
@@ -1957,19 +2066,13 @@ namespace
         setup_level_editor(main_scene);
         setup_level(main_scene);
 
-        for (u32 i = 0; i < 2; ++i)
-        {
-            vec3f pos = vec3f(rand() % 40 - 20, 0.0f, rand() % 40 - 20);
-            instantiate_mushroom(main_scene, exts, pos);
-        }
-
-        /*
         for (u32 i = 0; i < 15; ++i)
         {
-            vec3f pos = vec3f(rand() % 40 - 20, 0.0f, rand() % 40 - 20);
+            vec3f pos = vec3f(rand() % 10 - 10, 0.0f, -(rand() % 40));
             instantiate_blob(main_scene, exts, pos);
         }
 
+        /*
         for (u32 i = 0; i < 40; ++i)
         {
             vec3f pos = vec3f(rand() % 40 - 20, 0.0f, rand() % 40 - 20);
@@ -2090,6 +2193,8 @@ namespace
         setup_scene();
 
         pen::timer_start(frame_timer);
+
+        editor_enable(false);
 
         pen_main_loop(user_update);
         return PEN_THREAD_OK;
