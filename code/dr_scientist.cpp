@@ -1525,16 +1525,8 @@ void get_controller_input(camera* cam, ecs_scene* scene, controller_input& ci)
             
             ci.aim_dir = normalised(wp - dp);
 
-            if (!pen::input_key(PK_SHIFT))
-            {
-                ci.movement_dir = ci.aim_dir;
-                ci.movement_vel = 1.0f;
-            }
-            else if (released)
-            {
-                ci.actions |= e_controller::shoot;
-                released = false;
-            }
+            ci.movement_dir = ci.aim_dir;
+            ci.movement_vel = 1.0f;
         }
     }
     else
@@ -1617,11 +1609,6 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     else
     {
         ci.dir_angle = atan2(ci.aim_dir.x, ci.aim_dir.z);
-
-        if (ci.actions & e_controller::shoot)
-        {
-            u32 particle = soa_new(pc.pos + vec3f(0.0f, 0.3f, 0.5f), ci.aim_dir);
-        }
     }
 
     // update state --------------------------------------------------------------------------------------------------------
@@ -1883,13 +1870,6 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 
         vec3f focus_pos = pc.pos; // +vec3f(0.0f, 0.0f, 3.0f + (4.0f * zl));
 
-        /*
-        if (pen::input_is_key_down(PK_SHIFT))
-        {
-            zl += 2.0f;
-            focus_pos = pc.pos - vec3f(0.0f, 0.0f, 5.0f);
-        }
-        */
 
         pc.cam_y_target = lerp(pc.cam_y_target, pc.pos.y, camera_lerp_y * dt);
         pc.cam_pos_target = vec3f(focus_pos.x, pc.cam_y_target, focus_pos.z);
