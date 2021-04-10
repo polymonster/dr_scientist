@@ -9,7 +9,7 @@ It was a work in progress game that might never be completed, this is being made
 - physics ray/ sphere casts for controllers
 - collectable items
 
-![dr](https://github.com/polymonster/polymonster.github.io/blob/da8757c5d9e8a142f0f4ef4a83c486109467e7c1/images/pmtech/gifs/dr_scientist.gif)
+<img src="https://github.com/polymonster/polymonster.github.io/blob/da8757c5d9e8a142f0f4ef4a83c486109467e7c1/images/pmtech/gifs/dr_scientist.gif" width="1280" />
 
 # Requirements 
 
