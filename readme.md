@@ -1,10 +1,8 @@
 # dr_scientist [![CircleCI](https://circleci.com/gh/polymonster/dr_scientist.svg?style=svg&circle-token=4947316ae6ba47bee765c79654982d990b1dc5be)](https://circleci.com/gh/polymonster/dr_scientist)
 
-Follow work in progress: [trello](https://trello.com/b/MC3BGwCk/dr-scientist)
+The project builds ontop of [pmtech](https://github.com/polymonster/pmtech.git)... please checkout pmtech first and get familiar with how to build
 
-The project builds ontop of [pmtech](https://github.com/polymonster/pmtech.git). 
-
-It is developed by 2 experienced games industry professionals, one coder, one artists. We both work full time on other things so this project is a slow burner.
+It was a work in progress game that might never be completed, this is being made public as reference for pmtech and how to setup and use character controllers, physics and ecs extensions which are not in the pmtech examples.
 
 ![alt text](images/ds.png)
 
@@ -16,19 +14,15 @@ requirements:
 be sure to update or clone pmtech before running:
 ```
 cd ../pmtech
-git submodule init
-git submodule update
 git pull
+git submodule update --init recursive
 ```
 
-to generate projects and binaries run:  
+to generate projects and binaries run from this directory:  
 ```
-# win32
-build.bat
+pmbuild <platform> (mac, win32, linux)
+```
 
-# macOS and linux
-../pmtech/pmbuild -all
-```
 
 
 
