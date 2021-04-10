@@ -781,7 +781,6 @@ void setup_level(put::ecs::ecs_scene* scene)
 
 void instantiate_mushroom(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f pos)
 {
-    //u32 root = load_pmm("data/models/characters/guy/guy.pmm", scene);
     u32 root = load_pmm("data/models/props/mushroom01.pmm", scene);
     
     vec3f dim = scene->bounding_volumes[root].max_extents - scene->bounding_volumes[root].min_extents;
@@ -789,9 +788,8 @@ void instantiate_mushroom(put::ecs::ecs_scene* scene, dr_ecs_exts* ext, vec3f po
     // add capsule for collisions
     scene->physics_data[root].rigid_body.shape = physics::e_shape::capsule;
     scene->physics_data[root].rigid_body.mass = 0.0f;
-    
     scene->physics_data[root].rigid_body.group = e_collision_group::collectable;
-    scene->physics_data[root].rigid_body.mask = ~e_collision_group::dr;
+    scene->physics_data[root].rigid_body.mask = 0xfffffff;
     
     scene->physics_data[root].rigid_body.dimensions = dim * 0.5f;
     scene->physics_data[root].rigid_body.create_flags |= (physics::e_create_flags::dimensions);
@@ -851,7 +849,6 @@ void setup_character(put::ecs::ecs_scene* scene)
 {
     // load main model
     dr.root = load_pmm("data/models/characters/doctor/doctor.pmm", scene);
-    //dr.root = load_pmm("data/models/characters/guy/guy.pmm", scene);
         
     // load anims
     anim_handle idle = load_pma("data/models/characters/doctor/anims/doctor_idle01.pma");
@@ -1808,8 +1805,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
             {
                 if(scene->physics_handles[n] == cb[i].physics_handle)
                 {
-                    physics::remove_from_world(cb[i].physics_handle);
-                    scene->state_flags[n] |= e_state::hidden;
+                    ecs::delete_entity(scene, n);
                 }
             }
             continue;
@@ -2056,7 +2052,6 @@ namespace
             instantiate_blob(main_scene, exts, pos);
         }
 
-        /*
         for (u32 i = 0; i < 40; ++i)
         {
             vec3f pos = vec3f(rand() % 40 - 20, 0.0f, rand() % 40 - 20);
@@ -2070,7 +2065,6 @@ namespace
         }
 
         instantiate_house(main_scene, exts, vec3f(10.0f, 0.0f, -10.0f));
-        */
 
         // lights
         vec3f lp[] = {
@@ -2179,6 +2173,10 @@ namespace
         pen::timer_start(frame_timer);
 
         editor_enable(false);
+        
+        // start in non debug mode
+        main_scene->view_flags |= e_scene_view_flags::hide_debug;
+        put::dev_ui::enable(false);
 
         pen_main_loop(user_update);
         return PEN_THREAD_OK;
