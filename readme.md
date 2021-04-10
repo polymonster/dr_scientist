@@ -21,16 +21,30 @@ requirements:
 # Building 
 
 be sure to update or clone pmtech before running:
+
 ```
 cd ../pmtech
 git pull
 git submodule update --init recursive
 ```
+use pmbuild `-help` to see what profiles you can build:
 
-to generate projects and binaries run from this directory:  
 ```
-cd ../dr_scientist
+pmbuild -help
+```
+
+to generate projects (xcode, visual studio) and data to build with 
+
+```
+cd dr_scientist
 pmbuild <platform> (mac, win32, linux)
+```
+
+to build and run from the commandline
+
+```
+pmbuild make <platform> dr_scientist -<compiler args>
+pmbuild launch <platform> dr_scientist
 ```
 
 # Controls 
