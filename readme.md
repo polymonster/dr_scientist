@@ -2,14 +2,23 @@
 
 The project builds ontop of [pmtech](https://github.com/polymonster/pmtech.git)... please checkout pmtech first and get familiar with how to build
 
-It was a work in progress game that might never be completed, this is being made public as reference for pmtech and how to setup and use character controllers, physics and ecs extensions which are not in the pmtech examples.
+It was a work in progress game that might never be completed, this is being made public as reference for pmtech and how to setup more advanced features: 
+- character controller 
+- kinematic physics controller
+- ecs extensions
+- physics ray/ sphere casts for controllers
+- collectable items
 
 ![alt text](images/ds.png)
+
+# Requirements 
 
 requirements:   
 [python3](https://www.python.org/download/releases/3.0)  
 [git lfs](https://git-lfs.github.com/)  
 [pmtech](https://github.com/polymonster/pmtech.git) to be located one directory above this one (../pmtech)  
+
+# Building 
 
 be sure to update or clone pmtech before running:
 ```
@@ -20,9 +29,14 @@ git submodule update --init recursive
 
 to generate projects and binaries run from this directory:  
 ```
+cd ../dr_scientist
 pmbuild <platform> (mac, win32, linux)
 ```
 
+# Controls 
+
+WASD or Left Stick to move.
+Q or Button X/A to Jump
 
 
 
