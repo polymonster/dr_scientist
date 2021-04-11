@@ -9,7 +9,7 @@ It was a work in progress game that might never be completed, this is being made
 - physics ray/ sphere casts for controllers
 - collectable items
 
-![alt text](images/ds.png)
+<img src="https://github.com/polymonster/polymonster.github.io/blob/da8757c5d9e8a142f0f4ef4a83c486109467e7c1/images/pmtech/gifs/dr_scientist.gif" width="1280" />
 
 # Requirements 
 
@@ -21,16 +21,30 @@ requirements:
 # Building 
 
 be sure to update or clone pmtech before running:
+
 ```
 cd ../pmtech
 git pull
 git submodule update --init recursive
 ```
+use pmbuild `-help` to see what profiles you can build:
 
-to generate projects and binaries run from this directory:  
 ```
-cd ../dr_scientist
+pmbuild -help
+```
+
+to generate projects (xcode, visual studio) and data to build with 
+
+```
+cd dr_scientist
 pmbuild <platform> (mac, win32, linux)
+```
+
+to build and run from the commandline
+
+```
+pmbuild make <platform> dr_scientist -<compiler args>
+pmbuild launch <platform> dr_scientist
 ```
 
 # Controls 
