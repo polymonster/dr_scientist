@@ -178,12 +178,12 @@ void* dr_ecs_extension(ecs_scene* scene)
     ext.components = (generic_cmp_array*)&exts->cmp_flags;
     ext.context = exts;
     ext.num_components = exts->num_components;
-    ext.ext_func = &dr_ecs_extension;
-    ext.update_func = &update_game_components;
-    ext.browser_func = &dr_scene_browser_ui;
-    ext.shutdown = &dr_ecs_extension_shutdown;
+    ext.funcs.ext_func = &dr_ecs_extension;
+    ext.funcs.update_func = &update_game_components;
+    ext.funcs.browser_func = &dr_scene_browser_ui;
+    ext.funcs.shutdown = &dr_ecs_extension_shutdown;
 
-    register_ecs_extentsions(scene, ext);
+    register_ecs_extension(scene, ext);
 
     return (void*)exts;
 }
@@ -2128,7 +2128,7 @@ namespace
 
         // controllers
         game_controller.camera = &main_camera;
-        game_controller.update_func = &update_game_controller;
+        game_controller.funcs.update_func = &update_game_controller;
         game_controller.name = "dr_scientist_game_controller";
         game_controller.context = exts;
         game_controller.id_name = PEN_HASH(game_controller.name.c_str());
