@@ -2,8 +2,9 @@
 
 The project builds ontop of [pmtech](https://github.com/polymonster/pmtech.git)... please checkout pmtech first and get familiar with how to build
 
-It was a work in progress game that might never be completed, this is being made public as reference for pmtech and how to setup more advanced features: 
-- character controller 
+It was a work in progress game that might never be completed, this is being made public as reference for pmtech and how to setup more advanced features:  
+
+- character controller  
 - kinematic physics controller
 - ecs extensions
 - physics ray/ sphere casts for controllers
@@ -11,46 +12,58 @@ It was a work in progress game that might never be completed, this is being made
 
 <img src="https://github.com/polymonster/polymonster.github.io/blob/da8757c5d9e8a142f0f4ef4a83c486109467e7c1/images/pmtech/gifs/dr_scientist.gif" width="1280" />
 
-# Requirements 
+## Requirements  
 
-requirements:   
+requirements:  
 [python3](https://www.python.org/download/releases/3.0)  
 [git lfs](https://git-lfs.github.com/)  
 [pmtech](https://github.com/polymonster/pmtech.git) to be located one directory above this one (../pmtech)  
 
-# Building 
+## Cloning
+
+You need to clone and make sure to be setup with `git-lfs`.  
+
+```text
+git clone https://github.com/polymonster/dr_scientist
+cd dr_scientist
+git lfs install
+git lfs fetch
+```
+
+## Building  
 
 be sure to update or clone pmtech before running:
 
-```
+```text
 cd ../pmtech
 git pull
 git submodule update --init recursive
 ```
+
 use pmbuild `-help` to see what profiles you can build:
 
-```
+```text
 pmbuild -help
 ```
 
-to generate projects (xcode, visual studio) and data to build with 
+to generate projects (xcode, visual studio) and data to build with the following, you only need to build `-libs` the first time.
 
-```
+```text
 cd dr_scientist
-pmbuild <platform> (mac, win32, linux)
+pmbuild <platform> -libs // only required the first time
+pmbuild <platform>
 ```
 
-to build and run from the commandline
+to build and run from the commandline:
 
-```
+```text
 pmbuild make <platform> dr_scientist -<compiler args>
 pmbuild launch <platform> dr_scientist
 ```
 
-# Controls 
+for the launch command with debug builds the target is called `dr_scientist_d`, release builds `dr_scientist`
+
+## Controls  
 
 WASD or Left Stick to move.
-Q or Button X/A to Jump
-
-
-
+Q or Button X/A to Jump.  

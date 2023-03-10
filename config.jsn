@@ -209,7 +209,22 @@ import "../pmtech/tools/pmbuild_ext/pmbuild_init.jsn"
                 "-source"
             ]
         }
-        
+
+        make: {
+            toolchain: "xcodebuild"
+            workspace: "dr_scientist_osx.xcworkspace"
+            files: [
+                "build/osx/**/*.xcodeproj"
+            ]
+            change_ext: ""
+        }
+
+        launch: {
+            cmd: "%{target_path}/Contents/MacOS/%{target_name}"
+            files: [
+                "bin/osx/**/*.app"
+            ]
+        }
                 
 		libs: {
             type: shell
