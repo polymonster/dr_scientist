@@ -1197,13 +1197,13 @@ void update_level_editor(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
     mat4  view_proj = camera->proj * camera->view;
     vec3f r0 = maths::unproject_sc(vec3f(ms.x, ms.y, 0.0f), view_proj, vpi);
     vec3f r1 = maths::unproject_sc(vec3f(ms.x, ms.y, 1.0f), view_proj, vpi);
-    vec3f rv = normalised(r1 - r0);
+    vec3f rv = normalize(r1 - r0);
     
     // intersect with edit plane
-    vec3f ip = maths::ray_plane_intersect(r0, rv, p0, pN);
+    vec3f ip = maths::ray_vs_plane(r0, rv, p0, pN);
     
     vec3f altpN = axis[(edit_axis+1)%3];
-    vec3f altip = maths::ray_plane_intersect(r0, rv, p0, altpN);
+    vec3f altip = maths::ray_vs_plane(r0, rv, p0, altpN);
     
     // snap to grid
     ip = floor(ip) + vec3f(0.5f);
@@ -1417,7 +1417,7 @@ void get_controller_input(camera* cam, ecs_scene* scene, controller_input& ci)
     
     vec3f xz_dir = cam->focus - cam->pos;
     xz_dir.y = 0.0f;
-    xz_dir = normalised(xz_dir);
+    xz_dir = normalize(xz_dir);
     
     f32 xz_angle = atan2(xz_dir.x, xz_dir.z);
     
@@ -1478,14 +1478,14 @@ void get_controller_input(camera* cam, ecs_scene* scene, controller_input& ci)
         }
                         
         if(mag2(left_stick) > 0)
-            normalise(left_stick);
+            left_stick = normalize(left_stick);
     }
     
     mat4 rot = mat::create_y_rotation(xz_angle);
     
     if(mag(left_stick) > 0.2f)
     {
-        vec3f transfromed_left_stick = normalised(-rot.transform_vector(left_stick));
+        vec3f transfromed_left_stick = normalize(-rot.transform_vector(left_stick));
         ci.movement_dir = transfromed_left_stick;
         ci.movement_vel = mag(left_stick);
     }
@@ -1520,7 +1520,7 @@ void get_controller_input(camera* cam, ecs_scene* scene, controller_input& ci)
             vec3f wp = surface_cast.point * vec3f(1.0f, 0.0f, 1.0f);
             vec3f dp = scene->transforms[dr.root].translation * vec3f(1.0f, 0.0f, 1.0f);
             
-            ci.aim_dir = normalised(wp - dp);
+            ci.aim_dir = normalize(wp - dp);
 
             ci.movement_dir = ci.aim_dir;
             ci.movement_vel = 1.0f;
@@ -1706,7 +1706,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         f32 vel2 = mag2(xzdir);
         if (vel2 > 0)
         {
-            xzdir = normalised(xzdir);
+            xzdir = normalize(xzdir);
 
             vec3f cp1 = cross(pc.surface_normal, xzdir);
             vec3f perp = cross(cp1, pc.surface_normal);
@@ -1833,7 +1833,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
 
                 vec3f vn = cb[i].normal * vec3f(1.0f, 0.0f, 1.0f);
                 if(mag2(vn) != 0.0f)
-                    pc.pos += normalised(vn) * diff;
+                    pc.pos += normalize(vn) * diff;
             }
         }
 
@@ -1844,7 +1844,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
         {
             // ceil
             f32 diff = capsule_radius - m;
-            pc.pos += normalised(cb[i].normal) * diff;
+            pc.pos += normalize(cb[i].normal) * diff;
             pc.vel.y *= 0.5f;
         }
     }
@@ -1903,7 +1903,7 @@ void update_character_controller(ecs_controller& ecsc, ecs_scene* scene, f32 dt)
                
         vec3f xz_dir = camera->focus - camera->pos;
         xz_dir.y = 0.0f;
-        xz_dir = normalised(xz_dir);
+        xz_dir = normalize(xz_dir);
 
         put::dbg::add_line(mid, mid + xz_dir, vec4f::white());
     }
@@ -1985,7 +1985,7 @@ void update_game_components(ecs_extension& extension, ecs_scene* scene, f32 dt)
             
             vec3f p = scene->transforms[n].translation;
             
-            vec3f vv = normalised((dr_pos - p) * vec3f(1.0f, 0.0f, 1.0f));
+            vec3f vv = normalize((dr_pos - p) * vec3f(1.0f, 0.0f, 1.0f));
             
             scene->transforms[n].translation += vv * 0.01f;
             

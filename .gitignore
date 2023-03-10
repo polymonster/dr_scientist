@@ -60,4 +60,5 @@ WIP/
 *.vscode
 
 assets/poseLib/
+shader_structs/
 
